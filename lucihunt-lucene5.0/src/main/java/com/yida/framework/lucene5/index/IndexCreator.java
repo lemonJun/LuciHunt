@@ -39,7 +39,7 @@ public class IndexCreator implements Runnable {
     private String docPath;
     /**索引文件存放目录*/
     private String luceneDir;
-
+    
     private int threadCount;
 
     private final CountDownLatch countDownLatch1;

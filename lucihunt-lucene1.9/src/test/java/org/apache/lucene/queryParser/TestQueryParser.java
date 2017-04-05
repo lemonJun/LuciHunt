@@ -30,6 +30,7 @@ import org.apache.lucene.search.RangeQuery;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.store.RAMDirectory;
+import org.junit.Test;
 
 import com.google.common.base.Joiner;
 
@@ -128,6 +129,7 @@ public class TestQueryParser extends TestCase {
         return getParser(a).parse(query);
     }
 
+    @Test
     public void testquerytree() {
         try {
             Query query = getParser(null).parse("+(+apple* -boy) (cat* dog) -(eat~ foods)");
