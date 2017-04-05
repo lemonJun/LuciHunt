@@ -17,6 +17,7 @@
 		<module>lucihunt-lucene1.9</module>
 		<module>lucihunt-lucene5.0</module>
 		<module>lucihunt-tsearch</module>
+		<module>lucihunt-lucene4.10</module>
 	</modules>
 	
 	<properties>
