@@ -34,6 +34,11 @@ import org.apache.lucene.util.Parameter;
   */
 
 public final class Field implements Serializable {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     private String name = "body";
 
     // the one and only data object for all different kind of field values

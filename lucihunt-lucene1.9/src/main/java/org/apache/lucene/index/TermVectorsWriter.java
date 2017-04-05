@@ -111,7 +111,7 @@ final class TermVectorsWriter {
      *  closed automatically.
      */
     public final void openField(String field) throws IOException {
-        FieldInfo fieldInfo = fieldInfos.fieldInfo(field);
+        FieldInfo fieldInfo = fieldInfos.fieldInfoByName(field);
         openField(fieldInfo.number, fieldInfo.storePositionWithTermVector, fieldInfo.storeOffsetWithTermVector);
     }
 
@@ -197,7 +197,7 @@ final class TermVectorsWriter {
                     if (tpVector.size() > 0 && tpVector.getOffsets(0) != null)
                         storeOffsetWithTermVector = true;
 
-                    FieldInfo fieldInfo = fieldInfos.fieldInfo(tpVector.getField());
+                    FieldInfo fieldInfo = fieldInfos.fieldInfoByName(tpVector.getField());
                     openField(fieldInfo.number, storePositionWithTermVector, storeOffsetWithTermVector);
 
                     for (int j = 0; j < tpVector.size(); j++)
@@ -209,7 +209,7 @@ final class TermVectorsWriter {
 
                     TermFreqVector tfVector = vectors[i];
 
-                    FieldInfo fieldInfo = fieldInfos.fieldInfo(tfVector.getField());
+                    FieldInfo fieldInfo = fieldInfos.fieldInfoByName(tfVector.getField());
                     openField(fieldInfo.number, storePositionWithTermVector, storeOffsetWithTermVector);
 
                     for (int j = 0; j < tfVector.size(); j++)

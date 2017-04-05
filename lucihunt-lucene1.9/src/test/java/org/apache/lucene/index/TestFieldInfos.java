@@ -43,22 +43,22 @@ public class TestFieldInfos extends TestCase {
             assertTrue(output.length() > 0);
             FieldInfos readIn = new FieldInfos(dir, name);
             assertTrue(fieldInfos.size() == readIn.size());
-            FieldInfo info = readIn.fieldInfo("textField1");
+            FieldInfo info = readIn.fieldInfoByName("textField1");
             assertTrue(info != null);
             assertTrue(info.storeTermVector == false);
             assertTrue(info.omitNorms == false);
 
-            info = readIn.fieldInfo("textField2");
+            info = readIn.fieldInfoByName("textField2");
             assertTrue(info != null);
             assertTrue(info.storeTermVector == true);
             assertTrue(info.omitNorms == false);
 
-            info = readIn.fieldInfo("textField3");
+            info = readIn.fieldInfoByName("textField3");
             assertTrue(info != null);
             assertTrue(info.storeTermVector == false);
             assertTrue(info.omitNorms == true);
 
-            info = readIn.fieldInfo("omitNorms");
+            info = readIn.fieldInfoByName("omitNorms");
             assertTrue(info != null);
             assertTrue(info.storeTermVector == false);
             assertTrue(info.omitNorms == true);

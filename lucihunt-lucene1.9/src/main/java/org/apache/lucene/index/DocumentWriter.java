@@ -349,7 +349,7 @@ final class DocumentWriter {
                 if (currentField != termField) {
                     // changing field - see if there is something to save
                     currentField = termField;
-                    FieldInfo fi = fieldInfos.fieldInfo(currentField);
+                    FieldInfo fi = fieldInfos.fieldInfoByName(currentField);
                     if (fi.storeTermVector) {
                         if (termVectorWriter == null) {
                             termVectorWriter = new TermVectorsWriter(directory, segment, fieldInfos);

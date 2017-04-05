@@ -538,7 +538,7 @@ class SegmentReader extends IndexReader {
      */
     public TermFreqVector getTermFreqVector(int docNumber, String field) throws IOException {
         // Check if this field is invalid or has no stored term vector
-        FieldInfo fi = fieldInfos.fieldInfo(field);
+        FieldInfo fi = fieldInfos.fieldInfoByName(field);
         if (fi == null || !fi.storeTermVector || termVectorsReaderOrig == null)
             return null;
 

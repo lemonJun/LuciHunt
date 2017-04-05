@@ -31,6 +31,7 @@ import org.apache.lucene.store.IndexInput;
 import org.apache.lucene.store.IndexOutput;
 
 /**
+ * 
  * 域的元数据信息
  *  
  * Access to the Field Info file that describes document fields and whether or
@@ -47,9 +48,9 @@ final class FieldInfos {
     static final byte STORE_OFFSET_WITH_TERMVECTOR = 0x8;
     static final byte OMIT_NORMS = 0x10;
 
-    //域放在list中   可按下标查找
+    //把域放在list中   可按下标查找
     private ArrayList byNumber = new ArrayList();
-    //域放在map中 可按名称查找
+    //把域放在map中 可按名称查找
     private HashMap byName = new HashMap();
 
     FieldInfos() {
@@ -154,7 +155,7 @@ final class FieldInfos {
      *  sure that the isIndexed flag is the same as was given previously for this
      *  field. If not - marks it as being indexed.  Same goes for the TermVector
      * parameters.
-     *
+     * 
      * @param name The name of the field
      * @param isIndexed true if the field is indexed
      * @param storeTermVector true if the term vector should be stored
@@ -163,7 +164,7 @@ final class FieldInfos {
      * @param omitNorms true if the norms for the indexed field should be omitted
      */
     public void add(String name, boolean isIndexed, boolean storeTermVector, boolean storePositionWithTermVector, boolean storeOffsetWithTermVector, boolean omitNorms) {
-        FieldInfo fi = fieldInfo(name);
+        FieldInfo fi = fieldInfoByName(name);
         if (fi == null) {
             addInternal(name, isIndexed, storeTermVector, storePositionWithTermVector, storeOffsetWithTermVector, omitNorms);
         } else {
@@ -203,7 +204,7 @@ final class FieldInfos {
 
     public int fieldNumber(String fieldName) {
         try {
-            FieldInfo fi = fieldInfo(fieldName);
+            FieldInfo fi = fieldInfoByName(fieldName);
             if (fi != null)
                 return fi.number;
         } catch (IndexOutOfBoundsException ioobe) {
@@ -212,7 +213,7 @@ final class FieldInfos {
         return -1;
     }
 
-    public FieldInfo fieldInfo(String fieldName) {
+    public FieldInfo fieldInfoByName(String fieldName) {
         return (FieldInfo) byName.get(fieldName);
     }
 
