@@ -96,7 +96,7 @@ public class FSDirectory extends Directory {
             throw new RuntimeException(e.toString());
         }
     }
-    
+
     /** A buffer optionally used in renameTo method */
     private byte[] buffer = null;
 

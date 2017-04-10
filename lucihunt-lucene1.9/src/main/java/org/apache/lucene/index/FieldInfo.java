@@ -20,13 +20,10 @@ final class FieldInfo {
     String name;//域名
     boolean isIndexed;//是否索引
     int number;//在域元数据中的位置
-
     // true if term vector for this field should be stored
     boolean storeTermVector;//保存词微量
     boolean storePositionWithTermVector;//保存位置信息
-
     boolean storeOffsetWithTermVector;//保存偏移量
-
     boolean omitNorms; // omit norms associated with indexed fields
 
     FieldInfo(String na, boolean tk, int nu, boolean storeTermVector, boolean storePositionWithTermVector, boolean storeOffsetWithTermVector, boolean omitNorms) {

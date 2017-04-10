@@ -21,7 +21,7 @@ import org.apache.lucene.store.IndexOutput;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.StringHelper;
 
-/**
+/** 
  * 写入词典信息tis  
  * 1 初始化时写入版本  词的总数   内部间隔   跳跃间隔
  * 2 写入每一个Term的基本信息，这又包两部分：
@@ -69,7 +69,7 @@ final class TermInfosWriter {
     private long lastIndexPointer = 0;
     private boolean isIndex = false;
 
-    private TermInfosWriter other = null;
+    private TermInfosWriter other = null;//这个是用来写索引tii索引的
 
     //牛呗啊   这实时上是在同时写两个文件   
     TermInfosWriter(Directory directory, String segment, FieldInfos fis, int interval) throws IOException {

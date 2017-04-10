@@ -41,8 +41,9 @@ package org.apache.lucene.analysis;
      optimize for fewer object creations.  ]
 
 */
-
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  *

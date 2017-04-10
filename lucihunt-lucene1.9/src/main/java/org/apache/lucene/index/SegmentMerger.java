@@ -1,5 +1,9 @@
 package org.apache.lucene.index;
 
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Iterator;
+
 /**
  * Copyright 2004 The Apache Software Foundation
  *
@@ -17,15 +21,10 @@ package org.apache.lucene.index;
  */
 
 import java.util.Vector;
-import java.util.Iterator;
-import java.util.Collection;
-import java.io.IOException;
 
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.IndexOutput;
 import org.apache.lucene.store.RAMOutputStream;
-
-import com.google.common.collect.Lists;
 
 /**
  * The SegmentMerger class combines two or more Segments, represented by an IndexReader ({@link #add},
@@ -86,15 +85,14 @@ final class SegmentMerger {
      * @throws IOException
      */
     final int merge() throws IOException {
-        int value;
-
-        value = mergeFields();
+        int value = mergeFields();
         mergeTerms();
         mergeNorms();
 
-        if (fieldInfos.hasVectors())
+        if (fieldInfos.hasVectors()) {
             mergeVectors();
-
+        }
+        
         return value;
     }
 
@@ -156,7 +154,8 @@ final class SegmentMerger {
     }
 
     /**
-     * 
+     * 合并字段的元数据信息  
+     * 是否分词 是否保存位置 是否保存偏移量
      * @return The number of documents in all of the readers
      * @throws IOException
      */
@@ -220,6 +219,10 @@ final class SegmentMerger {
     private int skipInterval;
     private SegmentMergeQueue queue = null;
 
+    /**
+     * 合并字典 倒排表等信息
+     * @throws IOException
+     */
     private final void mergeTerms() throws IOException {
         try {
             freqOutput = directory.createOutput(segment + ".frq");
@@ -390,6 +393,10 @@ final class SegmentMerger {
         return skipPointer;
     }
 
+    /**
+     * 合并向量信息
+     * @throws IOException
+     */
     private void mergeNorms() throws IOException {
         for (int i = 0; i < fieldInfos.size(); i++) {
             FieldInfo fi = fieldInfos.fieldInfo(i);

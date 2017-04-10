@@ -317,7 +317,6 @@ final class DocumentWriter {
             //
             for (int i = 0; i < postings.length; i++) {
                 Posting posting = postings[i];
-
                 //上来文档频率直接给1  此term只会属于一个文档     可以给1 
                 // add an entry to the dictionary with pointers to prox and freq files
                 //在tii中记录的是频率倒排表的偏移 和 位置倒排表的偏移    因为在查找的时候是由tii tis开始向倒排表查找的
@@ -325,8 +324,9 @@ final class DocumentWriter {
                 tis.add(posting.term, ti);
 
                 // add an entry to the freq file
-                int postingFreq = posting.freq;
+                int postingFreq = posting.freq;//此频率是词频率  ，与上面的文档频率不是一回事 
                 //词在文档中的频率为1则直接写入   否则先写入频率再写入各个位置
+                //对一个Term来讲  其频率肯定是1，但在一个倒排表中一个Term出现的频率肯定不是1
                 if (postingFreq == 1) // optimize freq=1
                     freq.writeVInt(1); // set low bit of doc num.
                 else {

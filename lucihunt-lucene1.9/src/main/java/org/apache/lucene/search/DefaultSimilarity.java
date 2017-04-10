@@ -62,7 +62,8 @@ public class DefaultSimilarity extends Similarity {
      *  Implemented as <code>log(numDocs/(docFreq+1)) + 1</code>. 
      */
     public float idf(int docFreq, int numDocs) {
-        return (float) (Math.log(numDocs / (double) (docFreq + 1)) + 1.0);
+        float f = (float) (Math.log(numDocs / (double) (docFreq + 1)) + 1.0);
+        return f;
     }
 
     /**

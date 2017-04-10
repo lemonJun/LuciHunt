@@ -58,7 +58,7 @@ final class FieldsWriter {
         indexStream.close();
     }
 
-    //写入一个记录
+    //写入一个记录s
     final void addDocument(Document doc) throws IOException {
         //在索引文件中写入域的起始位置
         indexStream.writeLong(fieldsStream.getFilePointer());

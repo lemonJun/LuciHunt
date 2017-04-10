@@ -60,13 +60,19 @@ final class FieldsReader {
         return size;
     }
 
-    //通过位置  查找一个文档的完整的域的信息
+    /**
+     * 读取域数据信息
+     * 通过位置  查找一个文档的完整的域的信息
+     * @param n
+     * @return
+     * @throws IOException
+     */
     final Document doc(int n) throws IOException {
         indexStream.seek(n * 8L);//从索引中找到数据的起始公交车  问题是怎么把位置与文档关联起来的
-        long position = indexStream.readLong();
-        fieldsStream.seek(position);
+        long position = indexStream.readLong();//读取偏移量的值
+        fieldsStream.seek(position);///数据文件seek到此位置
 
-        Document doc = new Document();
+        Document doc = new Document();//还原一个文档的内容
         int numFields = fieldsStream.readVInt();//多少个字段
         for (int i = 0; i < numFields; i++) {
             int fieldNumber = fieldsStream.readVInt();

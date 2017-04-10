@@ -530,7 +530,9 @@ class SegmentReader extends IndexReader {
         return tvReader;
     }
 
-    /** Return a term frequency vector for the specified document and field. The
+    /** 
+     * 读取词向量信息
+     * Return a term frequency vector for the specified document and field. The
      *  vector returned contains term numbers and frequencies for all terms in
      *  the specified field of this document, if the field had storeTermVector
      *  flag set.  If the flag was not set, the method returns null.

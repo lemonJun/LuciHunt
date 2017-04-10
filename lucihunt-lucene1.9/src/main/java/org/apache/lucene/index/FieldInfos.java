@@ -31,7 +31,7 @@ import org.apache.lucene.store.IndexInput;
 import org.apache.lucene.store.IndexOutput;
 
 /**
- * 
+ * s
  * 域的元数据信息
  *  
  * Access to the Field Info file that describes document fields and whether or

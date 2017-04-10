@@ -1,5 +1,7 @@
 package org.apache.lucene.index;
 
+import java.io.File;
+
 /**
  * Copyright 2004 The Apache Software Foundation
  *
@@ -17,19 +19,18 @@ package org.apache.lucene.index;
  */
 
 import java.io.IOException;
-import java.io.File;
 import java.io.PrintStream;
 import java.util.Vector;
 
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.search.Similarity;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.store.Lock;
 import org.apache.lucene.store.IndexInput;
 import org.apache.lucene.store.IndexOutput;
-import org.apache.lucene.search.Similarity;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.store.Lock;
+import org.apache.lucene.store.RAMDirectory;
 
 /**
  * 写索引
@@ -605,7 +606,7 @@ public class IndexWriter {
     }
 
     /**
-     * 
+     *  把内存索引写入磁盘时  便会MERGE一次
      *  Merges all RAM-resident segments. 
      *  
      *  */
@@ -660,7 +661,7 @@ public class IndexWriter {
         System.out.println("merging segments");
         SegmentMerger merger = new SegmentMerger(this, mergedName);
 
-        final Vector segmentsToDelete = new Vector();
+        final Vector<IndexReader> segmentsToDelete = new Vector<IndexReader>();
         for (int i = minSegment; i < end; i++) {
             SegmentInfo si = segmentInfos.info(i);
             System.out.println(" " + si.name + " (" + si.docCount + " docs)");
@@ -673,12 +674,12 @@ public class IndexWriter {
 
         int mergedDocCount = merger.merge();
 
-        if (infoStream != null) {
-            infoStream.println(" into " + mergedName + " (" + mergedDocCount + " docs)");
-        }
+        System.out.print(" into " + mergedName + " (" + mergedDocCount + " docs)");
 
-        for (int i = end - 1; i >= minSegment; i--) // remove old infos & add new
+        // remove old infos & add new
+        for (int i = end - 1; i >= minSegment; i--) {
             segmentInfos.remove(i);
+        }
         segmentInfos.addElement(new SegmentInfo(mergedName, mergedDocCount, directory));
 
         // close readers before we attempt to delete now-obsolete segments

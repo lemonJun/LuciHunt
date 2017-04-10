@@ -74,7 +74,7 @@ public abstract class Lock {
     /** Returns true if the resource is currently locked.  Note that one must
      * still call {@link #obtain()} before using the resource. */
     public abstract boolean isLocked();
-
+    
     /** Utility class for executing code with exclusive access. */
     public abstract static class With {
         private Lock lock;
@@ -93,7 +93,7 @@ public abstract class Lock {
             this.lock = lock;
             this.lockWaitTimeout = lockWaitTimeout;
         }
-
+        
         /** Code to execute with exclusive access. */
         protected abstract Object doBody() throws IOException;
 

@@ -39,8 +39,8 @@ public class TestFilterIndexReader extends TestCase {
 
             /** Scan for terms containing the letter 'e'.*/
             public boolean next() throws IOException {
-                while (in.next()) {
-                    if (in.term().text().indexOf('e') != -1)
+                while (te.next()) {
+                    if (te.term().text().indexOf('e') != -1)
                         return true;
                 }
                 return false;

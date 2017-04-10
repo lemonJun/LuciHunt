@@ -64,7 +64,7 @@ public abstract class Searcher implements Searchable {
      * the top <code>n</code> hits for <code>query</code>, applying
      * <code>filter</code> if non-null, and sorting the hits by the criteria in
      * <code>sort</code>.
-     *
+     * 
      * <p>Applications should usually call {@link
      * Searcher#search(Query,Filter,Sort)} instead.
      * @throws BooleanQuery.TooManyClauses
@@ -74,7 +74,7 @@ public abstract class Searcher implements Searchable {
     }
 
     /** Lower-level search API.
-     *
+     *  
      * <p>{@link HitCollector#collect(int,float)} is called for every non-zero
      * scoring document.
      *

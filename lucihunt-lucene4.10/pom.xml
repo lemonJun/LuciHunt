@@ -13,7 +13,7 @@
 		<lucene.maven.version>4.10.4</lucene.maven.version>
 		<maven.compile.deprecation>off</maven.compile.deprecation>
 	</properties>
-
+	
 	<dependencies>
 		<dependency>
 			<groupId>com.google.guava</groupId>

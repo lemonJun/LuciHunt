@@ -12,6 +12,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<lucene.version>5.0.0</lucene.version>
+		<maven.compile.deprecation>off</maven.compile.deprecation>
 	</properties>
 
 
@@ -26,7 +27,7 @@
 					<skip>true</skip>
 				</configuration>
 			</plugin>
-			
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -117,19 +118,10 @@
 			<artifactId>nlp-lang</artifactId>
 			<version>0.2</version>
 		</dependency>
-		<dependency>
-			<groupId>org.ansj</groupId>
-			<artifactId>ansj_seg</artifactId>
-			<version>2.0.8</version>
-		</dependency>
-
-		<!-- zoie[需要先本地install] -->
-		<dependency>
-			<groupId>com.linkedin.zoie</groupId>
-			<artifactId>zoie-core</artifactId>
-			<version>3.3.0</version>
-		</dependency>
-
+		<!-- <dependency> <groupId>org.ansj</groupId> <artifactId>ansj_seg</artifactId> 
+			<version>2.0.8</version> </dependency> -->
+		<!-- zoie[需要先本地install] <dependency> <groupId>com.linkedin.zoie</groupId> 
+			<artifactId>zoie-core</artifactId> <version>3.3.0</version> </dependency> -->
 		<!-- pinyin4j -->
 		<dependency>
 			<groupId>com.belerweb</groupId>

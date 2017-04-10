@@ -51,7 +51,7 @@ class AnalysisTest {
 
         ir.close();
     }
-
+    
     static void test(String text, boolean verbose) throws Exception {
         System.out.println(" Tokenizing string: " + text);
         test(new StringReader(text), verbose, text.length());
@@ -70,7 +70,7 @@ class AnalysisTest {
             }
             count++;
         }
-        
+
         Date end = new Date();
 
         long time = end.getTime() - start.getTime();

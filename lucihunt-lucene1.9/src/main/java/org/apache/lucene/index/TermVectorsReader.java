@@ -95,6 +95,7 @@ class TermVectorsReader implements Cloneable {
     }
 
     /**
+     * 对应的是 tvx tvd tvf  
      * 获取一个文档  指定域值的词信息
      * 
      * Retrieve the term vector for the given document and field

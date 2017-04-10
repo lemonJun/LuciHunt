@@ -1,19 +1,20 @@
 package org.apache.lucene;
 
-import junit.framework.TestCase;
-import org.apache.lucene.store.RAMDirectory;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.Term;
+import java.util.NoSuchElementException;
+
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.Hits;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.search.Hit;
 import org.apache.lucene.search.HitIterator;
+import org.apache.lucene.search.Hits;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.store.RAMDirectory;
 
-import java.util.NoSuchElementException;
+import junit.framework.TestCase;
 
 /**
  * This test intentionally not put in the search package in order

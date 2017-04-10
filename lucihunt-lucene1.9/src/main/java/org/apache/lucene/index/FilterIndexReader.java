@@ -88,26 +88,26 @@ public class FilterIndexReader extends IndexReader {
 
     /** Base class for filtering {@link TermEnum} implementations. */
     public static class FilterTermEnum extends TermEnum {
-        protected TermEnum in;
+        protected TermEnum te;
 
         public FilterTermEnum(TermEnum in) {
-            this.in = in;
+            this.te = in;
         }
 
         public boolean next() throws IOException {
-            return in.next();
+            return te.next();
         }
 
         public Term term() {
-            return in.term();
+            return te.term();
         }
 
         public int docFreq() {
-            return in.docFreq();
+            return te.docFreq();
         }
 
         public void close() throws IOException {
-            in.close();
+            te.close();
         }
     }
 

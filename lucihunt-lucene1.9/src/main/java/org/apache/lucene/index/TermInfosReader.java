@@ -45,10 +45,10 @@ final class TermInfosReader {
         directory = dir;
         segment = seg;
         fieldInfos = fis;
-
+        //讯取词典文件
         origEnum = new SegmentTermEnum(directory.openInput(segment + ".tis"), fieldInfos, false);
         size = origEnum.size;
-
+        //读取词典索引文件
         indexEnum = new SegmentTermEnum(directory.openInput(segment + ".tii"), fieldInfos, true);
     }
 

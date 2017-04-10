@@ -40,9 +40,9 @@ public class TestExplation {
     public static void exp() {
         try {
             BooleanQuery bq = new BooleanQuery();
-            TermQuery q = new TermQuery(new Term("line", "the"));
-            bq.add(q, Occur.SHOULD);
-            TermQuery q2 = new TermQuery(new Term("name", "with"));
+            TermQuery q = new TermQuery(new Term("line", "java"));
+            bq.add(q, Occur.MUST);
+            TermQuery q2 = new TermQuery(new Term("name", "php"));
             q2.setBoost(2.0f);
             bq.add(q2, Occur.SHOULD);
             System.out.println(bq.toString());

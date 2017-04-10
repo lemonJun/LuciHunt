@@ -43,7 +43,7 @@ public class TestDemo extends TestCase {
     public void testDemo() throws IOException, ParseException {
 
         Analyzer analyzer = new StandardAnalyzer();
-        
+
         // Store the index in memory:
         Directory directory = new RAMDirectory();
         // To store an index on disk, use this instead (note that the 
@@ -57,7 +57,7 @@ public class TestDemo extends TestCase {
         doc.add(new Field("fieldname", text, Field.Store.YES, Field.Index.TOKENIZED));
         iwriter.addDocument(doc);
         iwriter.close();
-        
+
         // Now search the index:
         IndexSearcher isearcher = new IndexSearcher(directory);
         // Parse a simple query that searches for "text":

@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
  */
 
 import org.apache.lucene.analysis.SimpleAnalyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.demo.FileDocument;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -40,36 +41,22 @@ class IndexTest {
     public static void index() {
         try {
             Date start = new Date();
-            IndexWriter writer = new IndexWriter(new File("D:/luncene1.9"), new SimpleAnalyzer(), true);
+            IndexWriter writer = new IndexWriter(new File("D:/luncene1.9"), new StandardAnalyzer(), true);
 
             writer.setMergeFactor(20);
             writer.setUseCompoundFile(false);
             //            indexDocs(writer, new File("D:/logs"));
             //            writer.optimize();
-            indexEng(writer);
-            //            indexStr(writer);
-            //            indexStr2(writer);
-            //            indexStr3(writer);
+            //            indexEng(writer);
+            indexStr(writer);
+            indexStr2(writer);
+            indexStr3(writer);
             writer.close();
 
             Date end = new Date();
 
             System.out.print(end.getTime() - start.getTime());
             System.out.println(" total milliseconds");
-            //
-            //            Runtime runtime = Runtime.getRuntime();
-            //
-            //            System.out.print(runtime.freeMemory());
-            //            System.out.println(" free memory before gc");
-            //            System.out.print(runtime.totalMemory());
-            //            System.out.println(" total memory before gc");
-            //            
-            //            runtime.gc();
-            //
-            //            System.out.print(runtime.freeMemory());
-            //            System.out.println(" free memory after gc");
-            //            System.out.print(runtime.totalMemory());
-            //            System.out.println(" total memory after gc");
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(" caught a " + e.getClass() + "\n with message: " + e.getMessage());
@@ -78,10 +65,9 @@ class IndexTest {
 
     public static void indexStr(IndexWriter writer) {
         try {
-            String line = "java";
             Document doc = new Document();
-            doc.add(new Field("line", line, Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
-            //            doc.add(new Field("name", line, Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
+            doc.add(new Field("line", "java is good php is bad so java", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
+            doc.add(new Field("name", "hi java ", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
             writer.addDocument(doc);
         } catch (Exception e) {
             e.printStackTrace();
@@ -90,10 +76,9 @@ class IndexTest {
 
     public static void indexStr2(IndexWriter writer) {
         try {
-            String line = "you  ";
             Document doc = new Document();
-            doc.add(new Field("line", line, Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
-            doc.add(new Field("name", line, Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
+            doc.add(new Field("line", "you love java but not php", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
+            doc.add(new Field("name", "see you ", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
             //            doc.add(new Field("mame", line, Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
             writer.addDocument(doc);
         } catch (Exception e) {
@@ -103,11 +88,9 @@ class IndexTest {
 
     public static void indexStr3(IndexWriter writer) {
         try {
-            String line = "hello ";
             Document doc = new Document();
-            doc.add(new Field("line", line, Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
-            doc.add(new Field("ha", line, Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
-            //            doc.add(new Field("mame", line, Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
+            doc.add(new Field("line", "php say hello world java ", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
+            doc.add(new Field("mame", "java is bad ", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
             writer.addDocument(doc);
         } catch (Exception e) {
             e.printStackTrace();

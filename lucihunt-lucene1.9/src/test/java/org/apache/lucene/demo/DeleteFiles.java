@@ -35,7 +35,7 @@ public class DeleteFiles {
             System.err.println("Usage: " + usage);
             System.exit(1);
         }
-        
+
         try {
             Directory directory = FSDirectory.getDirectory("index", false);
             IndexReader reader = IndexReader.open(directory);
@@ -51,7 +51,7 @@ public class DeleteFiles {
               System.out.println("Deleting document with id " + i);
               reader.delete(i);
             }*/
-            
+
             reader.close();
             directory.close();
 
