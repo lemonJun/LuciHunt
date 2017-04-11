@@ -33,7 +33,7 @@ import java.nio.channels.FileChannel.MapMode;
  * FSDirectory#getDirectory(File,boolean)} to return instances of this class.
  */
 public class MMapDirectory extends FSDirectory {
-
+    
     private static class MMapIndexInput extends IndexInput {
 
         private ByteBuffer buffer;

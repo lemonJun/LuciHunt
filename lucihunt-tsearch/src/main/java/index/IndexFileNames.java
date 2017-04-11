@@ -22,13 +22,13 @@ package index;
  * @author Bernhard Messer
  * @version $rcs = ' $Id: Exp $ ' ;
  */
-final class IndexFileNames {
+public final class IndexFileNames {
 
     /** Name of the index segment file */
-    static final String SEGMENTS = "segments";
+    public static final String SEGMENTS = "segments";
 
     /** Name of the index deletable file */
-    static final String DELETABLE = "deletable";
+    public static final String DELETABLE = "deletable";
 
     /**
      * This array contains all filename extensions used by Lucene's index files, with

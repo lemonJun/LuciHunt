@@ -4,6 +4,7 @@ import java.io.IOException;
 import org.apache.lucene.store.IndexInput;
 
 /**
+ * 这是一个Term的枚举类，通过这个类可以获取此段下的所有的词
  * 按1->5标记的是读的顺序
  * 词典文件.tis   词典索引文件.tii 共用的是同一个类   
  * 
@@ -100,7 +101,8 @@ final class SegmentTermEnum extends TermEnum implements Cloneable {
 
     /**
      * 遍历数据
-     *  Increments the enumeration to the next element.  True if one exists.*/
+     * Increments the enumeration to the next element.  True if one exists.
+     */
     public final boolean next() throws IOException {
         if (position++ >= size - 1) {//没有数据就不读了
             termBuffer.reset();

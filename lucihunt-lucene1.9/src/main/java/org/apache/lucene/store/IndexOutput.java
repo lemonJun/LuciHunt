@@ -27,19 +27,25 @@ import java.io.IOException;
  */
 public abstract class IndexOutput {
 
-    /** Writes a single byte.
+    /**
+     * 写一个字节 
+     * Writes a single byte.
      * @see IndexInput#readByte()
      */
     public abstract void writeByte(byte b) throws IOException;
 
-    /** Writes an array of bytes.
+    /** 
+     * 写一个字节数组
+     * Writes an array of bytes.
      * @param b the bytes to write
      * @param length the number of bytes to write
      * @see IndexInput#readBytes(byte[],int,int)
      */
     public abstract void writeBytes(byte[] b, int length) throws IOException;
 
-    /** Writes an int as four bytes.
+    /** 
+     * 从高到低写入一个整数   一个整数占四个字节
+     * Writes an int as four bytes.
      * @see IndexInput#readInt()
      */
     public void writeInt(int i) throws IOException {
@@ -49,7 +55,9 @@ public abstract class IndexOutput {
         writeByte((byte) i);
     }
 
-    /** Writes an int in a variable-length format.  Writes between one and
+    /** 
+     * 写入一个变长的整数，长度在1到5个字节，不支持负数
+     * Writes an int in a variable-length format.  Writes between one and
      * five bytes.  Smaller values take fewer bytes.  Negative numbers are not
      * supported.
      * @see IndexInput#readVInt()
@@ -62,7 +70,9 @@ public abstract class IndexOutput {
         writeByte((byte) i);
     }
 
-    /** Writes a long as eight bytes.
+    /**
+     * 写入一个LONG数据  占8个字节
+     *  Writes a long as eight bytes.
      * @see IndexInput#readLong()
      */
     public void writeLong(long i) throws IOException {
@@ -70,7 +80,9 @@ public abstract class IndexOutput {
         writeInt((int) i);
     }
 
-    /** Writes an long in a variable-length format.  Writes between one and five
+    /**
+     * 变长的LONG
+     * Writes an long in a variable-length format.  Writes between one and five
      * bytes.  Smaller values take fewer bytes.  Negative numbers are not
      * supported.
      * @see IndexInput#readVLong()
@@ -83,7 +95,10 @@ public abstract class IndexOutput {
         writeByte((byte) i);
     }
 
-    /** Writes a string.
+    /** 
+     * 写入一个字符串，先以变长的方式写入此字符串的长度，再写入字符
+     * 读操作与此相反
+     * Writes a string.
      * @see IndexInput#readString()
      */
     public void writeString(String s) throws IOException {
@@ -92,7 +107,9 @@ public abstract class IndexOutput {
         writeChars(s, 0, length);
     }
 
-    /** Writes a sequence of UTF-8 encoded characters from a string.
+    /** 
+     * 写入一个UTF-8编码的字符串
+     * Writes a sequence of UTF-8 encoded characters from a string.
      * @param s the source of the characters
      * @param start the first character in the sequence
      * @param length the number of characters in the sequence
@@ -115,24 +132,28 @@ public abstract class IndexOutput {
         }
     }
 
-    /** Forces any buffered output to be written. */
+    //强制把缓存的数据写出
     public abstract void flush() throws IOException;
 
     /** Closes this stream to further operations. */
     public abstract void close() throws IOException;
 
-    /** Returns the current position in this file, where the next write will
+    /**
+     * 返回此文件当前写入的位置，
+     * Returns the current position in this file, where the next write will
      * occur.
      * @see #seek(long)
      */
     public abstract long getFilePointer();
 
-    /** Sets current position in this file, where the next write will occur.
+    /** 
+     * 定位到文件的某个位置
+     * Sets current position in this file, where the next write will occur.
      * @see #getFilePointer()
      */
     public abstract void seek(long pos) throws IOException;
 
-    /** The number of bytes in the file. */
+    //文件的字节数
     public abstract long length() throws IOException;
 
 }

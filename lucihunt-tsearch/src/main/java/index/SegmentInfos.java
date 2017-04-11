@@ -1,4 +1,4 @@
-package org.apache.lucene.index;
+package index;
 
 import java.io.IOException;
 
@@ -20,24 +20,28 @@ import java.io.IOException;
 
 import java.util.Vector;
 
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.IndexInput;
-import org.apache.lucene.store.IndexOutput;
+import store.Directory;
+import store.IndexInput;
+import store.IndexOutput;
 
 /**
- * 对应段的文件格式
+ *  对索引段的操作，
  * 
  * @author WangYazhou
- * @date  2017年2月27日 下午4:07:49
- * @see
+ * @date   2017年2月27日 下午4:07:49
+ * @see    
  */
-final class SegmentInfos extends Vector {
+public final class SegmentInfos extends Vector<SegmentInfo> {
 
+    private static final long serialVersionUID = 1L;
+    
+    //随着段的生成    在不断的变化 
     /** The file format version, a negative number. */
     /* Works since counter, the old 1st entry, is always >= 0 */
     // 1 索文件格式版本号
     public static final int FORMAT = -1;
 
+    //此值会在indexwriter中更新
     //3 下一个新段的段名   因为段名都是用数字+1来表示的  所以起名为counter
     public int counter = 0; // used to name new segments
 
@@ -56,7 +60,6 @@ final class SegmentInfos extends Vector {
     }
 
     public final void read(Directory directory) throws IOException {
-
         IndexInput input = directory.openInput(IndexFileNames.SEGMENTS);
         try {
             int format = input.readInt();
@@ -69,7 +72,7 @@ final class SegmentInfos extends Vector {
             } else { // file is in old format without explicit format info
                 counter = format;
             }
-            
+
             for (int i = input.readInt(); i > 0; i--) { // read segmentInfos
                 SegmentInfo si = new SegmentInfo(input.readString(), input.readInt(), directory);
                 addElement(si);
@@ -101,7 +104,6 @@ final class SegmentInfos extends Vector {
         } finally {
             output.close();
         }
-
         // install new segment info
         directory.renameFile("segments.new", IndexFileNames.SEGMENTS);
     }

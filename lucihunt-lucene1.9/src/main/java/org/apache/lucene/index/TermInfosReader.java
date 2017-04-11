@@ -35,8 +35,8 @@ final class TermInfosReader {
     private SegmentTermEnum origEnum;
     private long size;
 
-    private Term[] indexTerms = null;
-    private TermInfo[] indexInfos;
+    private Term[] indexTerms = null;//保存所有的词 field:value
+    private TermInfo[] indexInfos;//保存所有的词信息 如文档频率  频率倒排表  位置倒排表
     private long[] indexPointers;
 
     private SegmentTermEnum indexEnum;
@@ -45,7 +45,7 @@ final class TermInfosReader {
         directory = dir;
         segment = seg;
         fieldInfos = fis;
-        //讯取词典文件
+        //读词典文件
         origEnum = new SegmentTermEnum(directory.openInput(segment + ".tis"), fieldInfos, false);
         size = origEnum.size;
         //读取词典索引文件
@@ -82,6 +82,10 @@ final class TermInfosReader {
         return termEnum;
     }
 
+    /**
+     * 词典索引文件 会在初始化时  全部读入内存
+     * @throws IOException
+     */
     private synchronized void ensureIndexIsRead() throws IOException {
         if (indexTerms != null) // index already read
             return; // do nothing
@@ -126,6 +130,7 @@ final class TermInfosReader {
     }
 
     /** 
+     * 
      * 以跳跃表的方式  查找一个词是否存在 
      * 
      * Returns the TermInfo for a Term in the set, or null. 

@@ -71,7 +71,6 @@ public class FSDirectory extends Directory {
      * Directory specified by <code>org.apache.lucene.lockDir</code>
      * or <code>java.io.tmpdir</code> system property
      */
-    public static final String LOCK_DIR = System.getProperty("org.apache.lucene.lockDir", System.getProperty("java.io.tmpdir"));
 
     //以这种方式来保证  此FSdirectory类是由lucene来实现的 
     /** The default class which implements filesystem-based directories. */
@@ -158,6 +157,8 @@ public class FSDirectory extends Directory {
 
     protected FSDirectory() {
     }; // permit subclassing
+
+    public static final String LOCK_DIR = null;//System.getProperty("org.apache.lucene.lockDir", System.getProperty("java.io.tmpdir"));
 
     //先创建一个文件锁
     private void init(File path, boolean create) throws IOException {
@@ -339,7 +340,7 @@ public class FSDirectory extends Directory {
         StringBuffer buf = getLockPrefix();
         buf.append("-");
         buf.append(name);
-
+        System.out.println(lockDir);
         // create a lock file
         final File lockFile = new File(lockDir, buf.toString());
 
