@@ -3,7 +3,7 @@ package analysis;
 /** 
  * Token内部维护的是开始结束的偏移量
  * 而位置是基于Term的  也就是Token的  因此每一个Token的产生  外部就会对位置+1
- * 
+ * 当然这是低版本   事实上这个值完全可以在内部维护
  * 
  * 一个token代表着一个字段的文本产生了一个词，它包含了词的内容，词的启始线束偏移量 以及类型；
  * 起始结束的偏移量使得能够重新定位Tokin在文本中的位置，比如高亮显示；
@@ -29,14 +29,14 @@ public final class Token {
         startOffset = start;
         endOffset = end;
     }
-
-    /** Constructs a Token with the given text, start and end offsets, & type. */
-    public Token(String text, int start, int end, String typ) {
-        termText = text;
-        startOffset = start;
-        endOffset = end;
-        type = typ;
-    }
+    
+    //    /** Constructs a Token with the given text, start and end offsets, & type. */
+    //    public Token(String text, int start, int end, String typ) {
+    //        termText = text;
+    //        startOffset = start;
+    //        endOffset = end;
+    //        type = typ;
+    //    }
 
     /** Set the position increment.  This determines the position of this token
      * relative to the previous Token in a {@link TokenStream}, used in phrase
