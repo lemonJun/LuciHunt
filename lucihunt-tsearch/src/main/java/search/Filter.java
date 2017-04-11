@@ -26,6 +26,11 @@ import index.IndexReader;
  */
 public abstract class Filter implements java.io.Serializable {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     /** 
      * Returns a BitSet with true for documents which should be permitted in
      * search results, and false for those that should not. 

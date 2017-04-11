@@ -28,6 +28,11 @@ import document.Document;
  */
 public class Hit implements java.io.Serializable {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     private Document doc = null;
 
     private boolean resolved = false;

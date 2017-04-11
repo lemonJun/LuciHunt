@@ -62,29 +62,16 @@ public abstract class Query implements java.io.Serializable, Cloneable {
         return boost;
     }
 
-    /** Prints a query to a string, with <code>field</code> as the default field
-     * for terms.  <p>The representation used is one that is supposed to be readable
-     * by {@link org.apache.lucene.queryParser.QueryParser QueryParser}. However,
-     * there are the following limitations:
-     * <ul>
-     *  <li>If the query was created by the parser, the printed
-     *  representation may not be exactly what was parsed. For example,
-     *  characters that need to be escaped will be represented without
-     *  the required backslash.</li>
-     * <li>Some of the more complicated queries (e.g. span queries)
-     *  don't have a representation that can be parsed by QueryParser.</li>
-     * </ul>
-     */
     public abstract String toString(String field);
 
-    /** Prints a query to a string. */
     public String toString() {
         return toString("");
     }
 
     /** 
+     * 为这个query创建weight树
      * Expert: Constructs an appropriate Weight implementation for this query.
-     *
+     * 
      * <p>Only implemented by primitive queries, which re-write to themselves.
      */
     protected Weight createWeight(Searcher searcher) throws IOException {
@@ -92,7 +79,7 @@ public abstract class Query implements java.io.Serializable, Cloneable {
     }
 
     /**
-     * 
+     *  生成weight对象
      *  Expert: Constructs and initializes a Weight for a top-level query. 
      */
     public Weight weight(Searcher searcher) throws IOException {
@@ -112,8 +99,11 @@ public abstract class Query implements java.io.Serializable, Cloneable {
         return this;
     }
 
-    /** Expert: called when re-writing queries under MultiSearcher.
-     *
+    /**
+     *  对需要重写的多词查询 用Boolean搜索把多个query组合起来
+     *  多个查询之间取should关系
+     *  Expert: called when re-writing queries under MultiSearcher.
+     *  
      * Create a single query suitable for use by all subsearchers (in 1-1
      * correspondence with queries). This is an optimization of the OR of
      * all queries. We handle the common optimization cases of equal
@@ -191,7 +181,9 @@ public abstract class Query implements java.io.Serializable, Cloneable {
         return result;
     }
 
-    /** Expert: Returns the Similarity implementation to be used for this query.
+    /** 
+     * 获取这个查询的打分算法   此方法可以被子类覆盖
+     * Expert: Returns the Similarity implementation to be used for this query.
      * Subclasses may override this method to specify their own Similarity
      * implementation, perhaps one that delegates through that of the Searcher.
      * By default the Searcher's Similarity implementation is returned.*/

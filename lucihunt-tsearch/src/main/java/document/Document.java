@@ -102,8 +102,8 @@ public final class Document implements java.io.Serializable {
     }
 
     /** Returns an Enumeration of all the fields in a document. */
-    public final Enumeration fields() {
-        return ((Vector) fields).elements();
+    public final Enumeration<Field> fields() {
+        return ((Vector<Field>) fields).elements();
     }
 
     /**
