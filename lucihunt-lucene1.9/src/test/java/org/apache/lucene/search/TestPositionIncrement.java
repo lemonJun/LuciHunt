@@ -36,7 +36,7 @@ import junit.framework.TestCase;
 
 /**
  * Term position unit test.
- *
+ * 
  * @author Doug Cutting
  * @version $Revision: 150585 $
  */

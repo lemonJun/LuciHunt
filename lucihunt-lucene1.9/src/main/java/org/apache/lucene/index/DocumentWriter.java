@@ -155,7 +155,7 @@ final class DocumentWriter {
                         for (Token t = stream.next(); t != null; t = stream.next()) {
                             System.out.println(t.termText() + "->" + t.getPositionIncrement() + "->" + t.endOffset());
                             position += (t.getPositionIncrement() - 1);
-
+                            
                             if (field.isStoreOffsetWithTermVector())
                                 addPosition(fieldName, t.termText(), position++, new TermVectorOffsetInfo(offset + t.startOffset(), offset + t.endOffset()));
                             else

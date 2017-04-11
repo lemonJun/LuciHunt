@@ -1,39 +1,18 @@
-package org.apache.lucene.analysis;
+package analysis;
 
-/**
- * Copyright 2004 The Apache Software Foundation
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/** A Token is an occurence of a term from the text of a field.  It consists of
-  a term's text, the start and end offset of the term in the text of the field,
-  and a type string.
-
-  The start and end offsets permit applications to re-associate a token with
-  its source text, e.g., to display highlighted query terms in a document
-  browser, or to show matching text fragments in a KWIC (KeyWord In Context)
-  display, etc.
-
-  The type is an interned string, assigned by a lexical analyzer
-  (a.k.a. tokenizer), naming the lexical or syntactic class that the token
-  belongs to.  For example an end of sentence marker token might be implemented
-  with type "eos".  The default token type is "word". 
+/** 
+ * Token内部维护的是开始结束的偏移量
+ * 而位置是基于Term的  也就是Token的  因此每一个Token的产生  外部就会对位置+1
+ * 
+ * 
+ * 一个token代表着一个字段的文本产生了一个词，它包含了词的内容，词的启始线束偏移量 以及类型；
+ * 起始结束的偏移量使得能够重新定位Tokin在文本中的位置，比如高亮显示；
+ * 
  * offset 是基于字字母或汉字的   也就是一个utf-8的chr
  * 
  * @author WangYazhou
  * @date  2017年3月2日 下午4:27:05
- * @see
+ * @see   
  */
 public final class Token {
     String termText; // the text of the term
@@ -41,7 +20,7 @@ public final class Token {
     int endOffset; // end in source text
     String type = "word"; // lexical type
 
-    private int positionIncrement = 1;
+    private int positionIncrement = 1;//内部默认词的增量是1  外面维护位置数据
 
     /** Constructs a Token with the given term text, and start & end offsets.
       The type defaults to "word." */
@@ -59,9 +38,7 @@ public final class Token {
         type = typ;
     }
 
-    /** 
-     * 
-     * Set the position increment.  This determines the position of this token
+    /** Set the position increment.  This determines the position of this token
      * relative to the previous Token in a {@link TokenStream}, used in phrase
      * searching.
      *
@@ -82,7 +59,7 @@ public final class Token {
      * also sets the increment to the number of stop words removed before each
      * non-stop word.  Then exact phrase queries will only match when the terms
      * occur with no intervening stop words.
-     * 
+     *
      * </ul>
      * @see org.apache.lucene.index.TermPositions
      */
