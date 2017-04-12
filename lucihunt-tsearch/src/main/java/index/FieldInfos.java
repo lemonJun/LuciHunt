@@ -36,6 +36,9 @@ final class FieldInfos {
 
     private HashMap<String, FieldInfo> byName = new HashMap<String, FieldInfo>();
 
+    FieldInfos() {
+    }
+
     //读取一个现有的域元数据信息
     FieldInfos(Directory d, String name) throws IOException {
         IndexInput input = d.openInput(name);
@@ -103,6 +106,16 @@ final class FieldInfos {
 
     public int size() {
         return byNumber.size();
+    }
+
+    //
+    public void write(Directory d, String name) throws IOException {
+        IndexOutput output = d.createOutput(name);
+        try {
+            write(output);
+        } finally {
+            output.close();
+        }
     }
 
     public void write(IndexOutput output) throws IOException {

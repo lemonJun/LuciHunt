@@ -106,6 +106,10 @@ public final class Document implements java.io.Serializable {
         return ((Vector<Field>) fields).elements();
     }
 
+    public final int fieldscnt() {
+        return fields.size();
+    }
+
     /**
      * Returns an array of {@link Field}s with the given name.
      * This method can return <code>null</code>.
