@@ -66,12 +66,76 @@ public class DocumentWriter {
         Posting[] postings = sortPostingTable();
 
         //写入倒排表  对这一部分  其实是可以在另一个文件中写入的  好管理 
-        writerPos(postings);
+        writerPos(postings, segment);
+
+        // 
 
     }
 
-    private void writerPos(Posting[] postings) {
+    private void writerPos(Posting[] postings, String segment) throws IOException {
+        TermInfosWriter tw = null;
+        FreqProxWriter fw = null;
+        TermVectorsWriter termvertorwriter = null;
+        try {
+            tw = new TermInfosWriter(directory, segment, fieldInfos, termIndexInterval);
+            fw = new FreqProxWriter(directory, segment);
+            TermInfo ti = new TermInfo();
+            String currentfield = null;
+            for (int i = 0; i < postings.length; i++) {
+                Posting pos = postings[i];
+                ti.set(1, fw.getfreqpointer(), fw.getproxpointer(), termIndexInterval);
+                tw.add(pos.term, ti);
+                int tf = pos.freq;
+                if (tf == 1) {//写入频率倒排
+                    fw.getFreq().writeInt(1);
+                } else {
+                    fw.getFreq().writeInt(0);
+                    fw.getFreq().writeInt(tf);
+                }
+                int lastposition = 0;
+                //写入位置倒排
+                for (int j = 0; j < pos.positions.length; i++) {
+                    int position = pos.positions[j];
+                    fw.getProx().writeVInt(position - lastposition);
+                    lastposition = position;
+                }
 
+                //保存正向信息
+                String termfield = pos.term.field();
+                //换一个域的时候  就要保存一次正向信息  一个域是对应多个位置的   因为之前已经排过序了  所以可以这样做
+                if (currentfield != termfield) {
+                    currentfield = termfield;
+                    FieldInfo fi = fieldInfos.fieldInfoByName(currentfield);
+                    if (fi.storeTermVector) {
+                        if (termvertorwriter == null) {
+                            termvertorwriter = new TermVectorsWriter(directory, segment, fieldInfos);
+                            termvertorwriter.openDocument();
+                        }
+                        termvertorwriter.openField(currentfield);
+                    } else if (termvertorwriter != null) {
+                        termvertorwriter.closeField();
+                    }
+                }
+                if (termvertorwriter != null && termvertorwriter.isFieldOpen()) {
+                    termvertorwriter.addTerm(pos.term.text(), pos.freq, pos.positions, pos.offsets);
+                }
+                if (termvertorwriter != null) {
+                    termvertorwriter.close();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (tw != null) {
+                tw.close();
+            }
+            if (fw != null) {
+                fw.close();
+            }
+            if (termvertorwriter != null) {
+                termvertorwriter.close();
+            }
+        }
     }
 
     public Posting[] sortPostingTable() {
@@ -186,6 +250,7 @@ public class DocumentWriter {
         } else {
             Term term = new Term(field, text);
             Posting posting = new Posting(term, position, offset);
+            postingTable.put(term, posting);
         }
     }
 
