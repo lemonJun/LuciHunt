@@ -85,6 +85,8 @@ public abstract class IndexInput implements Cloneable {
 
     /** 
      * 根据长度读取一个字符串
+     * 在每次写入字符串的时候   都会先写一个长度 
+     * 当读取的时候  也是先读取长度 再读取内容
      * @see IndexOutput#writeString(String)
      */
     public String readString() throws IOException {
