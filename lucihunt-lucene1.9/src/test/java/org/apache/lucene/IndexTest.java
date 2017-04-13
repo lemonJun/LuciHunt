@@ -30,10 +30,10 @@ class IndexTest {
             writer.setUseCompoundFile(false);
             //            indexDocs(writer, new File("D:/logs"));
             //            writer.optimize();
-            //            indexEng(writer);
+            indexEng(writer);
             indexStr(writer);
-            indexStr2(writer);
-            indexStr3(writer);
+            //            indexStr2(writer);
+            //            indexStr3(writer);
             writer.close();
 
             Date end = new Date();
@@ -49,8 +49,8 @@ class IndexTest {
     public static void indexStr(IndexWriter writer) {
         try {
             Document doc = new Document();
-            doc.add(new Field("line", "java is good php is bad so java", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
-            doc.add(new Field("name", "hi java ", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
+            //            doc.add(new Field("line", "java is good php is bad so java", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
+            doc.add(new Field("name", "php is the best lang not java ", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
             writer.addDocument(doc);
         } catch (Exception e) {
             e.printStackTrace();
@@ -83,13 +83,11 @@ class IndexTest {
     public static void indexEng(IndexWriter writer) {
         try {
             List<String> lines = Files.readLines(new File("D:/eng.txt"), Charsets.UTF_8);
-            for (String line : lines) {
-                Document doc = new Document();
-                doc.add(new Field("line", line, Field.Store.YES, Field.Index.TOKENIZED));
-                writer.addDocument(doc);
-                System.out.println(line);
-                TimeUnit.SECONDS.sleep(5);
-            }
+            //            for (String line : lines) {
+            Document doc = new Document();
+            doc.add(new Field("name", "java is good php is bad", Field.Store.YES, Field.Index.TOKENIZED));
+            writer.addDocument(doc);
+            //            }
         } catch (Exception e) {
             e.printStackTrace();
         }

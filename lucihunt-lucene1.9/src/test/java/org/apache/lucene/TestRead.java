@@ -10,7 +10,7 @@ public class TestRead {
     @Test
     public void readseg() {
         try {
-            IndexInput input = FSDirectory.getDirectory("D:/testdir", false).openInput("segments");
+            IndexInput input = FSDirectory.getDirectory("D:/luncene1.9", false).openInput("segments");
             System.out.println(input.readInt());
             System.out.println(input.readLong());
             System.out.println(input.readInt());

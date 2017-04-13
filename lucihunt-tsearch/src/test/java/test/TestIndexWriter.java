@@ -20,6 +20,9 @@ public class TestIndexWriter {
             Document doc = new Document();
             doc.add(new Field("name", "java is good php is bad", Field.Store.YES, Field.Index.TOKENIZED));
             iw.addDocument(doc);
+            Document doc2 = new Document();
+            doc2.add(new Field("name", "php is the best lang not java", Field.Store.YES, Field.Index.TOKENIZED));
+            iw.addDocument(doc2);
             iw.close();
         } catch (IOException e) {
             e.printStackTrace();
