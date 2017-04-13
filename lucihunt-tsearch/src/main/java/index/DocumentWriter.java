@@ -62,6 +62,26 @@ public class DocumentWriter {
         //准备倒排表数据 
         invertdocument(doc);
 
+        //对倒排表进行排序
+        Posting[] postings = sortPostingTable();
+
+        //写入倒排表  对这一部分  其实是可以在另一个文件中写入的  好管理 
+        writerPos(postings);
+
+    }
+    
+    private void writerPos(Posting[] postings) {
+
+    }
+
+    public Posting[] sortPostingTable() {
+        Posting[] sortpos = new Posting[postingTable.size()];
+        Enumeration<Posting> enu = postingTable.elements();
+        for (int i = 0; i < sortpos.length; i++) {
+            sortpos[i] = enu.nextElement();
+        }
+        quickSort(sortpos, 0, sortpos.length - 1);
+        return sortpos;
     }
 
     //生成倒排表所需要的数据 
@@ -135,11 +155,92 @@ public class DocumentWriter {
         }
     }
 
-    //添加一个位置信息
+    private Term termBuffer = new Term("", "");
+
+    //如果词已经存在 则更新其位置信息  如果不存在  则生成一个位置
     private final void addPosition(String field, String text, int position, TermVectorOffsetInfo offset) {
-        Term term = new Term(field, text);
-        Posting posting = new Posting(term, position, offset);
-        
+        termBuffer.set(field, text);
+        Posting ti = postingTable.get(postingTable);
+        //同一个域中出现了多次这个词 
+        if (ti != null) {//同一个term已经有这个位置了，肯定要变更位置
+            int frep = ti.freq;
+            if (ti.positions.length == position) {//位置已经满了
+                int[] newpositons = new int[position * 2];
+                for (int i = 0; i < position; i++) {
+                    newpositons[i] = ti.positions[i];
+                }
+                ti.positions = newpositons;
+            }
+            ti.positions[frep] = position;
+            if (offset != null) {//同样要更新offset的值
+                if (ti.offsets.length == position) {
+                    TermVectorOffsetInfo[] newoffset = new TermVectorOffsetInfo[position * 2];
+                    for (int i = 0; i < position; i++) {
+                        newoffset[i] = ti.offsets[i];
+                    }
+                    ti.offsets = newoffset;
+                }
+                ti.offsets[position] = offset;
+            }
+            ti.freq = frep + 1;
+        } else {
+            Term term = new Term(field, text);
+            Posting posting = new Posting(term, position, offset);
+        }
+    }
+
+    //按字典序给排序    term中是先比较内存   再比较字段 
+    private static final void quickSort(Posting[] postings, int lo, int hi) {
+        if (lo >= hi)
+            return;
+
+        int mid = (lo + hi) / 2;
+
+        if (postings[lo].term.compareTo(postings[mid].term) > 0) {
+            Posting tmp = postings[lo];
+            postings[lo] = postings[mid];
+            postings[mid] = tmp;
+        }
+
+        if (postings[mid].term.compareTo(postings[hi].term) > 0) {
+            Posting tmp = postings[mid];
+            postings[mid] = postings[hi];
+            postings[hi] = tmp;
+
+            if (postings[lo].term.compareTo(postings[mid].term) > 0) {
+                Posting tmp2 = postings[lo];
+                postings[lo] = postings[mid];
+                postings[mid] = tmp2;
+            }
+        }
+
+        int left = lo + 1;
+        int right = hi - 1;
+
+        if (left >= right)
+            return;
+
+        Term partition = postings[mid].term;
+
+        for (;;) {
+            while (postings[right].term.compareTo(partition) > 0)
+                --right;
+
+            while (left < right && postings[left].term.compareTo(partition) <= 0)
+                ++left;
+
+            if (left < right) {
+                Posting tmp = postings[left];
+                postings[left] = postings[right];
+                postings[right] = tmp;
+                --right;
+            } else {
+                break;
+            }
+        }
+
+        quickSort(postings, lo, left);
+        quickSort(postings, left + 1, hi);
     }
 
     public void initinvert(Document doc) {

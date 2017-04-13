@@ -44,4 +44,9 @@ public class Term {
         else
             return field.compareTo(other.field);
     }
+
+    final void set(String fld, String txt) {
+        field = fld;
+        text = txt;
+    }
 }
