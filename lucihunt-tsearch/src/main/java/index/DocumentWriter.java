@@ -69,7 +69,7 @@ public class DocumentWriter {
         writerPos(postings);
 
     }
-    
+
     private void writerPos(Posting[] postings) {
 
     }

@@ -22,8 +22,8 @@ public class TermInfosWriter {
     private boolean isindex;
     private final int FORMAT = -2;
     private int skipInterval = 16;
-
-    TermInfosWriter(Directory directory, String segment, FieldInfos fis, int interval) throws IOException {
+    
+    public TermInfosWriter(Directory directory, String segment, FieldInfos fis, int interval) throws IOException {
         initialize(directory, segment, fis, interval, false);
     }
 

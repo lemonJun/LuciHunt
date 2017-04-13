@@ -40,7 +40,7 @@ final class FieldInfos {
     }
 
     //读取一个现有的域元数据信息
-    FieldInfos(Directory d, String name) throws IOException {
+    public FieldInfos(Directory d, String name) throws IOException {
         IndexInput input = d.openInput(name);
         try {
             read(input);
