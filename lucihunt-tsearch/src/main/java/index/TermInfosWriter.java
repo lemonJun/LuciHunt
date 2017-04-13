@@ -19,7 +19,6 @@ public class TermInfosWriter {
     private FieldInfos fieldInfos;
     private IndexOutput tii;
     private IndexOutput tis;
-    private boolean isindex;
     private final int FORMAT = -2;
     private int skipInterval = 16;
 
@@ -30,7 +29,6 @@ public class TermInfosWriter {
     private void initialize(Directory directory, String segment, FieldInfos fis, int interval, boolean isi) throws IOException {
         indexInterval = interval;
         fieldInfos = fis;
-        isindex = isi;
         tii = directory.createOutput(segment + ".tii");
         tii.writeInt(FORMAT); // 1write format 
         tii.writeLong(0); // 2 leave space for size
@@ -61,8 +59,9 @@ public class TermInfosWriter {
         if (size % indexInterval == 0) {
             addtii(lastterm, lastti);
         }
-
+        
         writeTerm(tis, term);
+        lastterm = term;
         tis.writeVInt(ti.docFreq);
         tis.writeVLong(ti.freqPointer - lastti.freqPointer);
         tis.writeVLong(ti.proxPointer - lastti.proxPointer);
@@ -85,9 +84,9 @@ public class TermInfosWriter {
     }
 
     public void addtii(Term term, TermInfo ti) throws IOException {
-        if (!isindex && term.compareTo(lastterm) <= 0) {
-            throw new IOException("term out of order");
-        }
+        //        if (term.compareTo(lastterm) <= 0) {
+        //            throw new IOException("term out of order");
+        //        }
         if (ti.freqPointer < lastti.freqPointer) {
             throw new IOException("freq out of order ");
         }

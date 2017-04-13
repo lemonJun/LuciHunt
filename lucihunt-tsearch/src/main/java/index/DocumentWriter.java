@@ -7,6 +7,9 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import analysis.Analyzer;
 import analysis.Token;
 import analysis.TokenStream;
@@ -16,6 +19,8 @@ import search.Similarity;
 import store.Directory;
 
 public class DocumentWriter {
+
+    private static final Logger logger = LoggerFactory.getLogger(DocumentWriter.class);
 
     private Analyzer analyzer;
     private Directory directory;
@@ -29,6 +34,14 @@ public class DocumentWriter {
         this.analyzer = analyzer;
         this.similarity = similarity;
         this.maxFieldLength = maxFieldLength;
+    }
+
+    DocumentWriter(Directory directory, Analyzer analyzer, IndexWriter writer) {
+        this.directory = directory;
+        this.analyzer = analyzer;
+        this.similarity = writer.getSimilarity();
+        this.maxFieldLength = writer.DEFAULT_MAX_FIELD_LENGTH;
+        this.termIndexInterval = writer.DEFAULT_TERM_INDEX_INTERVAL;
     }
 
     private final Hashtable<Term, Posting> postingTable = new Hashtable<Term, Posting>();
@@ -48,6 +61,7 @@ public class DocumentWriter {
      * @throws IOException
      */
     final public void addDocument(String segment, Document doc) throws IOException {
+        logger.info(String.format("add doc:", doc.toString()));
         //默认为是一个documentwriter写到一个索引段中  所以此处是直接new了一个  但这样一个段就只能包含一个文档了；
         fieldInfos = new FieldInfos();
         fieldInfos.add(doc);
@@ -73,30 +87,30 @@ public class DocumentWriter {
     }
 
     private void writerPos(Posting[] postings, String segment) throws IOException {
-        TermInfosWriter tw = null;
-        FreqProxWriter fw = null;
+        TermInfosWriter terminfoswriter = null;
+        FreqProxWriter freqproxwriter = null;
         TermVectorsWriter termvertorwriter = null;
         try {
-            tw = new TermInfosWriter(directory, segment, fieldInfos, termIndexInterval);
-            fw = new FreqProxWriter(directory, segment);
+            terminfoswriter = new TermInfosWriter(directory, segment, fieldInfos, termIndexInterval);
+            freqproxwriter = new FreqProxWriter(directory, segment);
             TermInfo ti = new TermInfo();
             String currentfield = null;
             for (int i = 0; i < postings.length; i++) {
                 Posting pos = postings[i];
-                ti.set(1, fw.getfreqpointer(), fw.getproxpointer(), termIndexInterval);
-                tw.add(pos.term, ti);
+                ti.set(1, freqproxwriter.getfreqpointer(), freqproxwriter.getproxpointer(), termIndexInterval);
+                terminfoswriter.add(pos.term, ti);
                 int tf = pos.freq;
                 if (tf == 1) {//写入频率倒排
-                    fw.getFreq().writeInt(1);
+                    freqproxwriter.getFreq().writeInt(1);
                 } else {
-                    fw.getFreq().writeInt(0);
-                    fw.getFreq().writeInt(tf);
+                    freqproxwriter.getFreq().writeInt(0);
+                    freqproxwriter.getFreq().writeInt(tf);
                 }
                 int lastposition = 0;
                 //写入位置倒排
                 for (int j = 0; j < pos.positions.length; i++) {
                     int position = pos.positions[j];
-                    fw.getProx().writeVInt(position - lastposition);
+                    freqproxwriter.getProx().writeVInt(position - lastposition);
                     lastposition = position;
                 }
 
@@ -126,11 +140,11 @@ public class DocumentWriter {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            if (tw != null) {
-                tw.close();
+            if (terminfoswriter != null) {
+                terminfoswriter.close();
             }
-            if (fw != null) {
-                fw.close();
+            if (freqproxwriter != null) {
+                freqproxwriter.close();
             }
             if (termvertorwriter != null) {
                 termvertorwriter.close();

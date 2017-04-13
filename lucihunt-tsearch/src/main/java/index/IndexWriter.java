@@ -25,6 +25,9 @@ public class IndexWriter {
 
     private FileLock writeLock;
 
+    public final static int DEFAULT_MAX_FIELD_LENGTH = 10000;
+    public final static int DEFAULT_TERM_INDEX_INTERVAL = 128;
+
     public IndexWriter(String path, Analyzer a, boolean create) throws IOException {
         this(FSDirectory.getDirectory(path, create), a, create, true);
     }
@@ -45,7 +48,6 @@ public class IndexWriter {
         this.writeLock = writeLock; // save it
         FileLock commitLock = directory.makeLock(IndexWriter.COMMIT_LOCK_NAME);
         commitLock.tryLock();
-
         if (create) {
             segmentInfos.write(directory);
         } else {
@@ -67,13 +69,27 @@ public class IndexWriter {
     }
 
     public void addDocument(Document doc, Analyzer analyzer) throws IOException {
-        //        DocumentWriter dw = new DocumentWriter(ramDirectory, analyzer, this);
-        //        String segmentName = newSegmentName();
-        //        dw.addDocument(segmentName, doc);
+        DocumentWriter dw = new DocumentWriter(directory, analyzer, this);
+        String segmentName = newSegmentName();
+        dw.addDocument(segmentName, doc);
         //        synchronized (this) {
         //            segmentInfos.addElement(new SegmentInfo(segmentName, 1, ramDirectory));
         //            maybeMergeSegments();
         //        }
+    }
+
+    public synchronized void close() throws IOException {
+        //        flushRamSegments();
+        //        if (writeLock != null) {
+        //            writeLock.release(); // release write lock
+        //            writeLock = null;
+        //        }
+        directory.close();
+        //        segmentInfos.clone();
+    }
+
+    private final synchronized String newSegmentName() {
+        return "_" + Integer.toString(segmentInfos.counter++, Character.MAX_RADIX);
     }
 
     public Directory getDirectory() {
