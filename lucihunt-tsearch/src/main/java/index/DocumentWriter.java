@@ -108,7 +108,7 @@ public class DocumentWriter {
                 }
                 int lastposition = 0;
                 //写入位置倒排
-                for (int j = 0; j < pos.positions.length; i++) {
+                for (int j = 0; j < pos.positions.length; j++) {
                     int position = pos.positions[j];
                     freqproxwriter.getProx().writeVInt(position - lastposition);
                     lastposition = position;
