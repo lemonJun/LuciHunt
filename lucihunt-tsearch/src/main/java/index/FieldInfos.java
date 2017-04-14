@@ -3,8 +3,10 @@ package index;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import document.Document;
@@ -55,6 +57,46 @@ final class FieldInfos {
             Field field = (Field) fields.nextElement();
             add(field);
         }
+    }
+
+    public void add(Collection<String> names, boolean isIndexed) {
+        Iterator<String> i = names.iterator();
+        while (i.hasNext()) {
+            add(i.next(), isIndexed);
+        }
+    }
+
+    public void add(String name, boolean isIndexed) {
+        add(name, isIndexed, false, false, false, false);
+    }
+
+    public void add(String name, boolean isIndexed, boolean storeTermVector, boolean storePositionWithTermVector, boolean storeOffsetWithTermVector, boolean omitNorms) {
+        FieldInfo fi = fieldInfoByName(name);
+        if (fi == null) {
+            addInternal(name, isIndexed, storeTermVector, storePositionWithTermVector, storeOffsetWithTermVector, omitNorms);
+        } else {
+            if (fi.isIndexed != isIndexed) {
+                fi.isIndexed = true; // once indexed, always index
+            }
+            if (fi.storeTermVector != storeTermVector) {
+                fi.storeTermVector = true; // once vector, always vector
+            }
+            if (fi.storePositionWithTermVector != storePositionWithTermVector) {
+                fi.storePositionWithTermVector = true; // once vector, always vector
+            }
+            if (fi.storeOffsetWithTermVector != storeOffsetWithTermVector) {
+                fi.storeOffsetWithTermVector = true; // once vector, always vector
+            }
+            if (fi.omitNorms != omitNorms) {
+                fi.omitNorms = false; // once norms are stored, always store
+            }
+        }
+    }
+    
+    private void addInternal(String name, boolean isIndexed, boolean storeTermVector, boolean storePositionWithTermVector, boolean storeOffsetWithTermVector, boolean omitNorms) {
+        FieldInfo fi = new FieldInfo(name, isIndexed, byNumber.size(), storeTermVector, storePositionWithTermVector, storeOffsetWithTermVector, omitNorms);
+        byNumber.add(fi);
+        byName.put(name, fi);
     }
 
     public void add(Field field) {

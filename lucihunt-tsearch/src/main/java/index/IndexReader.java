@@ -2,8 +2,10 @@ package index;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.concurrent.locks.Lock;
 
+import document.Document;
 import store.Directory;
 import store.FSDirectory;
 
@@ -112,16 +114,39 @@ public abstract class IndexReader {
             if (infos.size() == 1) { // index is optimized
                 return SegmentReader.get(infos, infos.info(0), closeDirectory);
             }
-            //            IndexReader[] readers = new IndexReader[infos.size()];
-            //            for (int i = 0; i < infos.size(); i++)
-            //                readers[i] = SegmentReader.get(infos.info(i));
-            //            return new MultiReader(directory, infos, closeDirectory, readers);
+            IndexReader[] readers = new IndexReader[infos.size()];
+            for (int i = 0; i < infos.size(); i++)
+                readers[i] = SegmentReader.get(infos.info(i));
+            return new MultiReader(directory, infos, closeDirectory, readers);
         }
-        return null;
     }
+
+    public abstract int numDocs();
+
+    public abstract Collection<String> getFieldNames(FieldOption fldOption);
+
+    //
+    public abstract int maxDoc();
+
+    //返回段中的第几个文档
+    public abstract Document document(int n) throws IOException;
+
+    //判断第n个文档 是否被删除
+    public abstract boolean isDeleted(int n);
+
+    //判断段中是否有删除的文档
+    public abstract boolean hasDeletions();
 
     public Directory directory() {
         return directory;
     }
+
+    public boolean hasNorms(String field) throws IOException {
+        // backward compatible implementation.
+        // SegmentReader has an efficient implementation.
+        return norms(field) != null;
+    }
+    
+    public abstract byte[] norms(String field) throws IOException;
 
 }

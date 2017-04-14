@@ -119,6 +119,12 @@ public class IndexWriter {
     private final void mergeSegments(int minSegment, int end) throws IOException {
         String newsegname = newSegmentName();
         logger.info("segment merger ...");
+        SegmentMerger segmerger = new SegmentMerger(directory, newsegname);
+        //
+        
+        
+        
+        
     }
 
     private final synchronized String newSegmentName() {

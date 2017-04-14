@@ -25,7 +25,8 @@ import store.IndexInput;
 import store.IndexOutput;
 
 /**
- *  对索引段的操作，
+ * 生成索引之前 先生成段  
+ * 
  * 
  * @author WangYazhou
  * @date   2017年2月27日 下午4:07:49
@@ -34,7 +35,7 @@ import store.IndexOutput;
 public final class SegmentInfos extends Vector<SegmentInfo> {
 
     private static final long serialVersionUID = 1L;
-    
+
     //随着段的生成    在不断的变化 
     /** The file format version, a negative number. */
     /* Works since counter, the old 1st entry, is always >= 0 */
@@ -133,7 +134,7 @@ public final class SegmentInfos extends Vector<SegmentInfo> {
         } finally {
             input.close();
         }
-
+        
         if (format < 0)
             return version;
 

@@ -77,7 +77,7 @@ public class FSDirectory extends Directory {
     private static Class IMPL;
     static {
         try {
-            String name = System.getProperty("org.apache.lucene.FSDirectory.class", FSDirectory.class.getName());
+            String name = System.getProperty("indexFSDirectory.class", FSDirectory.class.getName());
             IMPL = Class.forName(name);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("cannot load FSDirectory class: " + e.toString());

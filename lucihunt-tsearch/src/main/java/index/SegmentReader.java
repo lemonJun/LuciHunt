@@ -1,7 +1,11 @@
 package index;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
+import document.Document;
 import store.Directory;
 import store.IndexInput;
 import util.BitVector;
@@ -12,6 +16,7 @@ public class SegmentReader extends IndexReader {
 
     private FieldInfos fieldinfos;
     private FieldsReader fieldsreader;
+
     private TermInfosReader tis;
     private BitVector deledocs;
     private IndexInput freqstream;
@@ -100,7 +105,65 @@ public class SegmentReader extends IndexReader {
     static boolean hasDeletions(SegmentInfo si) throws IOException {
         return si.dir.fileExists(si.name + ".del");
     }
-    
-    
+
+    public boolean hasDeletions() {
+        return deledocs != null;
+    }
+
+    @Override
+    public int numDocs() {
+        int n = maxDoc();
+        if (deledocs != null)
+            n -= deledocs.count();
+        return n;
+    }
+
+    @Override
+    public int maxDoc() {
+        return fieldsreader.getSize();
+    }
+
+    @Override
+    public Document document(int n) throws IOException {
+        return fieldsreader.doc(n);
+    }
+
+    @Override
+    public boolean isDeleted(int n) {
+        return (deledocs != null && deledocs.get(n));
+    }
+
+    @Override
+    public Collection<String> getFieldNames(FieldOption fieldOption) {
+        Set<String> fieldSet = new HashSet<String>();
+        for (int i = 0; i < fieldinfos.size(); i++) {
+            FieldInfo fi = fieldinfos.fieldInfo(i);
+            if (fieldOption == IndexReader.FieldOption.ALL) {
+                fieldSet.add(fi.name);
+            } else if (!fi.isIndexed && fieldOption == IndexReader.FieldOption.UNINDEXED) {
+                fieldSet.add(fi.name);
+            } else if (fi.isIndexed && fieldOption == IndexReader.FieldOption.INDEXED) {
+                fieldSet.add(fi.name);
+            } else if (fi.isIndexed && fi.storeTermVector == false && fieldOption == IndexReader.FieldOption.INDEXED_NO_TERMVECTOR) {
+                fieldSet.add(fi.name);
+            } else if (fi.storeTermVector == true && fi.storePositionWithTermVector == false && fi.storeOffsetWithTermVector == false && fieldOption == IndexReader.FieldOption.TERMVECTOR) {
+                fieldSet.add(fi.name);
+            } else if (fi.isIndexed && fi.storeTermVector && fieldOption == IndexReader.FieldOption.INDEXED_WITH_TERMVECTOR) {
+                fieldSet.add(fi.name);
+            } else if (fi.storePositionWithTermVector && fi.storeOffsetWithTermVector == false && fieldOption == IndexReader.FieldOption.TERMVECTOR_WITH_POSITION) {
+                fieldSet.add(fi.name);
+            } else if (fi.storeOffsetWithTermVector && fi.storePositionWithTermVector == false && fieldOption == IndexReader.FieldOption.TERMVECTOR_WITH_OFFSET) {
+                fieldSet.add(fi.name);
+            } else if ((fi.storeOffsetWithTermVector && fi.storePositionWithTermVector) && fieldOption == IndexReader.FieldOption.TERMVECTOR_WITH_POSITION_OFFSET) {
+                fieldSet.add(fi.name);
+            }
+        }
+        return fieldSet;
+    }
+
+    @Override
+    public byte[] norms(String field) throws IOException {
+        return null;
+    }
 
 }

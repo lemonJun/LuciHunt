@@ -35,7 +35,7 @@ public class FieldsReader {
         indexstream.seek(n * 8L);//一个文档所在的位置是以LONG保存的 
         long datapointer = indexstream.readLong();
         datastream.seek(datapointer);
-        
+
         int fieldsize = datastream.readInt();//字段个数
         for (int i = 0; i < fieldsize; i++) {
             int fieldnum = datastream.readInt();//字段的序号
