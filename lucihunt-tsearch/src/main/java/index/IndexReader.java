@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.locks.Lock;
 
-import org.apache.lucene.index.MultiReader;
-
 import store.Directory;
 import store.FSDirectory;
 
@@ -114,11 +112,12 @@ public abstract class IndexReader {
             if (infos.size() == 1) { // index is optimized
                 return SegmentReader.get(infos, infos.info(0), closeDirectory);
             }
-            IndexReader[] readers = new IndexReader[infos.size()];
-            for (int i = 0; i < infos.size(); i++)
-                readers[i] = SegmentReader.get(infos.info(i));
-            return new MultiReader(directory, infos, closeDirectory, readers);
+            //            IndexReader[] readers = new IndexReader[infos.size()];
+            //            for (int i = 0; i < infos.size(); i++)
+            //                readers[i] = SegmentReader.get(infos.info(i));
+            //            return new MultiReader(directory, infos, closeDirectory, readers);
         }
+        return null;
     }
 
     public Directory directory() {

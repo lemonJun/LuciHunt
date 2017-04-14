@@ -22,9 +22,9 @@ public class TermVectorsWriter {
     //The size in bytes that the FORMAT_VERSION will take up at the beginning of each file 
     static final int FORMAT_SIZE = 4;
 
-    static final String TVX_EXTENSION = ".tvx";
-    static final String TVD_EXTENSION = ".tvd";
-    static final String TVF_EXTENSION = ".tvf";
+    public static final String TVX_EXTENSION = ".tvx";
+    public static final String TVD_EXTENSION = ".tvd";
+    public static final String TVF_EXTENSION = ".tvf";
 
     private IndexOutput tvx = null;
     private IndexOutput tvd = null;
@@ -93,7 +93,7 @@ public class TermVectorsWriter {
 
         closeDocument();
     }
-    
+
     public final void addTerm(String termText, int freq) {
         addTerm(termText, freq, null, null);
     }

@@ -8,7 +8,9 @@ import util.StringHelper;
 
 /**
  * 写入词典倒排表
- *
+ * 此处实现有问题  并且跳跃表只看到了间隔   没有层次信息啊 ??
+ * 难倒是在段合并中产生的??
+ * 
  * @author WangYazhou
  * @date  2017年4月13日 下午1:48:42
  * @see
@@ -71,13 +73,12 @@ public class TermInfosWriter {
 
         lastti.set(ti);
         size++;
-
     }
 
     private void writeTerm(IndexOutput output, Term term) throws IOException {
         int start = StringHelper.stringDifference(lastterm.text(), term.text());
         int length = term.text().length() - start;
-        output.writeInt(start);//写入开始偏移量
+        output.writeInt(start);//写入开始偏移量   表示这个词与上一个词开始不同的位置   因为都是按字典序排过的   所以可以这样做
         output.writeInt(length);//写入偏移后的长度
         output.writeChars(term.text(), start, length);
         output.writeInt(fieldInfos.fieldNumber(term.field()));//写入域在元数据中的次序

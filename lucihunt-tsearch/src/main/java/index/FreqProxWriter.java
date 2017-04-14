@@ -7,12 +7,15 @@ import store.IndexOutput;
 
 public class FreqProxWriter {
 
+    public static final String FREQ_SUFFIX = ".frq";
+    public static final String PROX_SUFFIX = ".prx";
+
     private IndexOutput freq;
     private IndexOutput prox;
 
     public FreqProxWriter(Directory directory, String seg) throws IOException {
-        freq = directory.createOutput(seg + ".frq");
-        prox = directory.createOutput(seg + ".prx");
+        freq = directory.createOutput(seg + FREQ_SUFFIX);
+        prox = directory.createOutput(seg + PROX_SUFFIX);
     }
 
     public void close() throws IOException {

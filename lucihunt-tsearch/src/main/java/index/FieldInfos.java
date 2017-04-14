@@ -104,6 +104,17 @@ final class FieldInfos {
         }
     }
 
+    public boolean hasVectors() {
+        boolean hasVectors = false;
+        for (int i = 0; i < size(); i++) {
+            if (fieldInfo(i).storeTermVector) {
+                hasVectors = true;
+                break;
+            }
+        }
+        return hasVectors;
+    }
+
     public int size() {
         return byNumber.size();
     }
