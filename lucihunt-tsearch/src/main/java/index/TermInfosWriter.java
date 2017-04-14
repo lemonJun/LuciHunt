@@ -19,7 +19,7 @@ public class TermInfosWriter {
     private FieldInfos fieldInfos;
     private IndexOutput tii;
     private IndexOutput tis;
-    private final int FORMAT = -2;
+    public static final int FORMAT = -2;
     private int skipInterval = 16;
 
     public TermInfosWriter(Directory directory, String segment, FieldInfos fis, int interval) throws IOException {
@@ -59,7 +59,7 @@ public class TermInfosWriter {
         if (size % indexInterval == 0) {
             addtii(lastterm, lastti);
         }
-        
+
         writeTerm(tis, term);
         lastterm = term;
         tis.writeVInt(ti.docFreq);

@@ -94,7 +94,7 @@ public class FieldsWriter {
         indexstream.close();
         datastream.close();
     }
-    
+
     //数据压缩
     private final byte[] compress(byte[] input) {
         // Create the compressor with highest level of compression

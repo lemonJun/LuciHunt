@@ -7,7 +7,7 @@ import org.junit.Test;
 import store.FSDirectory;
 import store.IndexInput;
 
-public class TestRead {
+public class TestTesearchFileRead {
     @Test
     public void readseg() {
         try {
