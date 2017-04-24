@@ -6,7 +6,7 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.IndexInput;
 import org.junit.Test;
 
-public class TestRead {
+public class TestLuceneFileRead {
     @Test
     public void readseg() {
         try {

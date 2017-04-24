@@ -3,7 +3,6 @@ package org.apache.lucene;
 import java.io.File;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.demo.FileDocument;
@@ -30,10 +29,10 @@ class IndexTest {
             writer.setUseCompoundFile(false);
             //            indexDocs(writer, new File("D:/logs"));
             //            writer.optimize();
-            indexEng(writer);
+            //            indexEng(writer);
             indexStr(writer);
-            //            indexStr2(writer);
-            //            indexStr3(writer);
+            indexStr2(writer);
+            indexStr3(writer);
             writer.close();
 
             Date end = new Date();
@@ -49,8 +48,8 @@ class IndexTest {
     public static void indexStr(IndexWriter writer) {
         try {
             Document doc = new Document();
-            //            doc.add(new Field("line", "java is good php is bad so java", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
-            doc.add(new Field("name", "php is the best lang not java ", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
+            doc.add(new Field("line", "java is good a java", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
+            doc.add(new Field("name", "php is not java ", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
             writer.addDocument(doc);
         } catch (Exception e) {
             e.printStackTrace();
@@ -60,7 +59,7 @@ class IndexTest {
     public static void indexStr2(IndexWriter writer) {
         try {
             Document doc = new Document();
-            doc.add(new Field("line", "you love java but not php", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
+            doc.add(new Field("line", "you love java", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
             doc.add(new Field("name", "see you ", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
             //            doc.add(new Field("mame", line, Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
             writer.addDocument(doc);
@@ -72,7 +71,7 @@ class IndexTest {
     public static void indexStr3(IndexWriter writer) {
         try {
             Document doc = new Document();
-            doc.add(new Field("line", "php say hello world java ", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
+            doc.add(new Field("line", "pho not java ", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
             doc.add(new Field("mame", "java is bad ", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
             writer.addDocument(doc);
         } catch (Exception e) {

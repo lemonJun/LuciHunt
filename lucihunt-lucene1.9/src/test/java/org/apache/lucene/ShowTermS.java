@@ -23,14 +23,14 @@ public class ShowTermS {
                 Term term = enumeration.term();
                 //out是一个输出流，它输出到一个文本，这里没有给出out的定义，读者可以自己定义它
                 sb.append(term.text());
-                sb.append("\n     Fi:").append(term.field());
-                sb.append(" D:").append(enumeration.docFreq());
+                sb.append("\n     域:").append(term.field());
+                sb.append(" DF:").append(enumeration.docFreq());
                 TermPositions posEnum = reader.termPositions(term);
                 while (posEnum.next()) {
-                    sb.append("\n     Fr:");
+                    sb.append("\n     TF:");
                     sb.append(posEnum.freq());
-                    sb.append(" D:").append(posEnum.doc());
-                    sb.append(" Pr:");
+                    sb.append(" Doc:").append(posEnum.doc());
+                    sb.append(" Position:");
                     for (int i = 0; i < posEnum.freq(); i++)
                         sb.append("[" + posEnum.nextPosition() + "]");
                     sb.append("  raw:");

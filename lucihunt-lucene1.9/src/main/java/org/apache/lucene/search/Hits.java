@@ -133,7 +133,7 @@ public final class Hits {
         return new HitIterator(this);
     }
 
-    private final HitDoc hitDoc(int n) throws IOException {
+    public final HitDoc hitDoc(int n) throws IOException {
         if (n >= length) {
             throw new IndexOutOfBoundsException("Not a valid hit number: " + n);
         }
@@ -192,4 +192,9 @@ final class HitDoc {
         score = s;
         id = i;
     }
+
+    public int getId() {
+        return id;
+    }
+
 }
