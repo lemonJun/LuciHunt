@@ -101,7 +101,7 @@ public abstract class Similarity implements Serializable {
     public static void setDefault(Similarity similarity) {
         Similarity.defaultImpl = similarity;
     }
-
+    
     /** Return the default Similarity implementation used by indexing and search
      * code.
      *
@@ -136,7 +136,9 @@ public abstract class Similarity implements Serializable {
         return NORM_TABLE;
     }
 
-    /** Computes the normalization value for a field given the total number of
+    /** 
+     * 
+     * Computes the normalization value for a field given the total number of
      * terms contained in a field.  These values, together with field boosts, are
      * stored in an index and multipled into scores for hits on each field by the
      * search code.

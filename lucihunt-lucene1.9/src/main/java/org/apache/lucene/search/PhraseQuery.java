@@ -26,6 +26,7 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.util.ToStringUtils;
 
 /**
+ * 
  * 在明确知道Term的情号下，可以直接使用new().addTerm().setSlop()的方式使用
  * 在不明确知道Term的情况下，可以使用queryparser来生成phrasequery  其中Analyzer要与建索引里的一样
  * 如：getParser(a).parse("\"hello there\" ~3")  

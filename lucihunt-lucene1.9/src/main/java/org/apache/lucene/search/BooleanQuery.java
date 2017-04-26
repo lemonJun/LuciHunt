@@ -383,7 +383,7 @@ public class BooleanQuery extends Query {
             if (!c.isProhibited()) { // just return clause
 
                 Query query = c.getQuery().rewrite(reader); // rewrite first
-
+                
                 if (getBoost() != 1.0f) { // incorporate boost
                     if (query == c.getQuery()) // if rewrite was no-op
                         query = (Query) query.clone(); // then clone before boost
@@ -393,7 +393,7 @@ public class BooleanQuery extends Query {
                 return query;
             }
         }
-
+        
         BooleanQuery clone = null; // recursively rewrite
         for (int i = 0; i < clauses.size(); i++) {
             BooleanClause c = (BooleanClause) clauses.elementAt(i);

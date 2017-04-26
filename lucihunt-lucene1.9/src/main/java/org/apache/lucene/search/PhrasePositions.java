@@ -17,7 +17,8 @@ package org.apache.lucene.search;
  */
 
 import java.io.IOException;
-import org.apache.lucene.index.*;
+
+import org.apache.lucene.index.TermPositions;
 
 final class PhrasePositions {
     int doc; // current doc

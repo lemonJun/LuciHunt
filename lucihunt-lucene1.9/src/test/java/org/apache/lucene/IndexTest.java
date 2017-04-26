@@ -49,7 +49,7 @@ class IndexTest {
         try {
             Document doc = new Document();
             doc.add(new Field("line", "java is good a java", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
-            doc.add(new Field("name", "php is not java ", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
+            doc.add(new Field("name", "good for you", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
             writer.addDocument(doc);
         } catch (Exception e) {
             e.printStackTrace();
@@ -60,7 +60,7 @@ class IndexTest {
         try {
             Document doc = new Document();
             doc.add(new Field("line", "you love java", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
-            doc.add(new Field("name", "see you ", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
+            doc.add(new Field("name", "hi java ", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
             //            doc.add(new Field("mame", line, Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
             writer.addDocument(doc);
         } catch (Exception e) {
@@ -71,8 +71,8 @@ class IndexTest {
     public static void indexStr3(IndexWriter writer) {
         try {
             Document doc = new Document();
-            doc.add(new Field("line", "pho not java ", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
-            doc.add(new Field("mame", "java is bad ", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
+            doc.add(new Field("line", "php not java ", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
+            doc.add(new Field("name", "java  bad ", Field.Store.YES, Field.Index.TOKENIZED, TermVector.WITH_POSITIONS_OFFSETS));
             writer.addDocument(doc);
         } catch (Exception e) {
             e.printStackTrace();

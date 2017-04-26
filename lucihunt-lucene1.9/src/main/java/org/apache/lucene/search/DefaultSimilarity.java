@@ -67,6 +67,7 @@ public class DefaultSimilarity extends Similarity {
     }
 
     /**
+     * 
      * 符合查询term / 总的查询term
      *  
      *  Implemented as <code>overlap / maxOverlap</code>. 
