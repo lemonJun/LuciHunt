@@ -45,42 +45,41 @@ import org.apache.lucene.util.Bits;
 // TermsDict + PostingsReader/WriterBase == PostingsConsumer/Producer
 public abstract class PostingsReaderBase implements Closeable, Accountable {
 
-  /** Sole constructor. (For invocation by subclass 
-   *  constructors, typically implicit.) */
-  protected PostingsReaderBase() {
-  }
+    /** Sole constructor. (For invocation by subclass 
+     *  constructors, typically implicit.) */
+    protected PostingsReaderBase() {
+    }
 
-  /** Performs any initialization, such as reading and
-   *  verifying the header from the provided terms
-   *  dictionary {@link IndexInput}. */
-  public abstract void init(IndexInput termsIn) throws IOException;
+    /** Performs any initialization, such as reading and
+     *  verifying the header from the provided terms
+     *  dictionary {@link IndexInput}. */
+    public abstract void init(IndexInput termsIn) throws IOException;
 
-  /** Return a newly created empty TermState */
-  public abstract BlockTermState newTermState() throws IOException;
+    /** Return a newly created empty TermState */
+    public abstract BlockTermState newTermState() throws IOException;
 
-  /** Actually decode metadata for next term 
-   *  @see PostingsWriterBase#encodeTerm 
-   */
-  public abstract void decodeTerm(long[] longs, DataInput in, FieldInfo fieldInfo, BlockTermState state, boolean absolute) throws IOException;
+    /** Actually decode metadata for next term 
+     *  @see PostingsWriterBase#encodeTerm 
+     */
+    public abstract void decodeTerm(long[] longs, DataInput in, FieldInfo fieldInfo, BlockTermState state, boolean absolute) throws IOException;
 
-  /** Must fully consume state, since after this call that
-   *  TermState may be reused. */
-  public abstract DocsEnum docs(FieldInfo fieldInfo, BlockTermState state, Bits skipDocs, DocsEnum reuse, int flags) throws IOException;
+    /** Must fully consume state, since after this call that
+     *  TermState may be reused. */
+    public abstract DocsEnum docs(FieldInfo fieldInfo, BlockTermState state, Bits skipDocs, DocsEnum reuse, int flags) throws IOException;
 
-  /** Must fully consume state, since after this call that
-   *  TermState may be reused. */
-  public abstract DocsAndPositionsEnum docsAndPositions(FieldInfo fieldInfo, BlockTermState state, Bits skipDocs, DocsAndPositionsEnum reuse,
-                                                        int flags) throws IOException;
-  
-  /** 
-   * Checks consistency of this reader.
-   * <p>
-   * Note that this may be costly in terms of I/O, e.g. 
-   * may involve computing a checksum value against large data files.
-   * @lucene.internal
-   */
-  public abstract void checkIntegrity() throws IOException;
-  
-  @Override
-  public abstract void close() throws IOException;
+    /** Must fully consume state, since after this call that
+     *  TermState may be reused. */
+    public abstract DocsAndPositionsEnum docsAndPositions(FieldInfo fieldInfo, BlockTermState state, Bits skipDocs, DocsAndPositionsEnum reuse, int flags) throws IOException;
+
+    /** 
+     * Checks consistency of this reader.
+     * <p>
+     * Note that this may be costly in terms of I/O, e.g. 
+     * may involve computing a checksum value against large data files.
+     * @lucene.internal
+     */
+    public abstract void checkIntegrity() throws IOException;
+
+    @Override
+    public abstract void close() throws IOException;
 }

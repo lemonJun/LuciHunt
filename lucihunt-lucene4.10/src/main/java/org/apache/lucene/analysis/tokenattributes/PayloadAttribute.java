@@ -36,15 +36,15 @@ import org.apache.lucene.util.BytesRef;
  * @see DocsAndPositionsEnum
  */
 public interface PayloadAttribute extends Attribute {
-  /**
-   * Returns this Token's payload.
-   * @see #setPayload(BytesRef)
-   */ 
-  public BytesRef getPayload();
+    /**
+     * Returns this Token's payload.
+     * @see #setPayload(BytesRef)
+     */
+    public BytesRef getPayload();
 
-  /** 
-   * Sets this Token's payload.
-   * @see #getPayload()
-   */
-  public void setPayload(BytesRef payload);
+    /** 
+     * Sets this Token's payload.
+     * @see #getPayload()
+     */
+    public void setPayload(BytesRef payload);
 }

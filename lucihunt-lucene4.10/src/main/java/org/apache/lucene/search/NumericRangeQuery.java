@@ -168,366 +168,343 @@ import org.apache.lucene.index.Term; // for javadocs
  **/
 public final class NumericRangeQuery<T extends Number> extends MultiTermQuery {
 
-  private NumericRangeQuery(final String field, final int precisionStep, final NumericType dataType,
-    T min, T max, final boolean minInclusive, final boolean maxInclusive
-  ) {
-    super(field);
-    if (precisionStep < 1)
-      throw new IllegalArgumentException("precisionStep must be >=1");
-    this.precisionStep = precisionStep;
-    this.dataType = dataType;
-    this.min = min;
-    this.max = max;
-    this.minInclusive = minInclusive;
-    this.maxInclusive = maxInclusive;
-  }
-  
-  /**
-   * Factory that creates a <code>NumericRangeQuery</code>, that queries a <code>long</code>
-   * range using the given <a href="#precisionStepDesc"><code>precisionStep</code></a>.
-   * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
-   * by setting the min or max value to <code>null</code>. By setting inclusive to false, it will
-   * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
-   */
-  public static NumericRangeQuery<Long> newLongRange(final String field, final int precisionStep,
-    Long min, Long max, final boolean minInclusive, final boolean maxInclusive
-  ) {
-    return new NumericRangeQuery<>(field, precisionStep, NumericType.LONG, min, max, minInclusive, maxInclusive);
-  }
-  
-  /**
-   * Factory that creates a <code>NumericRangeQuery</code>, that queries a <code>long</code>
-   * range using the default <code>precisionStep</code> {@link NumericUtils#PRECISION_STEP_DEFAULT} (16).
-   * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
-   * by setting the min or max value to <code>null</code>. By setting inclusive to false, it will
-   * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
-   */
-  public static NumericRangeQuery<Long> newLongRange(final String field,
-    Long min, Long max, final boolean minInclusive, final boolean maxInclusive
-  ) {
-    return new NumericRangeQuery<>(field, NumericUtils.PRECISION_STEP_DEFAULT, NumericType.LONG, min, max, minInclusive, maxInclusive);
-  }
-  
-  /**
-   * Factory that creates a <code>NumericRangeQuery</code>, that queries a <code>int</code>
-   * range using the given <a href="#precisionStepDesc"><code>precisionStep</code></a>.
-   * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
-   * by setting the min or max value to <code>null</code>. By setting inclusive to false, it will
-   * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
-   */
-  public static NumericRangeQuery<Integer> newIntRange(final String field, final int precisionStep,
-    Integer min, Integer max, final boolean minInclusive, final boolean maxInclusive
-  ) {
-    return new NumericRangeQuery<>(field, precisionStep, NumericType.INT, min, max, minInclusive, maxInclusive);
-  }
-  
-  /**
-   * Factory that creates a <code>NumericRangeQuery</code>, that queries a <code>int</code>
-   * range using the default <code>precisionStep</code> {@link NumericUtils#PRECISION_STEP_DEFAULT_32} (8).
-   * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
-   * by setting the min or max value to <code>null</code>. By setting inclusive to false, it will
-   * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
-   */
-  public static NumericRangeQuery<Integer> newIntRange(final String field,
-    Integer min, Integer max, final boolean minInclusive, final boolean maxInclusive
-  ) {
-    return new NumericRangeQuery<>(field, NumericUtils.PRECISION_STEP_DEFAULT_32, NumericType.INT, min, max, minInclusive, maxInclusive);
-  }
-  
-  /**
-   * Factory that creates a <code>NumericRangeQuery</code>, that queries a <code>double</code>
-   * range using the given <a href="#precisionStepDesc"><code>precisionStep</code></a>.
-   * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
-   * by setting the min or max value to <code>null</code>.
-   * {@link Double#NaN} will never match a half-open range, to hit {@code NaN} use a query
-   * with {@code min == max == Double.NaN}.  By setting inclusive to false, it will
-   * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
-   */
-  public static NumericRangeQuery<Double> newDoubleRange(final String field, final int precisionStep,
-    Double min, Double max, final boolean minInclusive, final boolean maxInclusive
-  ) {
-    return new NumericRangeQuery<>(field, precisionStep, NumericType.DOUBLE, min, max, minInclusive, maxInclusive);
-  }
-  
-  /**
-   * Factory that creates a <code>NumericRangeQuery</code>, that queries a <code>double</code>
-   * range using the default <code>precisionStep</code> {@link NumericUtils#PRECISION_STEP_DEFAULT} (16).
-   * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
-   * by setting the min or max value to <code>null</code>.
-   * {@link Double#NaN} will never match a half-open range, to hit {@code NaN} use a query
-   * with {@code min == max == Double.NaN}.  By setting inclusive to false, it will
-   * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
-   */
-  public static NumericRangeQuery<Double> newDoubleRange(final String field,
-    Double min, Double max, final boolean minInclusive, final boolean maxInclusive
-  ) {
-    return new NumericRangeQuery<>(field, NumericUtils.PRECISION_STEP_DEFAULT, NumericType.DOUBLE, min, max, minInclusive, maxInclusive);
-  }
-  
-  /**
-   * Factory that creates a <code>NumericRangeQuery</code>, that queries a <code>float</code>
-   * range using the given <a href="#precisionStepDesc"><code>precisionStep</code></a>.
-   * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
-   * by setting the min or max value to <code>null</code>.
-   * {@link Float#NaN} will never match a half-open range, to hit {@code NaN} use a query
-   * with {@code min == max == Float.NaN}.  By setting inclusive to false, it will
-   * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
-   */
-  public static NumericRangeQuery<Float> newFloatRange(final String field, final int precisionStep,
-    Float min, Float max, final boolean minInclusive, final boolean maxInclusive
-  ) {
-    return new NumericRangeQuery<>(field, precisionStep, NumericType.FLOAT, min, max, minInclusive, maxInclusive);
-  }
-  
-  /**
-   * Factory that creates a <code>NumericRangeQuery</code>, that queries a <code>float</code>
-   * range using the default <code>precisionStep</code> {@link NumericUtils#PRECISION_STEP_DEFAULT_32} (8).
-   * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
-   * by setting the min or max value to <code>null</code>.
-   * {@link Float#NaN} will never match a half-open range, to hit {@code NaN} use a query
-   * with {@code min == max == Float.NaN}.  By setting inclusive to false, it will
-   * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
-   */
-  public static NumericRangeQuery<Float> newFloatRange(final String field,
-    Float min, Float max, final boolean minInclusive, final boolean maxInclusive
-  ) {
-    return new NumericRangeQuery<>(field, NumericUtils.PRECISION_STEP_DEFAULT_32, NumericType.FLOAT, min, max, minInclusive, maxInclusive);
-  }
-
-  @Override @SuppressWarnings("unchecked")
-  protected TermsEnum getTermsEnum(final Terms terms, AttributeSource atts) throws IOException {
-    // very strange: java.lang.Number itself is not Comparable, but all subclasses used here are
-    if (min != null && max != null && ((Comparable<T>) min).compareTo(max) > 0) {
-      return TermsEnum.EMPTY;
+    private NumericRangeQuery(final String field, final int precisionStep, final NumericType dataType, T min, T max, final boolean minInclusive, final boolean maxInclusive) {
+        super(field);
+        if (precisionStep < 1)
+            throw new IllegalArgumentException("precisionStep must be >=1");
+        this.precisionStep = precisionStep;
+        this.dataType = dataType;
+        this.min = min;
+        this.max = max;
+        this.minInclusive = minInclusive;
+        this.maxInclusive = maxInclusive;
     }
-    return new NumericRangeTermsEnum(terms.iterator(null));
-  }
 
-  /** Returns <code>true</code> if the lower endpoint is inclusive */
-  public boolean includesMin() { return minInclusive; }
-  
-  /** Returns <code>true</code> if the upper endpoint is inclusive */
-  public boolean includesMax() { return maxInclusive; }
-
-  /** Returns the lower value of this range query */
-  public T getMin() { return min; }
-
-  /** Returns the upper value of this range query */
-  public T getMax() { return max; }
-  
-  /** Returns the precision step. */
-  public int getPrecisionStep() { return precisionStep; }
-  
-  @Override
-  public String toString(final String field) {
-    final StringBuilder sb = new StringBuilder();
-    if (!getField().equals(field)) sb.append(getField()).append(':');
-    return sb.append(minInclusive ? '[' : '{')
-      .append((min == null) ? "*" : min.toString())
-      .append(" TO ")
-      .append((max == null) ? "*" : max.toString())
-      .append(maxInclusive ? ']' : '}')
-      .append(ToStringUtils.boost(getBoost()))
-      .toString();
-  }
-
-  @Override
-  @SuppressWarnings({"unchecked","rawtypes"})
-  public final boolean equals(final Object o) {
-    if (o==this) return true;
-    if (!super.equals(o))
-      return false;
-    if (o instanceof NumericRangeQuery) {
-      final NumericRangeQuery q=(NumericRangeQuery)o;
-      return (
-        (q.min == null ? min == null : q.min.equals(min)) &&
-        (q.max == null ? max == null : q.max.equals(max)) &&
-        minInclusive == q.minInclusive &&
-        maxInclusive == q.maxInclusive &&
-        precisionStep == q.precisionStep
-      );
+    /**
+     * Factory that creates a <code>NumericRangeQuery</code>, that queries a <code>long</code>
+     * range using the given <a href="#precisionStepDesc"><code>precisionStep</code></a>.
+     * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
+     * by setting the min or max value to <code>null</code>. By setting inclusive to false, it will
+     * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
+     */
+    public static NumericRangeQuery<Long> newLongRange(final String field, final int precisionStep, Long min, Long max, final boolean minInclusive, final boolean maxInclusive) {
+        return new NumericRangeQuery<>(field, precisionStep, NumericType.LONG, min, max, minInclusive, maxInclusive);
     }
-    return false;
-  }
 
-  @Override
-  public final int hashCode() {
-    int hash = super.hashCode();
-    hash += precisionStep^0x64365465;
-    if (min != null) hash += min.hashCode()^0x14fa55fb;
-    if (max != null) hash += max.hashCode()^0x733fa5fe;
-    return hash +
-      (Boolean.valueOf(minInclusive).hashCode()^0x14fa55fb)+
-      (Boolean.valueOf(maxInclusive).hashCode()^0x733fa5fe);
-  }
-
-  // members (package private, to be also fast accessible by NumericRangeTermEnum)
-  final int precisionStep;
-  final NumericType dataType;
-  final T min, max;
-  final boolean minInclusive,maxInclusive;
-
-  // used to handle float/double infinity correcty
-  static final long LONG_NEGATIVE_INFINITY =
-    NumericUtils.doubleToSortableLong(Double.NEGATIVE_INFINITY);
-  static final long LONG_POSITIVE_INFINITY =
-    NumericUtils.doubleToSortableLong(Double.POSITIVE_INFINITY);
-  static final int INT_NEGATIVE_INFINITY =
-    NumericUtils.floatToSortableInt(Float.NEGATIVE_INFINITY);
-  static final int INT_POSITIVE_INFINITY =
-    NumericUtils.floatToSortableInt(Float.POSITIVE_INFINITY);
-
-  /**
-   * Subclass of FilteredTermsEnum for enumerating all terms that match the
-   * sub-ranges for trie range queries, using flex API.
-   * <p>
-   * WARNING: This term enumeration is not guaranteed to be always ordered by
-   * {@link Term#compareTo}.
-   * The ordering depends on how {@link NumericUtils#splitLongRange} and
-   * {@link NumericUtils#splitIntRange} generates the sub-ranges. For
-   * {@link MultiTermQuery} ordering is not relevant.
-   */
-  private final class NumericRangeTermsEnum extends FilteredTermsEnum {
-
-    private BytesRef currentLowerBound, currentUpperBound;
-
-    private final LinkedList<BytesRef> rangeBounds = new LinkedList<>();
-    private final Comparator<BytesRef> termComp;
-
-    NumericRangeTermsEnum(final TermsEnum tenum) {
-      super(tenum);
-      switch (dataType) {
-        case LONG:
-        case DOUBLE: {
-          // lower
-          long minBound;
-          if (dataType == NumericType.LONG) {
-            minBound = (min == null) ? Long.MIN_VALUE : min.longValue();
-          } else {
-            assert dataType == NumericType.DOUBLE;
-            minBound = (min == null) ? LONG_NEGATIVE_INFINITY
-              : NumericUtils.doubleToSortableLong(min.doubleValue());
-          }
-          if (!minInclusive && min != null) {
-            if (minBound == Long.MAX_VALUE) break;
-            minBound++;
-          }
-          
-          // upper
-          long maxBound;
-          if (dataType == NumericType.LONG) {
-            maxBound = (max == null) ? Long.MAX_VALUE : max.longValue();
-          } else {
-            assert dataType == NumericType.DOUBLE;
-            maxBound = (max == null) ? LONG_POSITIVE_INFINITY
-              : NumericUtils.doubleToSortableLong(max.doubleValue());
-          }
-          if (!maxInclusive && max != null) {
-            if (maxBound == Long.MIN_VALUE) break;
-            maxBound--;
-          }
-          
-          NumericUtils.splitLongRange(new NumericUtils.LongRangeBuilder() {
-            @Override
-            public final void addRange(BytesRef minPrefixCoded, BytesRef maxPrefixCoded) {
-              rangeBounds.add(minPrefixCoded);
-              rangeBounds.add(maxPrefixCoded);
-            }
-          }, precisionStep, minBound, maxBound);
-          break;
-        }
-          
-        case INT:
-        case FLOAT: {
-          // lower
-          int minBound;
-          if (dataType == NumericType.INT) {
-            minBound = (min == null) ? Integer.MIN_VALUE : min.intValue();
-          } else {
-            assert dataType == NumericType.FLOAT;
-            minBound = (min == null) ? INT_NEGATIVE_INFINITY
-              : NumericUtils.floatToSortableInt(min.floatValue());
-          }
-          if (!minInclusive && min != null) {
-            if (minBound == Integer.MAX_VALUE) break;
-            minBound++;
-          }
-          
-          // upper
-          int maxBound;
-          if (dataType == NumericType.INT) {
-            maxBound = (max == null) ? Integer.MAX_VALUE : max.intValue();
-          } else {
-            assert dataType == NumericType.FLOAT;
-            maxBound = (max == null) ? INT_POSITIVE_INFINITY
-              : NumericUtils.floatToSortableInt(max.floatValue());
-          }
-          if (!maxInclusive && max != null) {
-            if (maxBound == Integer.MIN_VALUE) break;
-            maxBound--;
-          }
-          
-          NumericUtils.splitIntRange(new NumericUtils.IntRangeBuilder() {
-            @Override
-            public final void addRange(BytesRef minPrefixCoded, BytesRef maxPrefixCoded) {
-              rangeBounds.add(minPrefixCoded);
-              rangeBounds.add(maxPrefixCoded);
-            }
-          }, precisionStep, minBound, maxBound);
-          break;
-        }
-          
-        default:
-          // should never happen
-          throw new IllegalArgumentException("Invalid NumericType");
-      }
-
-      termComp = getComparator();
+    /**
+     * Factory that creates a <code>NumericRangeQuery</code>, that queries a <code>long</code>
+     * range using the default <code>precisionStep</code> {@link NumericUtils#PRECISION_STEP_DEFAULT} (16).
+     * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
+     * by setting the min or max value to <code>null</code>. By setting inclusive to false, it will
+     * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
+     */
+    public static NumericRangeQuery<Long> newLongRange(final String field, Long min, Long max, final boolean minInclusive, final boolean maxInclusive) {
+        return new NumericRangeQuery<>(field, NumericUtils.PRECISION_STEP_DEFAULT, NumericType.LONG, min, max, minInclusive, maxInclusive);
     }
-    
-    private void nextRange() {
-      assert rangeBounds.size() % 2 == 0;
 
-      currentLowerBound = rangeBounds.removeFirst();
-      assert currentUpperBound == null || termComp.compare(currentUpperBound, currentLowerBound) <= 0 :
-        "The current upper bound must be <= the new lower bound";
-      
-      currentUpperBound = rangeBounds.removeFirst();
+    /**
+     * Factory that creates a <code>NumericRangeQuery</code>, that queries a <code>int</code>
+     * range using the given <a href="#precisionStepDesc"><code>precisionStep</code></a>.
+     * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
+     * by setting the min or max value to <code>null</code>. By setting inclusive to false, it will
+     * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
+     */
+    public static NumericRangeQuery<Integer> newIntRange(final String field, final int precisionStep, Integer min, Integer max, final boolean minInclusive, final boolean maxInclusive) {
+        return new NumericRangeQuery<>(field, precisionStep, NumericType.INT, min, max, minInclusive, maxInclusive);
     }
-    
+
+    /**
+     * Factory that creates a <code>NumericRangeQuery</code>, that queries a <code>int</code>
+     * range using the default <code>precisionStep</code> {@link NumericUtils#PRECISION_STEP_DEFAULT_32} (8).
+     * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
+     * by setting the min or max value to <code>null</code>. By setting inclusive to false, it will
+     * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
+     */
+    public static NumericRangeQuery<Integer> newIntRange(final String field, Integer min, Integer max, final boolean minInclusive, final boolean maxInclusive) {
+        return new NumericRangeQuery<>(field, NumericUtils.PRECISION_STEP_DEFAULT_32, NumericType.INT, min, max, minInclusive, maxInclusive);
+    }
+
+    /**
+     * Factory that creates a <code>NumericRangeQuery</code>, that queries a <code>double</code>
+     * range using the given <a href="#precisionStepDesc"><code>precisionStep</code></a>.
+     * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
+     * by setting the min or max value to <code>null</code>.
+     * {@link Double#NaN} will never match a half-open range, to hit {@code NaN} use a query
+     * with {@code min == max == Double.NaN}.  By setting inclusive to false, it will
+     * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
+     */
+    public static NumericRangeQuery<Double> newDoubleRange(final String field, final int precisionStep, Double min, Double max, final boolean minInclusive, final boolean maxInclusive) {
+        return new NumericRangeQuery<>(field, precisionStep, NumericType.DOUBLE, min, max, minInclusive, maxInclusive);
+    }
+
+    /**
+     * Factory that creates a <code>NumericRangeQuery</code>, that queries a <code>double</code>
+     * range using the default <code>precisionStep</code> {@link NumericUtils#PRECISION_STEP_DEFAULT} (16).
+     * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
+     * by setting the min or max value to <code>null</code>.
+     * {@link Double#NaN} will never match a half-open range, to hit {@code NaN} use a query
+     * with {@code min == max == Double.NaN}.  By setting inclusive to false, it will
+     * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
+     */
+    public static NumericRangeQuery<Double> newDoubleRange(final String field, Double min, Double max, final boolean minInclusive, final boolean maxInclusive) {
+        return new NumericRangeQuery<>(field, NumericUtils.PRECISION_STEP_DEFAULT, NumericType.DOUBLE, min, max, minInclusive, maxInclusive);
+    }
+
+    /**
+     * Factory that creates a <code>NumericRangeQuery</code>, that queries a <code>float</code>
+     * range using the given <a href="#precisionStepDesc"><code>precisionStep</code></a>.
+     * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
+     * by setting the min or max value to <code>null</code>.
+     * {@link Float#NaN} will never match a half-open range, to hit {@code NaN} use a query
+     * with {@code min == max == Float.NaN}.  By setting inclusive to false, it will
+     * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
+     */
+    public static NumericRangeQuery<Float> newFloatRange(final String field, final int precisionStep, Float min, Float max, final boolean minInclusive, final boolean maxInclusive) {
+        return new NumericRangeQuery<>(field, precisionStep, NumericType.FLOAT, min, max, minInclusive, maxInclusive);
+    }
+
+    /**
+     * Factory that creates a <code>NumericRangeQuery</code>, that queries a <code>float</code>
+     * range using the default <code>precisionStep</code> {@link NumericUtils#PRECISION_STEP_DEFAULT_32} (8).
+     * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
+     * by setting the min or max value to <code>null</code>.
+     * {@link Float#NaN} will never match a half-open range, to hit {@code NaN} use a query
+     * with {@code min == max == Float.NaN}.  By setting inclusive to false, it will
+     * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
+     */
+    public static NumericRangeQuery<Float> newFloatRange(final String field, Float min, Float max, final boolean minInclusive, final boolean maxInclusive) {
+        return new NumericRangeQuery<>(field, NumericUtils.PRECISION_STEP_DEFAULT_32, NumericType.FLOAT, min, max, minInclusive, maxInclusive);
+    }
+
     @Override
-    protected final BytesRef nextSeekTerm(BytesRef term) {
-      while (rangeBounds.size() >= 2) {
-        nextRange();
-        
-        // if the new upper bound is before the term parameter, the sub-range is never a hit
-        if (term != null && termComp.compare(term, currentUpperBound) > 0)
-          continue;
-        // never seek backwards, so use current term if lower bound is smaller
-        return (term != null && termComp.compare(term, currentLowerBound) > 0) ?
-          term : currentLowerBound;
-      }
-      
-      // no more sub-range enums available
-      assert rangeBounds.isEmpty();
-      currentLowerBound = currentUpperBound = null;
-      return null;
-    }
-    
-    @Override
-    protected final AcceptStatus accept(BytesRef term) {
-      while (currentUpperBound == null || termComp.compare(term, currentUpperBound) > 0) {
-        if (rangeBounds.isEmpty())
-          return AcceptStatus.END;
-        // peek next sub-range, only seek if the current term is smaller than next lower bound
-        if (termComp.compare(term, rangeBounds.getFirst()) < 0)
-          return AcceptStatus.NO_AND_SEEK;
-        // step forward to next range without seeking, as next lower range bound is less or equal current term
-        nextRange();
-      }
-      return AcceptStatus.YES;
+    @SuppressWarnings("unchecked")
+    protected TermsEnum getTermsEnum(final Terms terms, AttributeSource atts) throws IOException {
+        // very strange: java.lang.Number itself is not Comparable, but all subclasses used here are
+        if (min != null && max != null && ((Comparable<T>) min).compareTo(max) > 0) {
+            return TermsEnum.EMPTY;
+        }
+        return new NumericRangeTermsEnum(terms.iterator(null));
     }
 
-  }
-  
+    /** Returns <code>true</code> if the lower endpoint is inclusive */
+    public boolean includesMin() {
+        return minInclusive;
+    }
+
+    /** Returns <code>true</code> if the upper endpoint is inclusive */
+    public boolean includesMax() {
+        return maxInclusive;
+    }
+
+    /** Returns the lower value of this range query */
+    public T getMin() {
+        return min;
+    }
+
+    /** Returns the upper value of this range query */
+    public T getMax() {
+        return max;
+    }
+
+    /** Returns the precision step. */
+    public int getPrecisionStep() {
+        return precisionStep;
+    }
+
+    @Override
+    public String toString(final String field) {
+        final StringBuilder sb = new StringBuilder();
+        if (!getField().equals(field))
+            sb.append(getField()).append(':');
+        return sb.append(minInclusive ? '[' : '{').append((min == null) ? "*" : min.toString()).append(" TO ").append((max == null) ? "*" : max.toString()).append(maxInclusive ? ']' : '}').append(ToStringUtils.boost(getBoost())).toString();
+    }
+
+    @Override
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public final boolean equals(final Object o) {
+        if (o == this)
+            return true;
+        if (!super.equals(o))
+            return false;
+        if (o instanceof NumericRangeQuery) {
+            final NumericRangeQuery q = (NumericRangeQuery) o;
+            return ((q.min == null ? min == null : q.min.equals(min)) && (q.max == null ? max == null : q.max.equals(max)) && minInclusive == q.minInclusive && maxInclusive == q.maxInclusive && precisionStep == q.precisionStep);
+        }
+        return false;
+    }
+
+    @Override
+    public final int hashCode() {
+        int hash = super.hashCode();
+        hash += precisionStep ^ 0x64365465;
+        if (min != null)
+            hash += min.hashCode() ^ 0x14fa55fb;
+        if (max != null)
+            hash += max.hashCode() ^ 0x733fa5fe;
+        return hash + (Boolean.valueOf(minInclusive).hashCode() ^ 0x14fa55fb) + (Boolean.valueOf(maxInclusive).hashCode() ^ 0x733fa5fe);
+    }
+
+    // members (package private, to be also fast accessible by NumericRangeTermEnum)
+    final int precisionStep;
+    final NumericType dataType;
+    final T min, max;
+    final boolean minInclusive, maxInclusive;
+
+    // used to handle float/double infinity correcty
+    static final long LONG_NEGATIVE_INFINITY = NumericUtils.doubleToSortableLong(Double.NEGATIVE_INFINITY);
+    static final long LONG_POSITIVE_INFINITY = NumericUtils.doubleToSortableLong(Double.POSITIVE_INFINITY);
+    static final int INT_NEGATIVE_INFINITY = NumericUtils.floatToSortableInt(Float.NEGATIVE_INFINITY);
+    static final int INT_POSITIVE_INFINITY = NumericUtils.floatToSortableInt(Float.POSITIVE_INFINITY);
+
+    /**
+     * Subclass of FilteredTermsEnum for enumerating all terms that match the
+     * sub-ranges for trie range queries, using flex API.
+     * <p>
+     * WARNING: This term enumeration is not guaranteed to be always ordered by
+     * {@link Term#compareTo}.
+     * The ordering depends on how {@link NumericUtils#splitLongRange} and
+     * {@link NumericUtils#splitIntRange} generates the sub-ranges. For
+     * {@link MultiTermQuery} ordering is not relevant.
+     */
+    private final class NumericRangeTermsEnum extends FilteredTermsEnum {
+
+        private BytesRef currentLowerBound, currentUpperBound;
+
+        private final LinkedList<BytesRef> rangeBounds = new LinkedList<>();
+        private final Comparator<BytesRef> termComp;
+
+        NumericRangeTermsEnum(final TermsEnum tenum) {
+            super(tenum);
+            switch (dataType) {
+                case LONG:
+                case DOUBLE: {
+                    // lower
+                    long minBound;
+                    if (dataType == NumericType.LONG) {
+                        minBound = (min == null) ? Long.MIN_VALUE : min.longValue();
+                    } else {
+                        assert dataType == NumericType.DOUBLE;
+                        minBound = (min == null) ? LONG_NEGATIVE_INFINITY : NumericUtils.doubleToSortableLong(min.doubleValue());
+                    }
+                    if (!minInclusive && min != null) {
+                        if (minBound == Long.MAX_VALUE)
+                            break;
+                        minBound++;
+                    }
+
+                    // upper
+                    long maxBound;
+                    if (dataType == NumericType.LONG) {
+                        maxBound = (max == null) ? Long.MAX_VALUE : max.longValue();
+                    } else {
+                        assert dataType == NumericType.DOUBLE;
+                        maxBound = (max == null) ? LONG_POSITIVE_INFINITY : NumericUtils.doubleToSortableLong(max.doubleValue());
+                    }
+                    if (!maxInclusive && max != null) {
+                        if (maxBound == Long.MIN_VALUE)
+                            break;
+                        maxBound--;
+                    }
+
+                    NumericUtils.splitLongRange(new NumericUtils.LongRangeBuilder() {
+                        @Override
+                        public final void addRange(BytesRef minPrefixCoded, BytesRef maxPrefixCoded) {
+                            rangeBounds.add(minPrefixCoded);
+                            rangeBounds.add(maxPrefixCoded);
+                        }
+                    }, precisionStep, minBound, maxBound);
+                    break;
+                }
+
+                case INT:
+                case FLOAT: {
+                    // lower
+                    int minBound;
+                    if (dataType == NumericType.INT) {
+                        minBound = (min == null) ? Integer.MIN_VALUE : min.intValue();
+                    } else {
+                        assert dataType == NumericType.FLOAT;
+                        minBound = (min == null) ? INT_NEGATIVE_INFINITY : NumericUtils.floatToSortableInt(min.floatValue());
+                    }
+                    if (!minInclusive && min != null) {
+                        if (minBound == Integer.MAX_VALUE)
+                            break;
+                        minBound++;
+                    }
+
+                    // upper
+                    int maxBound;
+                    if (dataType == NumericType.INT) {
+                        maxBound = (max == null) ? Integer.MAX_VALUE : max.intValue();
+                    } else {
+                        assert dataType == NumericType.FLOAT;
+                        maxBound = (max == null) ? INT_POSITIVE_INFINITY : NumericUtils.floatToSortableInt(max.floatValue());
+                    }
+                    if (!maxInclusive && max != null) {
+                        if (maxBound == Integer.MIN_VALUE)
+                            break;
+                        maxBound--;
+                    }
+
+                    NumericUtils.splitIntRange(new NumericUtils.IntRangeBuilder() {
+                        @Override
+                        public final void addRange(BytesRef minPrefixCoded, BytesRef maxPrefixCoded) {
+                            rangeBounds.add(minPrefixCoded);
+                            rangeBounds.add(maxPrefixCoded);
+                        }
+                    }, precisionStep, minBound, maxBound);
+                    break;
+                }
+
+                default:
+                    // should never happen
+                    throw new IllegalArgumentException("Invalid NumericType");
+            }
+
+            termComp = getComparator();
+        }
+
+        private void nextRange() {
+            assert rangeBounds.size() % 2 == 0;
+
+            currentLowerBound = rangeBounds.removeFirst();
+            assert currentUpperBound == null || termComp.compare(currentUpperBound, currentLowerBound) <= 0 : "The current upper bound must be <= the new lower bound";
+
+            currentUpperBound = rangeBounds.removeFirst();
+        }
+
+        @Override
+        protected final BytesRef nextSeekTerm(BytesRef term) {
+            while (rangeBounds.size() >= 2) {
+                nextRange();
+
+                // if the new upper bound is before the term parameter, the sub-range is never a hit
+                if (term != null && termComp.compare(term, currentUpperBound) > 0)
+                    continue;
+                // never seek backwards, so use current term if lower bound is smaller
+                return (term != null && termComp.compare(term, currentLowerBound) > 0) ? term : currentLowerBound;
+            }
+
+            // no more sub-range enums available
+            assert rangeBounds.isEmpty();
+            currentLowerBound = currentUpperBound = null;
+            return null;
+        }
+
+        @Override
+        protected final AcceptStatus accept(BytesRef term) {
+            while (currentUpperBound == null || termComp.compare(term, currentUpperBound) > 0) {
+                if (rangeBounds.isEmpty())
+                    return AcceptStatus.END;
+                // peek next sub-range, only seek if the current term is smaller than next lower bound
+                if (termComp.compare(term, rangeBounds.getFirst()) < 0)
+                    return AcceptStatus.NO_AND_SEEK;
+                // step forward to next range without seeking, as next lower range bound is less or equal current term
+                nextRange();
+            }
+            return AcceptStatus.YES;
+        }
+
+    }
+
 }

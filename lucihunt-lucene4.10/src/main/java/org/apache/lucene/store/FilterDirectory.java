@@ -31,88 +31,86 @@ import java.util.Collection;
  *  @lucene.internal */
 public class FilterDirectory extends Directory {
 
-  protected final Directory in;
+    protected final Directory in;
 
-  /** Sole constructor, typically called from sub-classes. */
-  protected FilterDirectory(Directory in) {
-    this.in = in;
-  }
+    /** Sole constructor, typically called from sub-classes. */
+    protected FilterDirectory(Directory in) {
+        this.in = in;
+    }
 
-  /** Return the wrapped {@link Directory}. */
-  public final Directory getDelegate() {
-    return in;
-  }
+    /** Return the wrapped {@link Directory}. */
+    public final Directory getDelegate() {
+        return in;
+    }
 
-  @Override
-  public String[] listAll() throws IOException {
-    return in.listAll();
-  }
+    @Override
+    public String[] listAll() throws IOException {
+        return in.listAll();
+    }
 
-  @Override
-  public boolean fileExists(String name) throws IOException {
-    return in.fileExists(name);
-  }
+    @Override
+    public boolean fileExists(String name) throws IOException {
+        return in.fileExists(name);
+    }
 
-  @Override
-  public void deleteFile(String name) throws IOException {
-    in.deleteFile(name);
-  }
+    @Override
+    public void deleteFile(String name) throws IOException {
+        in.deleteFile(name);
+    }
 
-  @Override
-  public long fileLength(String name) throws IOException {
-    return in.fileLength(name);
-  }
+    @Override
+    public long fileLength(String name) throws IOException {
+        return in.fileLength(name);
+    }
 
-  @Override
-  public IndexOutput createOutput(String name, IOContext context)
-      throws IOException {
-    return in.createOutput(name, context);
-  }
+    @Override
+    public IndexOutput createOutput(String name, IOContext context) throws IOException {
+        return in.createOutput(name, context);
+    }
 
-  @Override
-  public void sync(Collection<String> names) throws IOException {
-    in.sync(names);
-  }
+    @Override
+    public void sync(Collection<String> names) throws IOException {
+        in.sync(names);
+    }
 
-  @Override
-  public IndexInput openInput(String name, IOContext context)
-      throws IOException {
-    return in.openInput(name, context);
-  }
+    @Override
+    public IndexInput openInput(String name, IOContext context) throws IOException {
+        return in.openInput(name, context);
+    }
 
-  @Override
-  public Lock makeLock(String name) {
-    return in.makeLock(name);
-  }
+    @Override
+    public Lock makeLock(String name) {
+        return in.makeLock(name);
+    }
 
-  @Override
-  public void clearLock(String name) throws IOException {
-    in.clearLock(name);
-  }
+    @Override
+    public void clearLock(String name) throws IOException {
+        in.clearLock(name);
+    }
 
-  @Override
-  public void close() throws IOException {
-    in.close();
-  }
+    @Override
+    public void close() throws IOException {
+        in.close();
+    }
 
-  @Override
-  public void setLockFactory(LockFactory lockFactory) throws IOException {
-    in.setLockFactory(lockFactory);
-  }
+    @Override
+    public void setLockFactory(LockFactory lockFactory) throws IOException {
+        in.setLockFactory(lockFactory);
+    }
 
-  @Override
-  public String getLockID() {
-    return in.getLockID();
-  }
-  
-  @Override
-  public LockFactory getLockFactory() {
-    return in.getLockFactory();
-  }
+    @Override
+    public String getLockID() {
+        return in.getLockID();
+    }
 
-  @Override
-  public String toString() {
-    return getClass().getSimpleName() + "(" + in.toString() + ")";
-  }
+    @Override
+    public LockFactory getLockFactory() {
+        return in.getLockFactory();
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "(" + in.toString() + ")";
+    }
 
 }

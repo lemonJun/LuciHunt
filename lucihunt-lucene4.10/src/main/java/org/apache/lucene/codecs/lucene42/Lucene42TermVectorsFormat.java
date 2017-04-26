@@ -124,9 +124,9 @@ import org.apache.lucene.util.packed.PackedInts;
  */
 public final class Lucene42TermVectorsFormat extends CompressingTermVectorsFormat {
 
-  /** Sole constructor. */
-  public Lucene42TermVectorsFormat() {
-    super("Lucene41StoredFields", "", CompressionMode.FAST, 1 << 12);
-  }
+    /** Sole constructor. */
+    public Lucene42TermVectorsFormat() {
+        super("Lucene41StoredFields", "", CompressionMode.FAST, 1 << 12);
+    }
 
 }

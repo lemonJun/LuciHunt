@@ -38,18 +38,18 @@ import org.apache.lucene.index.NumericDocValues;
 @Deprecated
 public class ShortDocValuesField extends NumericDocValuesField {
 
-  /** 
-   * Creates a new DocValues field with the specified 16-bit short value 
-   * @param name field name
-   * @param value 16-bit short value
-   * @throws IllegalArgumentException if the field name is null
-   */
-  public ShortDocValuesField(String name, short value) {
-    super(name, value);
-  }
+    /** 
+     * Creates a new DocValues field with the specified 16-bit short value 
+     * @param name field name
+     * @param value 16-bit short value
+     * @throws IllegalArgumentException if the field name is null
+     */
+    public ShortDocValuesField(String name, short value) {
+        super(name, value);
+    }
 
-  @Override
-  public void setShortValue(short value) {
-    setLongValue(value);
-  }
+    @Override
+    public void setShortValue(short value) {
+        setLongValue(value);
+    }
 }

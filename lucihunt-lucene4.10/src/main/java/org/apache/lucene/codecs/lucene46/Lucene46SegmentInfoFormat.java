@@ -66,27 +66,27 @@ import org.apache.lucene.store.DataOutput; // javadocs
  * @lucene.experimental
  */
 public class Lucene46SegmentInfoFormat extends SegmentInfoFormat {
-  private final SegmentInfoReader reader = new Lucene46SegmentInfoReader();
-  private final SegmentInfoWriter writer = new Lucene46SegmentInfoWriter();
+    private final SegmentInfoReader reader = new Lucene46SegmentInfoReader();
+    private final SegmentInfoWriter writer = new Lucene46SegmentInfoWriter();
 
-  /** Sole constructor. */
-  public Lucene46SegmentInfoFormat() {
-  }
-  
-  @Override
-  public SegmentInfoReader getSegmentInfoReader() {
-    return reader;
-  }
+    /** Sole constructor. */
+    public Lucene46SegmentInfoFormat() {
+    }
 
-  @Override
-  public SegmentInfoWriter getSegmentInfoWriter() {
-    return writer;
-  }
+    @Override
+    public SegmentInfoReader getSegmentInfoReader() {
+        return reader;
+    }
 
-  /** File extension used to store {@link SegmentInfo}. */
-  public final static String SI_EXTENSION = "si";
-  static final String CODEC_NAME = "Lucene46SegmentInfo";
-  static final int VERSION_START = 0;
-  static final int VERSION_CHECKSUM = 1;
-  static final int VERSION_CURRENT = VERSION_CHECKSUM;
+    @Override
+    public SegmentInfoWriter getSegmentInfoWriter() {
+        return writer;
+    }
+
+    /** File extension used to store {@link SegmentInfo}. */
+    public final static String SI_EXTENSION = "si";
+    static final String CODEC_NAME = "Lucene46SegmentInfo";
+    static final int VERSION_START = 0;
+    static final int VERSION_CHECKSUM = 1;
+    static final int VERSION_CURRENT = VERSION_CHECKSUM;
 }

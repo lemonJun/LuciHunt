@@ -37,70 +37,69 @@ import java.io.OutputStream;
 
 public class VerifyingLockFactory extends LockFactory {
 
-  final LockFactory lf;
-  final InputStream in;
-  final OutputStream out;
+    final LockFactory lf;
+    final InputStream in;
+    final OutputStream out;
 
-  private class CheckedLock extends Lock {
-    private final Lock lock;
+    private class CheckedLock extends Lock {
+        private final Lock lock;
 
-    public CheckedLock(Lock lock) {
-      this.lock = lock;
+        public CheckedLock(Lock lock) {
+            this.lock = lock;
+        }
+
+        private void verify(byte message) throws IOException {
+            out.write(message);
+            out.flush();
+            final int ret = in.read();
+            if (ret < 0) {
+                throw new IllegalStateException("Lock server died because of locking error.");
+            }
+            if (ret != message) {
+                throw new IOException("Protocol violation.");
+            }
+        }
+
+        @Override
+        public synchronized boolean obtain() throws IOException {
+            boolean obtained = lock.obtain();
+            if (obtained)
+                verify((byte) 1);
+            return obtained;
+        }
+
+        @Override
+        public synchronized boolean isLocked() throws IOException {
+            return lock.isLocked();
+        }
+
+        @Override
+        public synchronized void close() throws IOException {
+            if (isLocked()) {
+                verify((byte) 0);
+                lock.close();
+            }
+        }
     }
 
-    private void verify(byte message) throws IOException {
-      out.write(message);
-      out.flush();
-      final int ret = in.read();
-      if (ret < 0) {
-        throw new IllegalStateException("Lock server died because of locking error.");
-      }
-      if (ret != message) {
-        throw new IOException("Protocol violation.");
-      }
+    /**
+     * @param lf the LockFactory that we are testing
+     * @param in the socket's input to {@link LockVerifyServer}
+     * @param out the socket's output to {@link LockVerifyServer}
+    */
+    public VerifyingLockFactory(LockFactory lf, InputStream in, OutputStream out) throws IOException {
+        this.lf = lf;
+        this.in = in;
+        this.out = out;
     }
 
     @Override
-    public synchronized boolean obtain() throws IOException {
-      boolean obtained = lock.obtain();
-      if (obtained)
-        verify((byte) 1);
-      return obtained;
+    public synchronized Lock makeLock(String lockName) {
+        return new CheckedLock(lf.makeLock(lockName));
     }
 
     @Override
-    public synchronized boolean isLocked() throws IOException {
-      return lock.isLocked();
+    public synchronized void clearLock(String lockName) throws IOException {
+        lf.clearLock(lockName);
     }
-
-    @Override
-    public synchronized void close() throws IOException {
-      if (isLocked()) {
-        verify((byte) 0);
-        lock.close();
-      }
-    }
-  }
-
-  /**
-   * @param lf the LockFactory that we are testing
-   * @param in the socket's input to {@link LockVerifyServer}
-   * @param out the socket's output to {@link LockVerifyServer}
-  */
-  public VerifyingLockFactory(LockFactory lf, InputStream in, OutputStream out) throws IOException {
-    this.lf = lf;
-    this.in = in;
-    this.out = out;
-  }
-
-  @Override
-  public synchronized Lock makeLock(String lockName) {
-    return new CheckedLock(lf.makeLock(lockName));
-  }
-
-  @Override
-  public synchronized void clearLock(String lockName)
-    throws IOException {
-    lf.clearLock(lockName);
-  }
 }

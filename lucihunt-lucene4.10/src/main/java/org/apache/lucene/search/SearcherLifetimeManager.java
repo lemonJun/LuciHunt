@@ -99,205 +99,204 @@ import org.apache.lucene.util.IOUtils;
 
 public class SearcherLifetimeManager implements Closeable {
 
-  static final double NANOS_PER_SEC = 1000000000.0;
+    static final double NANOS_PER_SEC = 1000000000.0;
 
-  private static class SearcherTracker implements Comparable<SearcherTracker>, Closeable {
-    public final IndexSearcher searcher;
-    public final double recordTimeSec;
-    public final long version;
+    private static class SearcherTracker implements Comparable<SearcherTracker>, Closeable {
+        public final IndexSearcher searcher;
+        public final double recordTimeSec;
+        public final long version;
 
-    public SearcherTracker(IndexSearcher searcher) {
-      this.searcher = searcher;
-      version = ((DirectoryReader) searcher.getIndexReader()).getVersion();
-      searcher.getIndexReader().incRef();
-      // Use nanoTime not currentTimeMillis since it [in
-      // theory] reduces risk from clock shift
-      recordTimeSec = System.nanoTime() / NANOS_PER_SEC;
+        public SearcherTracker(IndexSearcher searcher) {
+            this.searcher = searcher;
+            version = ((DirectoryReader) searcher.getIndexReader()).getVersion();
+            searcher.getIndexReader().incRef();
+            // Use nanoTime not currentTimeMillis since it [in
+            // theory] reduces risk from clock shift
+            recordTimeSec = System.nanoTime() / NANOS_PER_SEC;
+        }
+
+        // Newer searchers are sort before older ones:
+        @Override
+        public int compareTo(SearcherTracker other) {
+            return Double.compare(other.recordTimeSec, recordTimeSec);
+        }
+
+        @Override
+        public synchronized void close() throws IOException {
+            searcher.getIndexReader().decRef();
+        }
     }
 
-    // Newer searchers are sort before older ones:
-    @Override
-    public int compareTo(SearcherTracker other) {
-      return Double.compare(other.recordTimeSec, recordTimeSec);
+    private volatile boolean closed;
+
+    // TODO: we could get by w/ just a "set"; need to have
+    // Tracker hash by its version and have compareTo(Long)
+    // compare to its version
+    private final ConcurrentHashMap<Long, SearcherTracker> searchers = new ConcurrentHashMap<>();
+
+    private void ensureOpen() {
+        if (closed) {
+            throw new AlreadyClosedException("this SearcherLifetimeManager instance is closed");
+        }
     }
 
+    /** Records that you are now using this IndexSearcher.
+     *  Always call this when you've obtained a possibly new
+     *  {@link IndexSearcher}, for example from {@link
+     *  SearcherManager}.  It's fine if you already passed the
+     *  same searcher to this method before.
+     *
+     *  <p>This returns the long token that you can later pass
+     *  to {@link #acquire} to retrieve the same IndexSearcher.
+     *  You should record this long token in the search results
+     *  sent to your user, such that if the user performs a
+     *  follow-on action (clicks next page, drills down, etc.)
+     *  the token is returned. */
+    public long record(IndexSearcher searcher) throws IOException {
+        ensureOpen();
+        // TODO: we don't have to use IR.getVersion to track;
+        // could be risky (if it's buggy); we could get better
+        // bug isolation if we assign our own private ID:
+        final long version = ((DirectoryReader) searcher.getIndexReader()).getVersion();
+        SearcherTracker tracker = searchers.get(version);
+        if (tracker == null) {
+            //System.out.println("RECORD version=" + version + " ms=" + System.currentTimeMillis());
+            tracker = new SearcherTracker(searcher);
+            if (searchers.putIfAbsent(version, tracker) != null) {
+                // Another thread beat us -- must decRef to undo
+                // incRef done by SearcherTracker ctor:
+                tracker.close();
+            }
+        } else if (tracker.searcher != searcher) {
+            throw new IllegalArgumentException("the provided searcher has the same underlying reader version yet the searcher instance differs from before (new=" + searcher + " vs old=" + tracker.searcher);
+        }
+
+        return version;
+    }
+
+    /** Retrieve a previously recorded {@link IndexSearcher}, if it
+     *  has not yet been closed
+     *
+     *  <p><b>NOTE</b>: this may return null when the
+     *  requested searcher has already timed out.  When this
+     *  happens you should notify your user that their session
+     *  timed out and that they'll have to restart their
+     *  search.
+     *
+     *  <p>If this returns a non-null result, you must match
+     *  later call {@link #release} on this searcher, best
+     *  from a finally clause. */
+    public IndexSearcher acquire(long version) {
+        ensureOpen();
+        final SearcherTracker tracker = searchers.get(version);
+        if (tracker != null && tracker.searcher.getIndexReader().tryIncRef()) {
+            return tracker.searcher;
+        }
+
+        return null;
+    }
+
+    /** Release a searcher previously obtained from {@link
+     *  #acquire}.
+     * 
+     * <p><b>NOTE</b>: it's fine to call this after close. */
+    public void release(IndexSearcher s) throws IOException {
+        s.getIndexReader().decRef();
+    }
+
+    /** See {@link #prune}. */
+    public interface Pruner {
+        /** Return true if this searcher should be removed. 
+         *  @param ageSec how much time has passed since this
+         *         searcher was the current (live) searcher
+         *  @param searcher Searcher
+         **/
+        public boolean doPrune(double ageSec, IndexSearcher searcher);
+    }
+
+    /** Simple pruner that drops any searcher older by
+     *  more than the specified seconds, than the newest
+     *  searcher. */
+    public final static class PruneByAge implements Pruner {
+        private final double maxAgeSec;
+
+        public PruneByAge(double maxAgeSec) {
+            if (maxAgeSec < 0) {
+                throw new IllegalArgumentException("maxAgeSec must be > 0 (got " + maxAgeSec + ")");
+            }
+            this.maxAgeSec = maxAgeSec;
+        }
+
+        @Override
+        public boolean doPrune(double ageSec, IndexSearcher searcher) {
+            return ageSec > maxAgeSec;
+        }
+    }
+
+    /** Calls provided {@link Pruner} to prune entries.  The
+     *  entries are passed to the Pruner in sorted (newest to
+     *  oldest IndexSearcher) order.
+     * 
+     *  <p><b>NOTE</b>: you must peridiocally call this, ideally
+     *  from the same background thread that opens new
+     *  searchers. */
+    public synchronized void prune(Pruner pruner) throws IOException {
+        // Cannot just pass searchers.values() to ArrayList ctor
+        // (not thread-safe since the values can change while
+        // ArrayList is init'ing itself); must instead iterate
+        // ourselves:
+        final List<SearcherTracker> trackers = new ArrayList<>();
+        for (SearcherTracker tracker : searchers.values()) {
+            trackers.add(tracker);
+        }
+        Collections.sort(trackers);
+        double lastRecordTimeSec = 0.0;
+        final double now = System.nanoTime() / NANOS_PER_SEC;
+        for (SearcherTracker tracker : trackers) {
+            final double ageSec;
+            if (lastRecordTimeSec == 0.0) {
+                ageSec = 0.0;
+            } else {
+                ageSec = now - lastRecordTimeSec;
+            }
+            // First tracker is always age 0.0 sec, since it's
+            // still "live"; second tracker's age (= seconds since
+            // it was "live") is now minus first tracker's
+            // recordTime, etc:
+            if (pruner.doPrune(ageSec, tracker.searcher)) {
+                //System.out.println("PRUNE version=" + tracker.version + " age=" + ageSec + " ms=" + System.currentTimeMillis());
+                searchers.remove(tracker.version);
+                tracker.close();
+            }
+            lastRecordTimeSec = tracker.recordTimeSec;
+        }
+    }
+
+    /** Close this to future searching; any searches still in
+     *  process in other threads won't be affected, and they
+     *  should still call {@link #release} after they are
+     *  done.
+     *
+     *  <p><b>NOTE</b>: you must ensure no other threads are
+     *  calling {@link #record} while you call close();
+     *  otherwise it's possible not all searcher references
+     *  will be freed. */
     @Override
     public synchronized void close() throws IOException {
-      searcher.getIndexReader().decRef();
+        closed = true;
+        final List<SearcherTracker> toClose = new ArrayList<>(searchers.values());
+
+        // Remove up front in case exc below, so we don't
+        // over-decRef on double-close:
+        for (SearcherTracker tracker : toClose) {
+            searchers.remove(tracker.version);
+        }
+
+        IOUtils.close(toClose);
+
+        // Make some effort to catch mis-use:
+        if (searchers.size() != 0) {
+            throw new IllegalStateException("another thread called record while this SearcherLifetimeManager instance was being closed; not all searchers were closed");
+        }
     }
-  }
-
-  private volatile boolean closed;
-
-  // TODO: we could get by w/ just a "set"; need to have
-  // Tracker hash by its version and have compareTo(Long)
-  // compare to its version
-  private final ConcurrentHashMap<Long,SearcherTracker> searchers = new ConcurrentHashMap<>();
-
-  private void ensureOpen() {
-    if (closed) {
-      throw new AlreadyClosedException("this SearcherLifetimeManager instance is closed");
-    }
-  }
-
-  /** Records that you are now using this IndexSearcher.
-   *  Always call this when you've obtained a possibly new
-   *  {@link IndexSearcher}, for example from {@link
-   *  SearcherManager}.  It's fine if you already passed the
-   *  same searcher to this method before.
-   *
-   *  <p>This returns the long token that you can later pass
-   *  to {@link #acquire} to retrieve the same IndexSearcher.
-   *  You should record this long token in the search results
-   *  sent to your user, such that if the user performs a
-   *  follow-on action (clicks next page, drills down, etc.)
-   *  the token is returned. */
-  public long record(IndexSearcher searcher) throws IOException {
-    ensureOpen();
-    // TODO: we don't have to use IR.getVersion to track;
-    // could be risky (if it's buggy); we could get better
-    // bug isolation if we assign our own private ID:
-    final long version = ((DirectoryReader) searcher.getIndexReader()).getVersion();
-    SearcherTracker tracker = searchers.get(version);
-    if (tracker == null) {
-      //System.out.println("RECORD version=" + version + " ms=" + System.currentTimeMillis());
-      tracker = new SearcherTracker(searcher);
-      if (searchers.putIfAbsent(version, tracker) != null) {
-        // Another thread beat us -- must decRef to undo
-        // incRef done by SearcherTracker ctor:
-        tracker.close();
-      }
-    } else if (tracker.searcher != searcher) {
-      throw new IllegalArgumentException("the provided searcher has the same underlying reader version yet the searcher instance differs from before (new=" + searcher + " vs old=" + tracker.searcher);
-    }
-
-    return version;
-  }
-
-  /** Retrieve a previously recorded {@link IndexSearcher}, if it
-   *  has not yet been closed
-   *
-   *  <p><b>NOTE</b>: this may return null when the
-   *  requested searcher has already timed out.  When this
-   *  happens you should notify your user that their session
-   *  timed out and that they'll have to restart their
-   *  search.
-   *
-   *  <p>If this returns a non-null result, you must match
-   *  later call {@link #release} on this searcher, best
-   *  from a finally clause. */
-  public IndexSearcher acquire(long version) {
-    ensureOpen();
-    final SearcherTracker tracker = searchers.get(version);
-    if (tracker != null &&
-        tracker.searcher.getIndexReader().tryIncRef()) {
-      return tracker.searcher;
-    }
-
-    return null;
-  }
-
-  /** Release a searcher previously obtained from {@link
-   *  #acquire}.
-   * 
-   * <p><b>NOTE</b>: it's fine to call this after close. */
-  public void release(IndexSearcher s) throws IOException {
-    s.getIndexReader().decRef();
-  }
-
-  /** See {@link #prune}. */
-  public interface Pruner {
-    /** Return true if this searcher should be removed. 
-     *  @param ageSec how much time has passed since this
-     *         searcher was the current (live) searcher
-     *  @param searcher Searcher
-     **/
-    public boolean doPrune(double ageSec, IndexSearcher searcher);
-  }
-
-  /** Simple pruner that drops any searcher older by
-   *  more than the specified seconds, than the newest
-   *  searcher. */
-  public final static class PruneByAge implements Pruner {
-    private final double maxAgeSec;
-
-    public PruneByAge(double maxAgeSec) {
-      if (maxAgeSec < 0) {
-        throw new IllegalArgumentException("maxAgeSec must be > 0 (got " + maxAgeSec + ")");
-      }
-      this.maxAgeSec = maxAgeSec;
-    }
-
-    @Override
-    public boolean doPrune(double ageSec, IndexSearcher searcher) {
-      return ageSec > maxAgeSec;
-    }
-  }
-
-  /** Calls provided {@link Pruner} to prune entries.  The
-   *  entries are passed to the Pruner in sorted (newest to
-   *  oldest IndexSearcher) order.
-   * 
-   *  <p><b>NOTE</b>: you must peridiocally call this, ideally
-   *  from the same background thread that opens new
-   *  searchers. */
-  public synchronized void prune(Pruner pruner) throws IOException {
-    // Cannot just pass searchers.values() to ArrayList ctor
-    // (not thread-safe since the values can change while
-    // ArrayList is init'ing itself); must instead iterate
-    // ourselves:
-    final List<SearcherTracker> trackers = new ArrayList<>();
-    for(SearcherTracker tracker : searchers.values()) {
-      trackers.add(tracker);
-    }
-    Collections.sort(trackers);
-    double lastRecordTimeSec = 0.0;
-    final double now = System.nanoTime()/NANOS_PER_SEC;
-    for (SearcherTracker tracker: trackers) {
-      final double ageSec;
-      if (lastRecordTimeSec == 0.0) {
-        ageSec = 0.0;
-      } else {
-        ageSec = now - lastRecordTimeSec;
-      }
-      // First tracker is always age 0.0 sec, since it's
-      // still "live"; second tracker's age (= seconds since
-      // it was "live") is now minus first tracker's
-      // recordTime, etc:
-      if (pruner.doPrune(ageSec, tracker.searcher)) {
-        //System.out.println("PRUNE version=" + tracker.version + " age=" + ageSec + " ms=" + System.currentTimeMillis());
-        searchers.remove(tracker.version);
-        tracker.close();
-      }
-      lastRecordTimeSec = tracker.recordTimeSec;
-    }
-  }
-
-  /** Close this to future searching; any searches still in
-   *  process in other threads won't be affected, and they
-   *  should still call {@link #release} after they are
-   *  done.
-   *
-   *  <p><b>NOTE</b>: you must ensure no other threads are
-   *  calling {@link #record} while you call close();
-   *  otherwise it's possible not all searcher references
-   *  will be freed. */
-  @Override
-  public synchronized void close() throws IOException {
-    closed = true;
-    final List<SearcherTracker> toClose = new ArrayList<>(searchers.values());
-
-    // Remove up front in case exc below, so we don't
-    // over-decRef on double-close:
-    for(SearcherTracker tracker : toClose) {
-      searchers.remove(tracker.version);
-    }
-
-    IOUtils.close(toClose);
-
-    // Make some effort to catch mis-use:
-    if (searchers.size() != 0) {
-      throw new IllegalStateException("another thread called record while this SearcherLifetimeManager instance was being closed; not all searchers were closed");
-    }
-  }
 }

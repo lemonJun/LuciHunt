@@ -219,64 +219,57 @@ import org.apache.lucene.util.fst.FST; // javadocs
 @Deprecated
 public class Lucene40PostingsFormat extends PostingsFormat {
 
-  /** minimum items (terms or sub-blocks) per block for BlockTree */
-  protected final int minBlockSize;
-  /** maximum items (terms or sub-blocks) per block for BlockTree */
-  protected final int maxBlockSize;
+    /** minimum items (terms or sub-blocks) per block for BlockTree */
+    protected final int minBlockSize;
+    /** maximum items (terms or sub-blocks) per block for BlockTree */
+    protected final int maxBlockSize;
 
-  /** Creates {@code Lucene40PostingsFormat} with default
-   *  settings. */
-  public Lucene40PostingsFormat() {
-    this(BlockTreeTermsWriter.DEFAULT_MIN_BLOCK_SIZE, BlockTreeTermsWriter.DEFAULT_MAX_BLOCK_SIZE);
-  }
-
-  /** Creates {@code Lucene40PostingsFormat} with custom
-   *  values for {@code minBlockSize} and {@code
-   *  maxBlockSize} passed to block terms dictionary.
-   *  @see BlockTreeTermsWriter#BlockTreeTermsWriter(SegmentWriteState,PostingsWriterBase,int,int) */
-  private Lucene40PostingsFormat(int minBlockSize, int maxBlockSize) {
-    super("Lucene40");
-    this.minBlockSize = minBlockSize;
-    assert minBlockSize > 1;
-    this.maxBlockSize = maxBlockSize;
-  }
-
-  @Override
-  public FieldsConsumer fieldsConsumer(SegmentWriteState state) throws IOException {
-    throw new UnsupportedOperationException("this codec can only be used for reading");
-  }
-
-  @Override
-  public FieldsProducer fieldsProducer(SegmentReadState state) throws IOException {
-    PostingsReaderBase postings = new Lucene40PostingsReader(state.directory, state.fieldInfos, state.segmentInfo, state.context, state.segmentSuffix);
-
-    boolean success = false;
-    try {
-      FieldsProducer ret = new BlockTreeTermsReader(
-                                                    state.directory,
-                                                    state.fieldInfos,
-                                                    state.segmentInfo,
-                                                    postings,
-                                                    state.context,
-                                                    state.segmentSuffix,
-                                                    state.termsIndexDivisor);
-      success = true;
-      return ret;
-    } finally {
-      if (!success) {
-        postings.close();
-      }
+    /** Creates {@code Lucene40PostingsFormat} with default
+     *  settings. */
+    public Lucene40PostingsFormat() {
+        this(BlockTreeTermsWriter.DEFAULT_MIN_BLOCK_SIZE, BlockTreeTermsWriter.DEFAULT_MAX_BLOCK_SIZE);
     }
-  }
 
-  /** Extension of freq postings file */
-  static final String FREQ_EXTENSION = "frq";
+    /** Creates {@code Lucene40PostingsFormat} with custom
+     *  values for {@code minBlockSize} and {@code
+     *  maxBlockSize} passed to block terms dictionary.
+     *  @see BlockTreeTermsWriter#BlockTreeTermsWriter(SegmentWriteState,PostingsWriterBase,int,int) */
+    private Lucene40PostingsFormat(int minBlockSize, int maxBlockSize) {
+        super("Lucene40");
+        this.minBlockSize = minBlockSize;
+        assert minBlockSize > 1;
+        this.maxBlockSize = maxBlockSize;
+    }
 
-  /** Extension of prox postings file */
-  static final String PROX_EXTENSION = "prx";
+    @Override
+    public FieldsConsumer fieldsConsumer(SegmentWriteState state) throws IOException {
+        throw new UnsupportedOperationException("this codec can only be used for reading");
+    }
 
-  @Override
-  public String toString() {
-    return getName() + "(minBlockSize=" + minBlockSize + " maxBlockSize=" + maxBlockSize + ")";
-  }
+    @Override
+    public FieldsProducer fieldsProducer(SegmentReadState state) throws IOException {
+        PostingsReaderBase postings = new Lucene40PostingsReader(state.directory, state.fieldInfos, state.segmentInfo, state.context, state.segmentSuffix);
+
+        boolean success = false;
+        try {
+            FieldsProducer ret = new BlockTreeTermsReader(state.directory, state.fieldInfos, state.segmentInfo, postings, state.context, state.segmentSuffix, state.termsIndexDivisor);
+            success = true;
+            return ret;
+        } finally {
+            if (!success) {
+                postings.close();
+            }
+        }
+    }
+
+    /** Extension of freq postings file */
+    static final String FREQ_EXTENSION = "frq";
+
+    /** Extension of prox postings file */
+    static final String PROX_EXTENSION = "prx";
+
+    @Override
+    public String toString() {
+        return getName() + "(minBlockSize=" + minBlockSize + " maxBlockSize=" + maxBlockSize + ")";
+    }
 }

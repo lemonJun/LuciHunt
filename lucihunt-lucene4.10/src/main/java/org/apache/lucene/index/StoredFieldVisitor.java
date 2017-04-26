@@ -42,55 +42,55 @@ import org.apache.lucene.document.DocumentStoredFieldVisitor;
 
 public abstract class StoredFieldVisitor {
 
-  /** Sole constructor. (For invocation by subclass 
-   * constructors, typically implicit.) */
-  protected StoredFieldVisitor() {
-  }
-  
-  /** Process a binary field. 
-   * @param value newly allocated byte array with the binary contents. 
-   */
-  public void binaryField(FieldInfo fieldInfo, byte[] value) throws IOException {
-  }
+    /** Sole constructor. (For invocation by subclass 
+     * constructors, typically implicit.) */
+    protected StoredFieldVisitor() {
+    }
 
-  /** Process a string field */
-  public void stringField(FieldInfo fieldInfo, String value) throws IOException {
-  }
+    /** Process a binary field. 
+     * @param value newly allocated byte array with the binary contents. 
+     */
+    public void binaryField(FieldInfo fieldInfo, byte[] value) throws IOException {
+    }
 
-  /** Process a int numeric field. */
-  public void intField(FieldInfo fieldInfo, int value) throws IOException {
-  }
+    /** Process a string field */
+    public void stringField(FieldInfo fieldInfo, String value) throws IOException {
+    }
 
-  /** Process a long numeric field. */
-  public void longField(FieldInfo fieldInfo, long value) throws IOException {
-  }
+    /** Process a int numeric field. */
+    public void intField(FieldInfo fieldInfo, int value) throws IOException {
+    }
 
-  /** Process a float numeric field. */
-  public void floatField(FieldInfo fieldInfo, float value) throws IOException {
-  }
+    /** Process a long numeric field. */
+    public void longField(FieldInfo fieldInfo, long value) throws IOException {
+    }
 
-  /** Process a double numeric field. */
-  public void doubleField(FieldInfo fieldInfo, double value) throws IOException {
-  }
-  
-  /**
-   * Hook before processing a field.
-   * Before a field is processed, this method is invoked so that
-   * subclasses can return a {@link Status} representing whether
-   * they need that particular field or not, or to stop processing
-   * entirely.
-   */
-  public abstract Status needsField(FieldInfo fieldInfo) throws IOException;
-  
-  /**
-   * Enumeration of possible return values for {@link #needsField}.
-   */
-  public static enum Status {
-    /** YES: the field should be visited. */
-    YES,
-    /** NO: don't visit this field, but continue processing fields for this document. */
-    NO,
-    /** STOP: don't visit this field and stop processing any other fields for this document. */
-    STOP
-  }
+    /** Process a float numeric field. */
+    public void floatField(FieldInfo fieldInfo, float value) throws IOException {
+    }
+
+    /** Process a double numeric field. */
+    public void doubleField(FieldInfo fieldInfo, double value) throws IOException {
+    }
+
+    /**
+     * Hook before processing a field.
+     * Before a field is processed, this method is invoked so that
+     * subclasses can return a {@link Status} representing whether
+     * they need that particular field or not, or to stop processing
+     * entirely.
+     */
+    public abstract Status needsField(FieldInfo fieldInfo) throws IOException;
+
+    /**
+     * Enumeration of possible return values for {@link #needsField}.
+     */
+    public static enum Status {
+        /** YES: the field should be visited. */
+        YES,
+        /** NO: don't visit this field, but continue processing fields for this document. */
+        NO,
+        /** STOP: don't visit this field and stop processing any other fields for this document. */
+        STOP
+    }
 }

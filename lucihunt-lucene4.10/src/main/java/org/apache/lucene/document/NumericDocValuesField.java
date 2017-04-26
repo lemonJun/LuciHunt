@@ -35,23 +35,23 @@ import org.apache.lucene.index.FieldInfo;
 
 public class NumericDocValuesField extends Field {
 
-  /**
-   * Type for numeric DocValues.
-   */
-  public static final FieldType TYPE = new FieldType();
-  static {
-    TYPE.setDocValueType(FieldInfo.DocValuesType.NUMERIC);
-    TYPE.freeze();
-  }
+    /**
+     * Type for numeric DocValues.
+     */
+    public static final FieldType TYPE = new FieldType();
+    static {
+        TYPE.setDocValueType(FieldInfo.DocValuesType.NUMERIC);
+        TYPE.freeze();
+    }
 
-  /** 
-   * Creates a new DocValues field with the specified 64-bit long value 
-   * @param name field name
-   * @param value 64-bit long value
-   * @throws IllegalArgumentException if the field name is null
-   */
-  public NumericDocValuesField(String name, long value) {
-    super(name, TYPE);
-    fieldsData = Long.valueOf(value);
-  }
+    /** 
+     * Creates a new DocValues field with the specified 64-bit long value 
+     * @param name field name
+     * @param value 64-bit long value
+     * @throws IllegalArgumentException if the field name is null
+     */
+    public NumericDocValuesField(String name, long value) {
+        super(name, TYPE);
+        fieldsData = Long.valueOf(value);
+    }
 }

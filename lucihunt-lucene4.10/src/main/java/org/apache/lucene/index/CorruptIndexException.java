@@ -24,13 +24,13 @@ import java.io.IOException;
  * an inconsistency in the index.
  */
 public class CorruptIndexException extends IOException {
-  /** Create exception with a message only */
-  public CorruptIndexException(String message) {
-    super(message);
-  }
-  
-  /** Create exception with message and root cause. */
-  public CorruptIndexException(String message, Throwable cause) {
-    super(message, cause);
-  }
+    /** Create exception with a message only */
+    public CorruptIndexException(String message) {
+        super(message);
+    }
+
+    /** Create exception with message and root cause. */
+    public CorruptIndexException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

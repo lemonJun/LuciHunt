@@ -39,23 +39,23 @@ import org.apache.lucene.util.BytesRef;
 
 public class SortedSetDocValuesField extends Field {
 
-  /**
-   * Type for sorted bytes DocValues
-   */
-  public static final FieldType TYPE = new FieldType();
-  static {
-    TYPE.setDocValueType(FieldInfo.DocValuesType.SORTED_SET);
-    TYPE.freeze();
-  }
+    /**
+     * Type for sorted bytes DocValues
+     */
+    public static final FieldType TYPE = new FieldType();
+    static {
+        TYPE.setDocValueType(FieldInfo.DocValuesType.SORTED_SET);
+        TYPE.freeze();
+    }
 
-  /**
-   * Create a new sorted DocValues field.
-   * @param name field name
-   * @param bytes binary content
-   * @throws IllegalArgumentException if the field name is null
-   */
-  public SortedSetDocValuesField(String name, BytesRef bytes) {
-    super(name, TYPE);
-    fieldsData = bytes;
-  }
+    /**
+     * Create a new sorted DocValues field.
+     * @param name field name
+     * @param bytes binary content
+     * @throws IllegalArgumentException if the field name is null
+     */
+    public SortedSetDocValuesField(String name, BytesRef bytes) {
+        super(name, TYPE);
+        fieldsData = bytes;
+    }
 }

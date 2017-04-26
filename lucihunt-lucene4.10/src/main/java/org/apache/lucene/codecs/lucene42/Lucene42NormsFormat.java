@@ -42,41 +42,41 @@ import org.apache.lucene.util.packed.PackedInts;
  * @see Lucene42DocValuesFormat
  */
 public class Lucene42NormsFormat extends NormsFormat {
-  final float acceptableOverheadRatio;
+    final float acceptableOverheadRatio;
 
-  /** 
-   * Calls {@link #Lucene42NormsFormat(float) 
-   * Lucene42DocValuesFormat(PackedInts.FASTEST)} 
-   */
-  public Lucene42NormsFormat() {
-    // note: we choose FASTEST here (otherwise our norms are half as big but 15% slower than previous lucene)
-    this(PackedInts.FASTEST);
-  }
-  
-  /**
-   * Creates a new Lucene42DocValuesFormat with the specified
-   * <code>acceptableOverheadRatio</code> for NumericDocValues.
-   * @param acceptableOverheadRatio compression parameter for numerics. 
-   *        Currently this is only used when the number of unique values is small.
-   *        
-   * @lucene.experimental
-   */
-  public Lucene42NormsFormat(float acceptableOverheadRatio) {
-    this.acceptableOverheadRatio = acceptableOverheadRatio;
-  }
-  
-  @Override
-  public DocValuesConsumer normsConsumer(SegmentWriteState state) throws IOException {
-    throw new UnsupportedOperationException("this codec can only be used for reading");
-  }
-  
-  @Override
-  public DocValuesProducer normsProducer(SegmentReadState state) throws IOException {
-    return new Lucene42DocValuesProducer(state, DATA_CODEC, DATA_EXTENSION, METADATA_CODEC, METADATA_EXTENSION);
-  }
-  
-  static final String DATA_CODEC = "Lucene41NormsData";
-  static final String DATA_EXTENSION = "nvd";
-  static final String METADATA_CODEC = "Lucene41NormsMetadata";
-  static final String METADATA_EXTENSION = "nvm";
+    /** 
+     * Calls {@link #Lucene42NormsFormat(float) 
+     * Lucene42DocValuesFormat(PackedInts.FASTEST)} 
+     */
+    public Lucene42NormsFormat() {
+        // note: we choose FASTEST here (otherwise our norms are half as big but 15% slower than previous lucene)
+        this(PackedInts.FASTEST);
+    }
+
+    /**
+     * Creates a new Lucene42DocValuesFormat with the specified
+     * <code>acceptableOverheadRatio</code> for NumericDocValues.
+     * @param acceptableOverheadRatio compression parameter for numerics. 
+     *        Currently this is only used when the number of unique values is small.
+     *        
+     * @lucene.experimental
+     */
+    public Lucene42NormsFormat(float acceptableOverheadRatio) {
+        this.acceptableOverheadRatio = acceptableOverheadRatio;
+    }
+
+    @Override
+    public DocValuesConsumer normsConsumer(SegmentWriteState state) throws IOException {
+        throw new UnsupportedOperationException("this codec can only be used for reading");
+    }
+
+    @Override
+    public DocValuesProducer normsProducer(SegmentReadState state) throws IOException {
+        return new Lucene42DocValuesProducer(state, DATA_CODEC, DATA_EXTENSION, METADATA_CODEC, METADATA_EXTENSION);
+    }
+
+    static final String DATA_CODEC = "Lucene41NormsData";
+    static final String DATA_EXTENSION = "nvd";
+    static final String METADATA_CODEC = "Lucene41NormsMetadata";
+    static final String METADATA_EXTENSION = "nvm";
 }

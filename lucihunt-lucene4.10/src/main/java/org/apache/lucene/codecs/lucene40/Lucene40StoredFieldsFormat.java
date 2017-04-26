@@ -81,19 +81,17 @@ import org.apache.lucene.store.IOContext;
  * @lucene.experimental */
 public class Lucene40StoredFieldsFormat extends StoredFieldsFormat {
 
-  /** Sole constructor. */
-  public Lucene40StoredFieldsFormat() {
-  }
+    /** Sole constructor. */
+    public Lucene40StoredFieldsFormat() {
+    }
 
-  @Override
-  public StoredFieldsReader fieldsReader(Directory directory, SegmentInfo si,
-      FieldInfos fn, IOContext context) throws IOException {
-    return new Lucene40StoredFieldsReader(directory, si, fn, context);
-  }
+    @Override
+    public StoredFieldsReader fieldsReader(Directory directory, SegmentInfo si, FieldInfos fn, IOContext context) throws IOException {
+        return new Lucene40StoredFieldsReader(directory, si, fn, context);
+    }
 
-  @Override
-  public StoredFieldsWriter fieldsWriter(Directory directory, SegmentInfo si,
-      IOContext context) throws IOException {
-    return new Lucene40StoredFieldsWriter(directory, si.name, context);
-  }
+    @Override
+    public StoredFieldsWriter fieldsWriter(Directory directory, SegmentInfo si, IOContext context) throws IOException {
+        return new Lucene40StoredFieldsWriter(directory, si.name, context);
+    }
 }

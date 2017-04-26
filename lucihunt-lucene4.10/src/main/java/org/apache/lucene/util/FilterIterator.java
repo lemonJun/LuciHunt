@@ -25,51 +25,51 @@ import java.util.NoSuchElementException;
  * @see #predicateFunction
  */
 public abstract class FilterIterator<T> implements Iterator<T> {
-  
-  private final Iterator<T> iterator;
-  private T next = null;
-  private boolean nextIsSet = false;
-  
-  /** returns true, if this element should be returned by {@link #next()}. */
-  protected abstract boolean predicateFunction(T object);
-  
-  public FilterIterator(Iterator<T> baseIterator) {
-    this.iterator = baseIterator;
-  }
-  
-  @Override
-  public final boolean hasNext() {
-    return nextIsSet || setNext();
-  }
-  
-  @Override
-  public final T next() {
-    if (!hasNext()) {
-      throw new NoSuchElementException();
+
+    private final Iterator<T> iterator;
+    private T next = null;
+    private boolean nextIsSet = false;
+
+    /** returns true, if this element should be returned by {@link #next()}. */
+    protected abstract boolean predicateFunction(T object);
+
+    public FilterIterator(Iterator<T> baseIterator) {
+        this.iterator = baseIterator;
     }
-    assert nextIsSet;
-    try {
-      return next;
-    } finally {
-      nextIsSet = false;
-      next = null;
+
+    @Override
+    public final boolean hasNext() {
+        return nextIsSet || setNext();
     }
-  }
-  
-  @Override
-  public final void remove() {
-    throw new UnsupportedOperationException();
-  }
-  
-  private boolean setNext() {
-    while (iterator.hasNext()) {
-      final T object = iterator.next();
-      if (predicateFunction(object)) {
-        next = object;
-        nextIsSet = true;
-        return true;
-      }
+
+    @Override
+    public final T next() {
+        if (!hasNext()) {
+            throw new NoSuchElementException();
+        }
+        assert nextIsSet;
+        try {
+            return next;
+        } finally {
+            nextIsSet = false;
+            next = null;
+        }
     }
-    return false;
-  }
+
+    @Override
+    public final void remove() {
+        throw new UnsupportedOperationException();
+    }
+
+    private boolean setNext() {
+        while (iterator.hasNext()) {
+            final T object = iterator.next();
+            if (predicateFunction(object)) {
+                next = object;
+                nextIsSet = true;
+                return true;
+            }
+        }
+        return false;
+    }
 }

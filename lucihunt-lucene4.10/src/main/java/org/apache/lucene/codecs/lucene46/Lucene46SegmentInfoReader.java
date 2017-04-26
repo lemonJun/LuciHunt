@@ -41,53 +41,51 @@ import org.apache.lucene.util.Version;
  */
 public class Lucene46SegmentInfoReader extends SegmentInfoReader {
 
-  /** Sole constructor. */
-  public Lucene46SegmentInfoReader() {
-  }
-
-  @Override
-  public SegmentInfo read(Directory dir, String segment, IOContext context) throws IOException {
-    final String fileName = IndexFileNames.segmentFileName(segment, "", Lucene46SegmentInfoFormat.SI_EXTENSION);
-    final ChecksumIndexInput input = dir.openChecksumInput(fileName, context);
-    boolean success = false;
-    try {
-      int codecVersion = CodecUtil.checkHeader(input, Lucene46SegmentInfoFormat.CODEC_NAME,
-                                                      Lucene46SegmentInfoFormat.VERSION_START,
-                                                      Lucene46SegmentInfoFormat.VERSION_CURRENT);
-      final Version version;
-      try {
-        version = Version.parse(input.readString());
-      } catch (ParseException pe) {
-        throw new CorruptIndexException("unable to parse version string (resource=" + input + "): " + pe.getMessage(), pe);
-      }
-
-      final int docCount = input.readInt();
-      if (docCount < 0) {
-        throw new CorruptIndexException("invalid docCount: " + docCount + " (resource=" + input + ")");
-      }
-      final boolean isCompoundFile = input.readByte() == SegmentInfo.YES;
-      final Map<String,String> diagnostics = input.readStringStringMap();
-      final Set<String> files = input.readStringSet();
-      
-      if (codecVersion >= Lucene46SegmentInfoFormat.VERSION_CHECKSUM) {
-        CodecUtil.checkFooter(input);
-      } else {
-        CodecUtil.checkEOF(input);
-      }
-
-      final SegmentInfo si = new SegmentInfo(dir, version, segment, docCount, isCompoundFile, null, diagnostics);
-      si.setFiles(files);
-
-      success = true;
-
-      return si;
-
-    } finally {
-      if (!success) {
-        IOUtils.closeWhileHandlingException(input);
-      } else {
-        input.close();
-      }
+    /** Sole constructor. */
+    public Lucene46SegmentInfoReader() {
     }
-  }
+
+    @Override
+    public SegmentInfo read(Directory dir, String segment, IOContext context) throws IOException {
+        final String fileName = IndexFileNames.segmentFileName(segment, "", Lucene46SegmentInfoFormat.SI_EXTENSION);
+        final ChecksumIndexInput input = dir.openChecksumInput(fileName, context);
+        boolean success = false;
+        try {
+            int codecVersion = CodecUtil.checkHeader(input, Lucene46SegmentInfoFormat.CODEC_NAME, Lucene46SegmentInfoFormat.VERSION_START, Lucene46SegmentInfoFormat.VERSION_CURRENT);
+            final Version version;
+            try {
+                version = Version.parse(input.readString());
+            } catch (ParseException pe) {
+                throw new CorruptIndexException("unable to parse version string (resource=" + input + "): " + pe.getMessage(), pe);
+            }
+
+            final int docCount = input.readInt();
+            if (docCount < 0) {
+                throw new CorruptIndexException("invalid docCount: " + docCount + " (resource=" + input + ")");
+            }
+            final boolean isCompoundFile = input.readByte() == SegmentInfo.YES;
+            final Map<String, String> diagnostics = input.readStringStringMap();
+            final Set<String> files = input.readStringSet();
+
+            if (codecVersion >= Lucene46SegmentInfoFormat.VERSION_CHECKSUM) {
+                CodecUtil.checkFooter(input);
+            } else {
+                CodecUtil.checkEOF(input);
+            }
+
+            final SegmentInfo si = new SegmentInfo(dir, version, segment, docCount, isCompoundFile, null, diagnostics);
+            si.setFiles(files);
+
+            success = true;
+
+            return si;
+
+        } finally {
+            if (!success) {
+                IOUtils.closeWhileHandlingException(input);
+            } else {
+                input.close();
+            }
+        }
+    }
 }

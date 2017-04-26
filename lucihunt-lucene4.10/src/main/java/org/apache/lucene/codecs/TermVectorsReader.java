@@ -32,28 +32,28 @@ import org.apache.lucene.util.Accountable;
  */
 public abstract class TermVectorsReader implements Cloneable, Closeable, Accountable {
 
-  /** Sole constructor. (For invocation by subclass 
-   *  constructors, typically implicit.) */
-  protected TermVectorsReader() {
-  }
+    /** Sole constructor. (For invocation by subclass 
+     *  constructors, typically implicit.) */
+    protected TermVectorsReader() {
+    }
 
-  /** Returns term vectors for this document, or null if
-   *  term vectors were not indexed. If offsets are
-   *  available they are in an {@link OffsetAttribute}
-   *  available from the {@link DocsAndPositionsEnum}. */
-  public abstract Fields get(int doc) throws IOException;
-  
-  /** 
-   * Checks consistency of this reader.
-   * <p>
-   * Note that this may be costly in terms of I/O, e.g. 
-   * may involve computing a checksum value against large data files.
-   * @lucene.internal
-   */
-  public abstract void checkIntegrity() throws IOException;
-  
-  /** Create a clone that one caller at a time may use to
-   *  read term vectors. */
-  @Override
-  public abstract TermVectorsReader clone();
+    /** Returns term vectors for this document, or null if
+     *  term vectors were not indexed. If offsets are
+     *  available they are in an {@link OffsetAttribute}
+     *  available from the {@link DocsAndPositionsEnum}. */
+    public abstract Fields get(int doc) throws IOException;
+
+    /** 
+     * Checks consistency of this reader.
+     * <p>
+     * Note that this may be costly in terms of I/O, e.g. 
+     * may involve computing a checksum value against large data files.
+     * @lucene.internal
+     */
+    public abstract void checkIntegrity() throws IOException;
+
+    /** Create a clone that one caller at a time may use to
+     *  read term vectors. */
+    @Override
+    public abstract TermVectorsReader clone();
 }

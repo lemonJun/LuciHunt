@@ -34,65 +34,65 @@ import org.apache.lucene.util.AttributeSource;
  * stream to the first Token. 
  */
 public final class CachingTokenFilter extends TokenFilter {
-  private List<AttributeSource.State> cache = null;
-  private Iterator<AttributeSource.State> iterator = null; 
-  private AttributeSource.State finalState;
-  
-  /**
-   * Create a new CachingTokenFilter around <code>input</code>,
-   * caching its token attributes, which can be replayed again
-   * after a call to {@link #reset()}.
-   */
-  public CachingTokenFilter(TokenStream input) {
-    super(input);
-  }
-  
-  @Override
-  public final boolean incrementToken() throws IOException {
-    if (cache == null) {
-      // fill cache lazily
-      cache = new LinkedList<>();
-      fillCache();
-      iterator = cache.iterator();
-    }
-    
-    if (!iterator.hasNext()) {
-      // the cache is exhausted, return false
-      return false;
-    }
-    // Since the TokenFilter can be reset, the tokens need to be preserved as immutable.
-    restoreState(iterator.next());
-    return true;
-  }
-  
-  @Override
-  public final void end() {
-    if (finalState != null) {
-      restoreState(finalState);
-    }
-  }
+    private List<AttributeSource.State> cache = null;
+    private Iterator<AttributeSource.State> iterator = null;
+    private AttributeSource.State finalState;
 
-  /**
-   * Rewinds the iterator to the beginning of the cached list.
-   * <p>
-   * Note that this does not call reset() on the wrapped tokenstream ever, even
-   * the first time. You should reset() the inner tokenstream before wrapping
-   * it with CachingTokenFilter.
-   */
-  @Override
-  public void reset() {
-    if(cache != null) {
-      iterator = cache.iterator();
+    /**
+     * Create a new CachingTokenFilter around <code>input</code>,
+     * caching its token attributes, which can be replayed again
+     * after a call to {@link #reset()}.
+     */
+    public CachingTokenFilter(TokenStream input) {
+        super(input);
     }
-  }
-  
-  private void fillCache() throws IOException {
-    while(input.incrementToken()) {
-      cache.add(captureState());
+
+    @Override
+    public final boolean incrementToken() throws IOException {
+        if (cache == null) {
+            // fill cache lazily
+            cache = new LinkedList<>();
+            fillCache();
+            iterator = cache.iterator();
+        }
+
+        if (!iterator.hasNext()) {
+            // the cache is exhausted, return false
+            return false;
+        }
+        // Since the TokenFilter can be reset, the tokens need to be preserved as immutable.
+        restoreState(iterator.next());
+        return true;
     }
-    // capture final state
-    input.end();
-    finalState = captureState();
-  }
+
+    @Override
+    public final void end() {
+        if (finalState != null) {
+            restoreState(finalState);
+        }
+    }
+
+    /**
+     * Rewinds the iterator to the beginning of the cached list.
+     * <p>
+     * Note that this does not call reset() on the wrapped tokenstream ever, even
+     * the first time. You should reset() the inner tokenstream before wrapping
+     * it with CachingTokenFilter.
+     */
+    @Override
+    public void reset() {
+        if (cache != null) {
+            iterator = cache.iterator();
+        }
+    }
+
+    private void fillCache() throws IOException {
+        while (input.incrementToken()) {
+            cache.add(captureState());
+        }
+        // capture final state
+        input.end();
+        finalState = captureState();
+    }
 
 }

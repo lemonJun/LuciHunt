@@ -25,23 +25,22 @@ import org.apache.lucene.index.Term;
  */
 public class PrefixFilter extends MultiTermQueryWrapperFilter<PrefixQuery> {
 
-  public PrefixFilter(Term prefix) {
-    super(new PrefixQuery(prefix));
-  }
+    public PrefixFilter(Term prefix) {
+        super(new PrefixQuery(prefix));
+    }
 
-  public Term getPrefix() { return query.getPrefix(); }
+    public Term getPrefix() {
+        return query.getPrefix();
+    }
 
-  /** Prints a user-readable version of this query. */
-  @Override
-  public String toString () {
-    StringBuilder buffer = new StringBuilder();
-    buffer.append("PrefixFilter(");
-    buffer.append(getPrefix().toString());
-    buffer.append(")");
-    return buffer.toString();
-  }
+    /** Prints a user-readable version of this query. */
+    @Override
+    public String toString() {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append("PrefixFilter(");
+        buffer.append(getPrefix().toString());
+        buffer.append(")");
+        return buffer.toString();
+    }
 
 }
-
-
-

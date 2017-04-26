@@ -29,42 +29,44 @@ import java.io.IOException;
 
 public class NoLockFactory extends LockFactory {
 
-  // Single instance returned whenever makeLock is called.
-  private static NoLock singletonLock = new NoLock();
-  private static NoLockFactory singleton = new NoLockFactory();
-  
-  private NoLockFactory() {}
+    // Single instance returned whenever makeLock is called.
+    private static NoLock singletonLock = new NoLock();
+    private static NoLockFactory singleton = new NoLockFactory();
 
-  public static NoLockFactory getNoLockFactory() {
-    return singleton;
-  }
+    private NoLockFactory() {
+    }
 
-  @Override
-  public Lock makeLock(String lockName) {
-    return singletonLock;
-  }
+    public static NoLockFactory getNoLockFactory() {
+        return singleton;
+    }
 
-  @Override
-  public void clearLock(String lockName) {}
+    @Override
+    public Lock makeLock(String lockName) {
+        return singletonLock;
+    }
+
+    @Override
+    public void clearLock(String lockName) {
+    }
 }
 
 class NoLock extends Lock {
-  @Override
-  public boolean obtain() throws IOException {
-    return true;
-  }
+    @Override
+    public boolean obtain() throws IOException {
+        return true;
+    }
 
-  @Override
-  public void close() {
-  }
+    @Override
+    public void close() {
+    }
 
-  @Override
-  public boolean isLocked() {
-    return false;
-  }
+    @Override
+    public boolean isLocked() {
+        return false;
+    }
 
-  @Override
-  public String toString() {
-    return "NoLock";
-  }
+    @Override
+    public String toString() {
+        return "NoLock";
+    }
 }

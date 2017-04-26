@@ -47,155 +47,155 @@ import java.util.List;
  * @lucene.internal
  */
 public abstract class BaseCompositeReader<R extends IndexReader> extends CompositeReader {
-  private final R[] subReaders;
-  private final int[] starts;       // 1st docno for each reader
-  private final int maxDoc;
-  private final int numDocs;
+    private final R[] subReaders;
+    private final int[] starts; // 1st docno for each reader
+    private final int maxDoc;
+    private final int numDocs;
 
-  /** List view solely for {@link #getSequentialSubReaders()},
-   * for effectiveness the array is used internally. */
-  private final List<R> subReadersList;
+    /** List view solely for {@link #getSequentialSubReaders()},
+     * for effectiveness the array is used internally. */
+    private final List<R> subReadersList;
 
-  /**
-   * Constructs a {@code BaseCompositeReader} on the given subReaders.
-   * @param subReaders the wrapped sub-readers. This array is returned by
-   * {@link #getSequentialSubReaders} and used to resolve the correct
-   * subreader for docID-based methods. <b>Please note:</b> This array is <b>not</b>
-   * cloned and not protected for modification, the subclass is responsible 
-   * to do this.
-   */
-  protected BaseCompositeReader(R[] subReaders) {
-    this.subReaders = subReaders;
-    this.subReadersList = Collections.unmodifiableList(Arrays.asList(subReaders));
-    starts = new int[subReaders.length + 1];    // build starts array
-    long maxDoc = 0, numDocs = 0;
-    for (int i = 0; i < subReaders.length; i++) {
-      starts[i] = (int) maxDoc;
-      final IndexReader r = subReaders[i];
-      maxDoc += r.maxDoc();      // compute maxDocs
-      numDocs += r.numDocs();    // compute numDocs
-      r.registerParentReader(this);
+    /**
+     * Constructs a {@code BaseCompositeReader} on the given subReaders.
+     * @param subReaders the wrapped sub-readers. This array is returned by
+     * {@link #getSequentialSubReaders} and used to resolve the correct
+     * subreader for docID-based methods. <b>Please note:</b> This array is <b>not</b>
+     * cloned and not protected for modification, the subclass is responsible 
+     * to do this.
+     */
+    protected BaseCompositeReader(R[] subReaders) {
+        this.subReaders = subReaders;
+        this.subReadersList = Collections.unmodifiableList(Arrays.asList(subReaders));
+        starts = new int[subReaders.length + 1]; // build starts array
+        long maxDoc = 0, numDocs = 0;
+        for (int i = 0; i < subReaders.length; i++) {
+            starts[i] = (int) maxDoc;
+            final IndexReader r = subReaders[i];
+            maxDoc += r.maxDoc(); // compute maxDocs
+            numDocs += r.numDocs(); // compute numDocs
+            r.registerParentReader(this);
+        }
+
+        if (maxDoc > IndexWriter.getActualMaxDocs()) {
+            throw new IllegalArgumentException("Too many documents: composite IndexReaders cannot exceed " + IndexWriter.getActualMaxDocs() + " but readers have total maxDoc=" + maxDoc);
+        }
+
+        starts[subReaders.length] = (int) maxDoc;
+        this.maxDoc = (int) maxDoc;
+        this.numDocs = (int) numDocs;
     }
 
-    if (maxDoc > IndexWriter.getActualMaxDocs()) {
-      throw new IllegalArgumentException("Too many documents: composite IndexReaders cannot exceed " + IndexWriter.getActualMaxDocs() + " but readers have total maxDoc=" + maxDoc);
+    @Override
+    public final Fields getTermVectors(int docID) throws IOException {
+        ensureOpen();
+        final int i = readerIndex(docID); // find subreader num
+        return subReaders[i].getTermVectors(docID - starts[i]); // dispatch to subreader
     }
 
-    starts[subReaders.length] = (int) maxDoc;
-    this.maxDoc = (int) maxDoc;
-    this.numDocs = (int) numDocs;
-  }
+    @Override
+    public final int numDocs() {
+        // Don't call ensureOpen() here (it could affect performance)
+        return numDocs;
+    }
 
-  @Override
-  public final Fields getTermVectors(int docID) throws IOException {
-    ensureOpen();
-    final int i = readerIndex(docID);        // find subreader num
-    return subReaders[i].getTermVectors(docID - starts[i]); // dispatch to subreader
-  }
+    @Override
+    public final int maxDoc() {
+        // Don't call ensureOpen() here (it could affect performance)
+        return maxDoc;
+    }
 
-  @Override
-  public final int numDocs() {
-    // Don't call ensureOpen() here (it could affect performance)
-    return numDocs;
-  }
+    @Override
+    public final void document(int docID, StoredFieldVisitor visitor) throws IOException {
+        ensureOpen();
+        final int i = readerIndex(docID); // find subreader num
+        subReaders[i].document(docID - starts[i], visitor); // dispatch to subreader
+    }
 
-  @Override
-  public final int maxDoc() {
-    // Don't call ensureOpen() here (it could affect performance)
-    return maxDoc;
-  }
+    @Override
+    public final int docFreq(Term term) throws IOException {
+        ensureOpen();
+        int total = 0; // sum freqs in subreaders
+        for (int i = 0; i < subReaders.length; i++) {
+            total += subReaders[i].docFreq(term);
+        }
+        return total;
+    }
 
-  @Override
-  public final void document(int docID, StoredFieldVisitor visitor) throws IOException {
-    ensureOpen();
-    final int i = readerIndex(docID);                          // find subreader num
-    subReaders[i].document(docID - starts[i], visitor);    // dispatch to subreader
-  }
+    @Override
+    public final long totalTermFreq(Term term) throws IOException {
+        ensureOpen();
+        long total = 0; // sum freqs in subreaders
+        for (int i = 0; i < subReaders.length; i++) {
+            long sub = subReaders[i].totalTermFreq(term);
+            if (sub == -1) {
+                return -1;
+            }
+            total += sub;
+        }
+        return total;
+    }
 
-  @Override
-  public final int docFreq(Term term) throws IOException {
-    ensureOpen();
-    int total = 0;          // sum freqs in subreaders
-    for (int i = 0; i < subReaders.length; i++) {
-      total += subReaders[i].docFreq(term);
+    @Override
+    public final long getSumDocFreq(String field) throws IOException {
+        ensureOpen();
+        long total = 0; // sum doc freqs in subreaders
+        for (R reader : subReaders) {
+            long sub = reader.getSumDocFreq(field);
+            if (sub == -1) {
+                return -1; // if any of the subs doesn't support it, return -1
+            }
+            total += sub;
+        }
+        return total;
     }
-    return total;
-  }
-  
-  @Override
-  public final long totalTermFreq(Term term) throws IOException {
-    ensureOpen();
-    long total = 0;        // sum freqs in subreaders
-    for (int i = 0; i < subReaders.length; i++) {
-      long sub = subReaders[i].totalTermFreq(term);
-      if (sub == -1) {
-        return -1;
-      }
-      total += sub;
-    }
-    return total;
-  }
-  
-  @Override
-  public final long getSumDocFreq(String field) throws IOException {
-    ensureOpen();
-    long total = 0; // sum doc freqs in subreaders
-    for (R reader : subReaders) {
-      long sub = reader.getSumDocFreq(field);
-      if (sub == -1) {
-        return -1; // if any of the subs doesn't support it, return -1
-      }
-      total += sub;
-    }
-    return total;
-  }
-  
-  @Override
-  public final int getDocCount(String field) throws IOException {
-    ensureOpen();
-    int total = 0; // sum doc counts in subreaders
-    for (R reader : subReaders) {
-      int sub = reader.getDocCount(field);
-      if (sub == -1) {
-        return -1; // if any of the subs doesn't support it, return -1
-      }
-      total += sub;
-    }
-    return total;
-  }
 
-  @Override
-  public final long getSumTotalTermFreq(String field) throws IOException {
-    ensureOpen();
-    long total = 0; // sum doc total term freqs in subreaders
-    for (R reader : subReaders) {
-      long sub = reader.getSumTotalTermFreq(field);
-      if (sub == -1) {
-        return -1; // if any of the subs doesn't support it, return -1
-      }
-      total += sub;
+    @Override
+    public final int getDocCount(String field) throws IOException {
+        ensureOpen();
+        int total = 0; // sum doc counts in subreaders
+        for (R reader : subReaders) {
+            int sub = reader.getDocCount(field);
+            if (sub == -1) {
+                return -1; // if any of the subs doesn't support it, return -1
+            }
+            total += sub;
+        }
+        return total;
     }
-    return total;
-  }
-  
-  /** Helper method for subclasses to get the corresponding reader for a doc ID */
-  protected final int readerIndex(int docID) {
-    if (docID < 0 || docID >= maxDoc) {
-      throw new IllegalArgumentException("docID must be >= 0 and < maxDoc=" + maxDoc + " (got docID=" + docID + ")");
+
+    @Override
+    public final long getSumTotalTermFreq(String field) throws IOException {
+        ensureOpen();
+        long total = 0; // sum doc total term freqs in subreaders
+        for (R reader : subReaders) {
+            long sub = reader.getSumTotalTermFreq(field);
+            if (sub == -1) {
+                return -1; // if any of the subs doesn't support it, return -1
+            }
+            total += sub;
+        }
+        return total;
     }
-    return ReaderUtil.subIndex(docID, this.starts);
-  }
-  
-  /** Helper method for subclasses to get the docBase of the given sub-reader index. */
-  protected final int readerBase(int readerIndex) {
-    if (readerIndex < 0 || readerIndex >= subReaders.length) {
-      throw new IllegalArgumentException("readerIndex must be >= 0 and < getSequentialSubReaders().size()");
+
+    /** Helper method for subclasses to get the corresponding reader for a doc ID */
+    protected final int readerIndex(int docID) {
+        if (docID < 0 || docID >= maxDoc) {
+            throw new IllegalArgumentException("docID must be >= 0 and < maxDoc=" + maxDoc + " (got docID=" + docID + ")");
+        }
+        return ReaderUtil.subIndex(docID, this.starts);
     }
-    return this.starts[readerIndex];
-  }
-  
-  @Override
-  protected final List<? extends R> getSequentialSubReaders() {
-    return subReadersList;
-  }
+
+    /** Helper method for subclasses to get the docBase of the given sub-reader index. */
+    protected final int readerBase(int readerIndex) {
+        if (readerIndex < 0 || readerIndex >= subReaders.length) {
+            throw new IllegalArgumentException("readerIndex must be >= 0 and < getSequentialSubReaders().size()");
+        }
+        return this.starts[readerIndex];
+    }
+
+    @Override
+    protected final List<? extends R> getSequentialSubReaders() {
+        return subReadersList;
+    }
 }

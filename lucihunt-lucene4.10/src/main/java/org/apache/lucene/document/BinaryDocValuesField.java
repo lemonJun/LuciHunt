@@ -40,24 +40,24 @@ import org.apache.lucene.util.BytesRef;
  * @see BinaryDocValues
  * */
 public class BinaryDocValuesField extends Field {
-  
-  /**
-   * Type for straight bytes DocValues.
-   */
-  public static final FieldType TYPE = new FieldType();
-  static {
-    TYPE.setDocValueType(FieldInfo.DocValuesType.BINARY);
-    TYPE.freeze();
-  }
-  
-  /**
-   * Create a new binary DocValues field.
-   * @param name field name
-   * @param value binary content
-   * @throws IllegalArgumentException if the field name is null
-   */
-  public BinaryDocValuesField(String name, BytesRef value) {
-    super(name, TYPE);
-    fieldsData = value;
-  }
+
+    /**
+     * Type for straight bytes DocValues.
+     */
+    public static final FieldType TYPE = new FieldType();
+    static {
+        TYPE.setDocValueType(FieldInfo.DocValuesType.BINARY);
+        TYPE.freeze();
+    }
+
+    /**
+     * Create a new binary DocValues field.
+     * @param name field name
+     * @param value binary content
+     * @throws IllegalArgumentException if the field name is null
+     */
+    public BinaryDocValuesField(String name, BytesRef value) {
+        super(name, TYPE);
+        fieldsData = value;
+    }
 }

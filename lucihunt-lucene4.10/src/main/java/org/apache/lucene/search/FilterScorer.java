@@ -33,45 +33,45 @@ import org.apache.lucene.util.AttributeSource;
  * methods and fields.
  */
 abstract class FilterScorer extends Scorer {
-  protected final Scorer in;
-  
-  public FilterScorer(Scorer in) {
-    super(in.weight);
-    this.in = in;
-  }
-  
-  @Override
-  public float score() throws IOException {
-    return in.score();
-  }
+    protected final Scorer in;
 
-  @Override
-  public int freq() throws IOException {
-    return in.freq();
-  }
+    public FilterScorer(Scorer in) {
+        super(in.weight);
+        this.in = in;
+    }
 
-  @Override
-  public int docID() {
-    return in.docID();
-  }
+    @Override
+    public float score() throws IOException {
+        return in.score();
+    }
 
-  @Override
-  public int nextDoc() throws IOException {
-    return in.nextDoc();
-  }
+    @Override
+    public int freq() throws IOException {
+        return in.freq();
+    }
 
-  @Override
-  public int advance(int target) throws IOException {
-    return in.advance(target);
-  }
+    @Override
+    public int docID() {
+        return in.docID();
+    }
 
-  @Override
-  public long cost() {
-    return in.cost();
-  }
+    @Override
+    public int nextDoc() throws IOException {
+        return in.nextDoc();
+    }
 
-  @Override
-  public AttributeSource attributes() {
-    return in.attributes();
-  }
+    @Override
+    public int advance(int target) throws IOException {
+        return in.advance(target);
+    }
+
+    @Override
+    public long cost() {
+        return in.cost();
+    }
+
+    @Override
+    public AttributeSource attributes() {
+        return in.attributes();
+    }
 }

@@ -24,9 +24,9 @@ package org.apache.lucene.util;
  */
 public interface Accountable {
 
-  /**
-   * Return the memory usage of this object in bytes. Negative values are illegal.
-   */
-  long ramBytesUsed();
+    /**
+     * Return the memory usage of this object in bytes. Negative values are illegal.
+     */
+    long ramBytesUsed();
 
 }

@@ -31,15 +31,15 @@ import org.apache.lucene.codecs.FieldInfosWriter;
  */
 @Deprecated
 class Lucene3xFieldInfosFormat extends FieldInfosFormat {
-  private final FieldInfosReader reader = new Lucene3xFieldInfosReader();
-  
-  @Override
-  public FieldInfosReader getFieldInfosReader() throws IOException {
-    return reader;
-  }
+    private final FieldInfosReader reader = new Lucene3xFieldInfosReader();
 
-  @Override
-  public FieldInfosWriter getFieldInfosWriter() throws IOException {
-    throw new UnsupportedOperationException("this codec can only be used for reading");
-  }
+    @Override
+    public FieldInfosReader getFieldInfosReader() throws IOException {
+        return reader;
+    }
+
+    @Override
+    public FieldInfosWriter getFieldInfosWriter() throws IOException {
+        throw new UnsupportedOperationException("this codec can only be used for reading");
+    }
 }

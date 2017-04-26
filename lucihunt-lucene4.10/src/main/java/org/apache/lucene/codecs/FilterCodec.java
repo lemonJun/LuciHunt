@@ -47,56 +47,56 @@ package org.apache.lucene.codecs;
  */
 public abstract class FilterCodec extends Codec {
 
-  /** The codec to filter. */
-  protected final Codec delegate;
-  
-  /** Sole constructor. When subclassing this codec,
-   * create a no-arg ctor and pass the delegate codec
-   * and a unique name to this ctor.
-   */
-  protected FilterCodec(String name, Codec delegate) {
-    super(name);
-    this.delegate = delegate;
-  }
+    /** The codec to filter. */
+    protected final Codec delegate;
 
-  @Override
-  public DocValuesFormat docValuesFormat() {
-    return delegate.docValuesFormat();
-  }
+    /** Sole constructor. When subclassing this codec,
+     * create a no-arg ctor and pass the delegate codec
+     * and a unique name to this ctor.
+     */
+    protected FilterCodec(String name, Codec delegate) {
+        super(name);
+        this.delegate = delegate;
+    }
 
-  @Override
-  public FieldInfosFormat fieldInfosFormat() {
-    return delegate.fieldInfosFormat();
-  }
+    @Override
+    public DocValuesFormat docValuesFormat() {
+        return delegate.docValuesFormat();
+    }
 
-  @Override
-  public LiveDocsFormat liveDocsFormat() {
-    return delegate.liveDocsFormat();
-  }
+    @Override
+    public FieldInfosFormat fieldInfosFormat() {
+        return delegate.fieldInfosFormat();
+    }
 
-  @Override
-  public NormsFormat normsFormat() {
-    return delegate.normsFormat();
-  }
+    @Override
+    public LiveDocsFormat liveDocsFormat() {
+        return delegate.liveDocsFormat();
+    }
 
-  @Override
-  public PostingsFormat postingsFormat() {
-    return delegate.postingsFormat();
-  }
+    @Override
+    public NormsFormat normsFormat() {
+        return delegate.normsFormat();
+    }
 
-  @Override
-  public SegmentInfoFormat segmentInfoFormat() {
-    return delegate.segmentInfoFormat();
-  }
+    @Override
+    public PostingsFormat postingsFormat() {
+        return delegate.postingsFormat();
+    }
 
-  @Override
-  public StoredFieldsFormat storedFieldsFormat() {
-    return delegate.storedFieldsFormat();
-  }
+    @Override
+    public SegmentInfoFormat segmentInfoFormat() {
+        return delegate.segmentInfoFormat();
+    }
 
-  @Override
-  public TermVectorsFormat termVectorsFormat() {
-    return delegate.termVectorsFormat();
-  }
+    @Override
+    public StoredFieldsFormat storedFieldsFormat() {
+        return delegate.storedFieldsFormat();
+    }
+
+    @Override
+    public TermVectorsFormat termVectorsFormat() {
+        return delegate.termVectorsFormat();
+    }
 
 }

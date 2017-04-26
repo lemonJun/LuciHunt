@@ -37,18 +37,18 @@ import org.apache.lucene.index.NumericDocValues;
 @Deprecated
 public class IntDocValuesField extends NumericDocValuesField {
 
-  /** 
-   * Creates a new DocValues field with the specified 32-bit integer value 
-   * @param name field name
-   * @param value 32-bit integer value
-   * @throws IllegalArgumentException if the field name is null
-   */
-  public IntDocValuesField(String name, int value) {
-    super(name, value);
-  }
+    /** 
+     * Creates a new DocValues field with the specified 32-bit integer value 
+     * @param name field name
+     * @param value 32-bit integer value
+     * @throws IllegalArgumentException if the field name is null
+     */
+    public IntDocValuesField(String name, int value) {
+        super(name, value);
+    }
 
-  @Override
-  public void setIntValue(int value) {
-    setLongValue(value);
-  }
+    @Override
+    public void setIntValue(int value) {
+        setLongValue(value);
+    }
 }

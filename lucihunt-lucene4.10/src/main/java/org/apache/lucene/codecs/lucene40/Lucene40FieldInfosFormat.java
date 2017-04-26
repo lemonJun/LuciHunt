@@ -96,34 +96,34 @@ import org.apache.lucene.store.DataOutput; // javadoc
  */
 @Deprecated
 public class Lucene40FieldInfosFormat extends FieldInfosFormat {
-  private final FieldInfosReader reader = new Lucene40FieldInfosReader();
-  
-  /** Sole constructor. */
-  public Lucene40FieldInfosFormat() {
-  }
+    private final FieldInfosReader reader = new Lucene40FieldInfosReader();
 
-  @Override
-  public FieldInfosReader getFieldInfosReader() throws IOException {
-    return reader;
-  }
+    /** Sole constructor. */
+    public Lucene40FieldInfosFormat() {
+    }
 
-  @Override
-  public FieldInfosWriter getFieldInfosWriter() throws IOException {
-    throw new UnsupportedOperationException("this codec can only be used for reading");
-  }
-  
-  /** Extension of field infos */
-  static final String FIELD_INFOS_EXTENSION = "fnm";
-  
-  static final String CODEC_NAME = "Lucene40FieldInfos";
-  static final int FORMAT_START = 0;
-  static final int FORMAT_CURRENT = FORMAT_START;
-  
-  static final byte IS_INDEXED = 0x1;
-  static final byte STORE_TERMVECTOR = 0x2;
-  static final byte STORE_OFFSETS_IN_POSTINGS = 0x4;
-  static final byte OMIT_NORMS = 0x10;
-  static final byte STORE_PAYLOADS = 0x20;
-  static final byte OMIT_TERM_FREQ_AND_POSITIONS = 0x40;
-  static final byte OMIT_POSITIONS = -128;
+    @Override
+    public FieldInfosReader getFieldInfosReader() throws IOException {
+        return reader;
+    }
+
+    @Override
+    public FieldInfosWriter getFieldInfosWriter() throws IOException {
+        throw new UnsupportedOperationException("this codec can only be used for reading");
+    }
+
+    /** Extension of field infos */
+    static final String FIELD_INFOS_EXTENSION = "fnm";
+
+    static final String CODEC_NAME = "Lucene40FieldInfos";
+    static final int FORMAT_START = 0;
+    static final int FORMAT_CURRENT = FORMAT_START;
+
+    static final byte IS_INDEXED = 0x1;
+    static final byte STORE_TERMVECTOR = 0x2;
+    static final byte STORE_OFFSETS_IN_POSTINGS = 0x4;
+    static final byte OMIT_NORMS = 0x10;
+    static final byte STORE_PAYLOADS = 0x20;
+    static final byte OMIT_TERM_FREQ_AND_POSITIONS = 0x40;
+    static final byte OMIT_POSITIONS = -128;
 }

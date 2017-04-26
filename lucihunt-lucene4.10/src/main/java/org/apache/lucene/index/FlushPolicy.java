@@ -52,94 +52,91 @@ import org.apache.lucene.util.InfoStream;
  * @see IndexWriterConfig#setFlushPolicy(FlushPolicy)
  */
 abstract class FlushPolicy {
-  protected LiveIndexWriterConfig indexWriterConfig;
-  protected InfoStream infoStream;
+    protected LiveIndexWriterConfig indexWriterConfig;
+    protected InfoStream infoStream;
 
-  /**
-   * Called for each delete term. If this is a delete triggered due to an update
-   * the given {@link ThreadState} is non-null.
-   * <p>
-   * Note: This method is called synchronized on the given
-   * {@link DocumentsWriterFlushControl} and it is guaranteed that the calling
-   * thread holds the lock on the given {@link ThreadState}
-   */
-  public abstract void onDelete(DocumentsWriterFlushControl control,
-      ThreadState state);
+    /**
+     * Called for each delete term. If this is a delete triggered due to an update
+     * the given {@link ThreadState} is non-null.
+     * <p>
+     * Note: This method is called synchronized on the given
+     * {@link DocumentsWriterFlushControl} and it is guaranteed that the calling
+     * thread holds the lock on the given {@link ThreadState}
+     */
+    public abstract void onDelete(DocumentsWriterFlushControl control, ThreadState state);
 
-  /**
-   * Called for each document update on the given {@link ThreadState}'s
-   * {@link DocumentsWriterPerThread}.
-   * <p>
-   * Note: This method is called  synchronized on the given
-   * {@link DocumentsWriterFlushControl} and it is guaranteed that the calling
-   * thread holds the lock on the given {@link ThreadState}
-   */
-  public void onUpdate(DocumentsWriterFlushControl control, ThreadState state) {
-    onInsert(control, state);
-    onDelete(control, state);
-  }
+    /**
+     * Called for each document update on the given {@link ThreadState}'s
+     * {@link DocumentsWriterPerThread}.
+     * <p>
+     * Note: This method is called  synchronized on the given
+     * {@link DocumentsWriterFlushControl} and it is guaranteed that the calling
+     * thread holds the lock on the given {@link ThreadState}
+     */
+    public void onUpdate(DocumentsWriterFlushControl control, ThreadState state) {
+        onInsert(control, state);
+        onDelete(control, state);
+    }
 
-  /**
-   * Called for each document addition on the given {@link ThreadState}s
-   * {@link DocumentsWriterPerThread}.
-   * <p>
-   * Note: This method is synchronized by the given
-   * {@link DocumentsWriterFlushControl} and it is guaranteed that the calling
-   * thread holds the lock on the given {@link ThreadState}
-   */
-  public abstract void onInsert(DocumentsWriterFlushControl control,
-      ThreadState state);
+    /**
+     * Called for each document addition on the given {@link ThreadState}s
+     * {@link DocumentsWriterPerThread}.
+     * <p>
+     * Note: This method is synchronized by the given
+     * {@link DocumentsWriterFlushControl} and it is guaranteed that the calling
+     * thread holds the lock on the given {@link ThreadState}
+     */
+    public abstract void onInsert(DocumentsWriterFlushControl control, ThreadState state);
 
-  /**
-   * Called by DocumentsWriter to initialize the FlushPolicy
-   */
-  protected synchronized void init(LiveIndexWriterConfig indexWriterConfig) {
-    this.indexWriterConfig = indexWriterConfig;
-    infoStream = indexWriterConfig.getInfoStream();
-  }
+    /**
+     * Called by DocumentsWriter to initialize the FlushPolicy
+     */
+    protected synchronized void init(LiveIndexWriterConfig indexWriterConfig) {
+        this.indexWriterConfig = indexWriterConfig;
+        infoStream = indexWriterConfig.getInfoStream();
+    }
 
-  /**
-   * Returns the current most RAM consuming non-pending {@link ThreadState} with
-   * at least one indexed document.
-   * <p>
-   * This method will never return <code>null</code>
-   */
-  protected ThreadState findLargestNonPendingWriter(
-      DocumentsWriterFlushControl control, ThreadState perThreadState) {
-    assert perThreadState.dwpt.getNumDocsInRAM() > 0;
-    long maxRamSoFar = perThreadState.bytesUsed;
-    // the dwpt which needs to be flushed eventually
-    ThreadState maxRamUsingThreadState = perThreadState;
-    assert !perThreadState.flushPending : "DWPT should have flushed";
-    Iterator<ThreadState> activePerThreadsIterator = control.allActiveThreadStates();
-    int count = 0;
-    while (activePerThreadsIterator.hasNext()) {
-      ThreadState next = activePerThreadsIterator.next();
-      if (!next.flushPending) {
-        final long nextRam = next.bytesUsed;
-        if (nextRam > 0 && next.dwpt.getNumDocsInRAM() > 0) {
-          if (infoStream.isEnabled("FP")) {
-            infoStream.message("FP", "thread state has " + nextRam + " bytes; docInRAM=" + next.dwpt.getNumDocsInRAM());
-          }
-          count++;
-          if (nextRam > maxRamSoFar) {
-            maxRamSoFar = nextRam;
-            maxRamUsingThreadState = next;
-          }
+    /**
+     * Returns the current most RAM consuming non-pending {@link ThreadState} with
+     * at least one indexed document.
+     * <p>
+     * This method will never return <code>null</code>
+     */
+    protected ThreadState findLargestNonPendingWriter(DocumentsWriterFlushControl control, ThreadState perThreadState) {
+        assert perThreadState.dwpt.getNumDocsInRAM() > 0;
+        long maxRamSoFar = perThreadState.bytesUsed;
+        // the dwpt which needs to be flushed eventually
+        ThreadState maxRamUsingThreadState = perThreadState;
+        assert !perThreadState.flushPending : "DWPT should have flushed";
+        Iterator<ThreadState> activePerThreadsIterator = control.allActiveThreadStates();
+        int count = 0;
+        while (activePerThreadsIterator.hasNext()) {
+            ThreadState next = activePerThreadsIterator.next();
+            if (!next.flushPending) {
+                final long nextRam = next.bytesUsed;
+                if (nextRam > 0 && next.dwpt.getNumDocsInRAM() > 0) {
+                    if (infoStream.isEnabled("FP")) {
+                        infoStream.message("FP", "thread state has " + nextRam + " bytes; docInRAM=" + next.dwpt.getNumDocsInRAM());
+                    }
+                    count++;
+                    if (nextRam > maxRamSoFar) {
+                        maxRamSoFar = nextRam;
+                        maxRamUsingThreadState = next;
+                    }
+                }
+            }
         }
-      }
+        if (infoStream.isEnabled("FP")) {
+            infoStream.message("FP", count + " in-use non-flushing threads states");
+        }
+        assert assertMessage("set largest ram consuming thread pending on lower watermark");
+        return maxRamUsingThreadState;
     }
-    if (infoStream.isEnabled("FP")) {
-      infoStream.message("FP", count + " in-use non-flushing threads states");
+
+    private boolean assertMessage(String s) {
+        if (infoStream.isEnabled("FP")) {
+            infoStream.message("FP", s);
+        }
+        return true;
     }
-    assert assertMessage("set largest ram consuming thread pending on lower watermark");
-    return maxRamUsingThreadState;
-  }
-  
-  private boolean assertMessage(String s) {
-    if (infoStream.isEnabled("FP")) {
-      infoStream.message("FP", s);
-    }
-    return true;
-  }
 }

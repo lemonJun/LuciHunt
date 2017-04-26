@@ -28,29 +28,29 @@ import java.util.List;
 
 public final class KeepOnlyLastCommitDeletionPolicy extends IndexDeletionPolicy {
 
-  /** Sole constructor. */
-  public KeepOnlyLastCommitDeletionPolicy() {
-  }
-
-  /**
-   * Deletes all commits except the most recent one.
-   */
-  @Override
-  public void onInit(List<? extends IndexCommit> commits) {
-    // Note that commits.size() should normally be 1:
-    onCommit(commits);
-  }
-
-  /**
-   * Deletes all commits except the most recent one.
-   */
-  @Override
-  public void onCommit(List<? extends IndexCommit> commits) {
-    // Note that commits.size() should normally be 2 (if not
-    // called by onInit above):
-    int size = commits.size();
-    for(int i=0;i<size-1;i++) {
-      commits.get(i).delete();
+    /** Sole constructor. */
+    public KeepOnlyLastCommitDeletionPolicy() {
     }
-  }
+
+    /**
+     * Deletes all commits except the most recent one.
+     */
+    @Override
+    public void onInit(List<? extends IndexCommit> commits) {
+        // Note that commits.size() should normally be 1:
+        onCommit(commits);
+    }
+
+    /**
+     * Deletes all commits except the most recent one.
+     */
+    @Override
+    public void onCommit(List<? extends IndexCommit> commits) {
+        // Note that commits.size() should normally be 2 (if not
+        // called by onInit above):
+        int size = commits.size();
+        for (int i = 0; i < size - 1; i++) {
+            commits.get(i).delete();
+        }
+    }
 }

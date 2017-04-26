@@ -91,39 +91,39 @@ import org.apache.lucene.store.DataOutput;
  * @lucene.experimental
  */
 public final class Lucene46FieldInfosFormat extends FieldInfosFormat {
-  private final FieldInfosReader reader = new Lucene46FieldInfosReader();
-  private final FieldInfosWriter writer = new Lucene46FieldInfosWriter();
-  
-  /** Sole constructor. */
-  public Lucene46FieldInfosFormat() {
-  }
+    private final FieldInfosReader reader = new Lucene46FieldInfosReader();
+    private final FieldInfosWriter writer = new Lucene46FieldInfosWriter();
 
-  @Override
-  public FieldInfosReader getFieldInfosReader() throws IOException {
-    return reader;
-  }
+    /** Sole constructor. */
+    public Lucene46FieldInfosFormat() {
+    }
 
-  @Override
-  public FieldInfosWriter getFieldInfosWriter() throws IOException {
-    return writer;
-  }
-  
-  /** Extension of field infos */
-  static final String EXTENSION = "fnm";
-  
-  // Codec header
-  static final String CODEC_NAME = "Lucene46FieldInfos";
-  static final int FORMAT_START = 0;
-  static final int FORMAT_CHECKSUM = 1;
-  static final int FORMAT_SORTED_NUMERIC = 2;
-  static final int FORMAT_CURRENT = FORMAT_SORTED_NUMERIC;
-  
-  // Field flags
-  static final byte IS_INDEXED = 0x1;
-  static final byte STORE_TERMVECTOR = 0x2;
-  static final byte STORE_OFFSETS_IN_POSTINGS = 0x4;
-  static final byte OMIT_NORMS = 0x10;
-  static final byte STORE_PAYLOADS = 0x20;
-  static final byte OMIT_TERM_FREQ_AND_POSITIONS = 0x40;
-  static final byte OMIT_POSITIONS = -128;
+    @Override
+    public FieldInfosReader getFieldInfosReader() throws IOException {
+        return reader;
+    }
+
+    @Override
+    public FieldInfosWriter getFieldInfosWriter() throws IOException {
+        return writer;
+    }
+
+    /** Extension of field infos */
+    static final String EXTENSION = "fnm";
+
+    // Codec header
+    static final String CODEC_NAME = "Lucene46FieldInfos";
+    static final int FORMAT_START = 0;
+    static final int FORMAT_CHECKSUM = 1;
+    static final int FORMAT_SORTED_NUMERIC = 2;
+    static final int FORMAT_CURRENT = FORMAT_SORTED_NUMERIC;
+
+    // Field flags
+    static final byte IS_INDEXED = 0x1;
+    static final byte STORE_TERMVECTOR = 0x2;
+    static final byte STORE_OFFSETS_IN_POSTINGS = 0x4;
+    static final byte OMIT_NORMS = 0x10;
+    static final byte STORE_PAYLOADS = 0x20;
+    static final byte OMIT_TERM_FREQ_AND_POSITIONS = 0x40;
+    static final byte OMIT_POSITIONS = -128;
 }

@@ -166,30 +166,30 @@ import org.apache.lucene.util.packed.MonotonicBlockPackedWriter;
  */
 public class Lucene49DocValuesFormat extends DocValuesFormat {
 
-  /** Sole Constructor */
-  public Lucene49DocValuesFormat() {
-    super("Lucene49");
-  }
+    /** Sole Constructor */
+    public Lucene49DocValuesFormat() {
+        super("Lucene49");
+    }
 
-  @Override
-  public DocValuesConsumer fieldsConsumer(SegmentWriteState state) throws IOException {
-    return new Lucene49DocValuesConsumer(state, DATA_CODEC, DATA_EXTENSION, META_CODEC, META_EXTENSION);
-  }
+    @Override
+    public DocValuesConsumer fieldsConsumer(SegmentWriteState state) throws IOException {
+        return new Lucene49DocValuesConsumer(state, DATA_CODEC, DATA_EXTENSION, META_CODEC, META_EXTENSION);
+    }
 
-  @Override
-  public DocValuesProducer fieldsProducer(SegmentReadState state) throws IOException {
-    return new Lucene49DocValuesProducer(state, DATA_CODEC, DATA_EXTENSION, META_CODEC, META_EXTENSION);
-  }
-  
-  static final String DATA_CODEC = "Lucene49DocValuesData";
-  static final String DATA_EXTENSION = "dvd";
-  static final String META_CODEC = "Lucene49ValuesMetadata";
-  static final String META_EXTENSION = "dvm";
-  static final int VERSION_START = 0;
-  static final int VERSION_CURRENT = VERSION_START;
-  static final byte NUMERIC = 0;
-  static final byte BINARY = 1;
-  static final byte SORTED = 2;
-  static final byte SORTED_SET = 3;
-  static final byte SORTED_NUMERIC = 4;
+    @Override
+    public DocValuesProducer fieldsProducer(SegmentReadState state) throws IOException {
+        return new Lucene49DocValuesProducer(state, DATA_CODEC, DATA_EXTENSION, META_CODEC, META_EXTENSION);
+    }
+
+    static final String DATA_CODEC = "Lucene49DocValuesData";
+    static final String DATA_EXTENSION = "dvd";
+    static final String META_CODEC = "Lucene49ValuesMetadata";
+    static final String META_EXTENSION = "dvm";
+    static final int VERSION_START = 0;
+    static final int VERSION_CURRENT = VERSION_START;
+    static final byte NUMERIC = 0;
+    static final byte BINARY = 1;
+    static final byte SORTED = 2;
+    static final byte SORTED_SET = 3;
+    static final byte SORTED_NUMERIC = 4;
 }

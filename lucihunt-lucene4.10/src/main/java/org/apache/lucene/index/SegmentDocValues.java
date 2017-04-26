@@ -35,64 +35,62 @@ import org.apache.lucene.util.RefCount;
  */
 final class SegmentDocValues {
 
-  private final Map<Long,RefCount<DocValuesProducer>> genDVProducers = new HashMap<>();
+    private final Map<Long, RefCount<DocValuesProducer>> genDVProducers = new HashMap<>();
 
-  private RefCount<DocValuesProducer> newDocValuesProducer(SegmentCommitInfo si, IOContext context, Directory dir,
-      DocValuesFormat dvFormat, final Long gen, FieldInfos infos, int termsIndexDivisor) throws IOException {
-    Directory dvDir = dir;
-    String segmentSuffix = "";
-    if (gen.longValue() != -1) {
-      dvDir = si.info.dir; // gen'd files are written outside CFS, so use SegInfo directory
-      segmentSuffix = Long.toString(gen.longValue(), Character.MAX_RADIX);
-    }
-
-    // set SegmentReadState to list only the fields that are relevant to that gen
-    SegmentReadState srs = new SegmentReadState(dvDir, si.info, infos, context, termsIndexDivisor, segmentSuffix);
-    return new RefCount<DocValuesProducer>(dvFormat.fieldsProducer(srs)) {
-      @SuppressWarnings("synthetic-access")
-      @Override
-      protected void release() throws IOException {
-        object.close();
-        synchronized (SegmentDocValues.this) {
-          genDVProducers.remove(gen);
+    private RefCount<DocValuesProducer> newDocValuesProducer(SegmentCommitInfo si, IOContext context, Directory dir, DocValuesFormat dvFormat, final Long gen, FieldInfos infos, int termsIndexDivisor) throws IOException {
+        Directory dvDir = dir;
+        String segmentSuffix = "";
+        if (gen.longValue() != -1) {
+            dvDir = si.info.dir; // gen'd files are written outside CFS, so use SegInfo directory
+            segmentSuffix = Long.toString(gen.longValue(), Character.MAX_RADIX);
         }
-      }
-    };
-  }
 
-  /** Returns the {@link DocValuesProducer} for the given generation. */
-  synchronized DocValuesProducer getDocValuesProducer(long gen, SegmentCommitInfo si, IOContext context, Directory dir, 
-      DocValuesFormat dvFormat, FieldInfos infos, int termsIndexDivisor) throws IOException {
-    RefCount<DocValuesProducer> dvp = genDVProducers.get(gen);
-    if (dvp == null) {
-      dvp = newDocValuesProducer(si, context, dir, dvFormat, gen, infos, termsIndexDivisor);
-      assert dvp != null;
-      genDVProducers.put(gen, dvp);
-    } else {
-      dvp.incRef();
+        // set SegmentReadState to list only the fields that are relevant to that gen
+        SegmentReadState srs = new SegmentReadState(dvDir, si.info, infos, context, termsIndexDivisor, segmentSuffix);
+        return new RefCount<DocValuesProducer>(dvFormat.fieldsProducer(srs)) {
+            @SuppressWarnings("synthetic-access")
+            @Override
+            protected void release() throws IOException {
+                object.close();
+                synchronized (SegmentDocValues.this) {
+                    genDVProducers.remove(gen);
+                }
+            }
+        };
     }
-    return dvp.get();
-  }
-  
-  /**
-   * Decrement the reference count of the given {@link DocValuesProducer}
-   * generations. 
-   */
-  synchronized void decRef(List<Long> dvProducersGens) throws IOException {
-    Throwable t = null;
-    for (Long gen : dvProducersGens) {
-      RefCount<DocValuesProducer> dvp = genDVProducers.get(gen);
-      assert dvp != null : "gen=" + gen;
-      try {
-        dvp.decRef();
-      } catch (Throwable th) {
+
+    /** Returns the {@link DocValuesProducer} for the given generation. */
+    synchronized DocValuesProducer getDocValuesProducer(long gen, SegmentCommitInfo si, IOContext context, Directory dir, DocValuesFormat dvFormat, FieldInfos infos, int termsIndexDivisor) throws IOException {
+        RefCount<DocValuesProducer> dvp = genDVProducers.get(gen);
+        if (dvp == null) {
+            dvp = newDocValuesProducer(si, context, dir, dvFormat, gen, infos, termsIndexDivisor);
+            assert dvp != null;
+            genDVProducers.put(gen, dvp);
+        } else {
+            dvp.incRef();
+        }
+        return dvp.get();
+    }
+
+    /**
+     * Decrement the reference count of the given {@link DocValuesProducer}
+     * generations. 
+     */
+    synchronized void decRef(List<Long> dvProducersGens) throws IOException {
+        Throwable t = null;
+        for (Long gen : dvProducersGens) {
+            RefCount<DocValuesProducer> dvp = genDVProducers.get(gen);
+            assert dvp != null : "gen=" + gen;
+            try {
+                dvp.decRef();
+            } catch (Throwable th) {
+                if (t != null) {
+                    t = th;
+                }
+            }
+        }
         if (t != null) {
-          t = th;
+            IOUtils.reThrow(t);
         }
-      }
     }
-    if (t != null) {
-      IOUtils.reThrow(t);
-    }
-  }
 }

@@ -31,23 +31,23 @@ import org.apache.lucene.util.Accountable;
  * @lucene.experimental
  */
 public abstract class StoredFieldsReader implements Cloneable, Closeable, Accountable {
-  /** Sole constructor. (For invocation by subclass 
-   *  constructors, typically implicit.) */
-  protected StoredFieldsReader() {
-  }
-  
-  /** Visit the stored fields for document <code>n</code> */
-  public abstract void visitDocument(int n, StoredFieldVisitor visitor) throws IOException;
+    /** Sole constructor. (For invocation by subclass 
+     *  constructors, typically implicit.) */
+    protected StoredFieldsReader() {
+    }
 
-  @Override
-  public abstract StoredFieldsReader clone();
-  
-  /** 
-   * Checks consistency of this reader.
-   * <p>
-   * Note that this may be costly in terms of I/O, e.g. 
-   * may involve computing a checksum value against large data files.
-   * @lucene.internal
-   */
-  public abstract void checkIntegrity() throws IOException;
+    /** Visit the stored fields for document <code>n</code> */
+    public abstract void visitDocument(int n, StoredFieldVisitor visitor) throws IOException;
+
+    @Override
+    public abstract StoredFieldsReader clone();
+
+    /** 
+     * Checks consistency of this reader.
+     * <p>
+     * Note that this may be costly in terms of I/O, e.g. 
+     * may involve computing a checksum value against large data files.
+     * @lucene.internal
+     */
+    public abstract void checkIntegrity() throws IOException;
 }

@@ -51,124 +51,123 @@ import java.util.Collection;
   */
 public final class IndexUpgrader {
 
-  private static void printUsage() {
-    System.err.println("Upgrades an index so all segments created with a previous Lucene version are rewritten.");
-    System.err.println("Usage:");
-    System.err.println("  java " + IndexUpgrader.class.getName() + " [-delete-prior-commits] [-verbose] [-dir-impl X] indexDir");
-    System.err.println("This tool keeps only the last commit in an index; for this");
-    System.err.println("reason, if the incoming index has more than one commit, the tool");
-    System.err.println("refuses to run by default. Specify -delete-prior-commits to override");
-    System.err.println("this, allowing the tool to delete all but the last commit.");
-    System.err.println("Specify a " + FSDirectory.class.getSimpleName() + 
-        " implementation through the -dir-impl option to force its use. If no package is specified the " 
-        + FSDirectory.class.getPackage().getName() + " package will be used.");
-    System.err.println("WARNING: This tool may reorder document IDs!");
-    System.exit(1);
-  }
+    private static void printUsage() {
+        System.err.println("Upgrades an index so all segments created with a previous Lucene version are rewritten.");
+        System.err.println("Usage:");
+        System.err.println("  java " + IndexUpgrader.class.getName() + " [-delete-prior-commits] [-verbose] [-dir-impl X] indexDir");
+        System.err.println("This tool keeps only the last commit in an index; for this");
+        System.err.println("reason, if the incoming index has more than one commit, the tool");
+        System.err.println("refuses to run by default. Specify -delete-prior-commits to override");
+        System.err.println("this, allowing the tool to delete all but the last commit.");
+        System.err.println("Specify a " + FSDirectory.class.getSimpleName() + " implementation through the -dir-impl option to force its use. If no package is specified the " + FSDirectory.class.getPackage().getName() + " package will be used.");
+        System.err.println("WARNING: This tool may reorder document IDs!");
+        System.exit(1);
+    }
 
-  /** Main method to run {code IndexUpgrader} from the
-   *  command-line. */
-  @SuppressWarnings("deprecation")
-  public static void main(String[] args) throws IOException {
-    parseArgs(args).upgrade();
-  }
-  static IndexUpgrader parseArgs(String[] args) throws IOException {
-    String path = null;
-    boolean deletePriorCommits = false;
-    InfoStream out = null;
-    String dirImpl = null;
-    int i = 0;
-    while (i<args.length) {
-      String arg = args[i];
-      if ("-delete-prior-commits".equals(arg)) {
-        deletePriorCommits = true;
-      } else if ("-verbose".equals(arg)) {
-        out = new PrintStreamInfoStream(System.out);
-      } else if ("-dir-impl".equals(arg)) {
-        if (i == args.length - 1) {
-          System.out.println("ERROR: missing value for -dir-impl option");
-          System.exit(1);
+    /** Main method to run {code IndexUpgrader} from the
+     *  command-line. */
+    @SuppressWarnings("deprecation")
+    public static void main(String[] args) throws IOException {
+        parseArgs(args).upgrade();
+    }
+
+    static IndexUpgrader parseArgs(String[] args) throws IOException {
+        String path = null;
+        boolean deletePriorCommits = false;
+        InfoStream out = null;
+        String dirImpl = null;
+        int i = 0;
+        while (i < args.length) {
+            String arg = args[i];
+            if ("-delete-prior-commits".equals(arg)) {
+                deletePriorCommits = true;
+            } else if ("-verbose".equals(arg)) {
+                out = new PrintStreamInfoStream(System.out);
+            } else if ("-dir-impl".equals(arg)) {
+                if (i == args.length - 1) {
+                    System.out.println("ERROR: missing value for -dir-impl option");
+                    System.exit(1);
+                }
+                i++;
+                dirImpl = args[i];
+            } else if (path == null) {
+                path = arg;
+            } else {
+                printUsage();
+            }
+            i++;
         }
-        i++;
-        dirImpl = args[i];
-      } else if (path == null) {
-        path = arg;
-      }else {
-        printUsage();
-      }
-      i++;
-    }
-    if (path == null) {
-      printUsage();
-    }
-    
-    Directory dir = null;
-    if (dirImpl == null) {
-      dir = FSDirectory.open(new File(path));
-    } else {
-      dir = CommandLineUtil.newFSDirectory(dirImpl, new File(path));
-    }
-    return new IndexUpgrader(dir, Version.LUCENE_CURRENT, out, deletePriorCommits);
-  }
-  
-  private final Directory dir;
-  private final IndexWriterConfig iwc;
-  private final boolean deletePriorCommits;
-  
-  /** Creates index upgrader on the given directory, using an {@link IndexWriter} using the given
-   * {@code matchVersion}. The tool refuses to upgrade indexes with multiple commit points. */
-  public IndexUpgrader(Directory dir, Version matchVersion) {
-    this(dir, new IndexWriterConfig(matchVersion, null), false);
-  }
-  
-  /** Creates index upgrader on the given directory, using an {@link IndexWriter} using the given
-   * {@code matchVersion}. You have the possibility to upgrade indexes with multiple commit points by removing
-   * all older ones. If {@code infoStream} is not {@code null}, all logging output will be sent to this stream. */
-  public IndexUpgrader(Directory dir, Version matchVersion, InfoStream infoStream, boolean deletePriorCommits) {
-    this(dir, new IndexWriterConfig(matchVersion, null), deletePriorCommits);
-    if (null != infoStream) {
-      this.iwc.setInfoStream(infoStream);
-    }
-  }
-  
-  /** Creates index upgrader on the given directory, using an {@link IndexWriter} using the given
-   * config. You have the possibility to upgrade indexes with multiple commit points by removing
-   * all older ones. */
-  public IndexUpgrader(Directory dir, IndexWriterConfig iwc, boolean deletePriorCommits) {
-    this.dir = dir;
-    this.iwc = iwc;
-    this.deletePriorCommits = deletePriorCommits;
-  }
+        if (path == null) {
+            printUsage();
+        }
 
-  /** Perform the upgrade. */
-  public void upgrade() throws IOException {
-    if (!DirectoryReader.indexExists(dir)) {
-      throw new IndexNotFoundException(dir.toString());
+        Directory dir = null;
+        if (dirImpl == null) {
+            dir = FSDirectory.open(new File(path));
+        } else {
+            dir = CommandLineUtil.newFSDirectory(dirImpl, new File(path));
+        }
+        return new IndexUpgrader(dir, Version.LUCENE_CURRENT, out, deletePriorCommits);
     }
-  
-    if (!deletePriorCommits) {
-      final Collection<IndexCommit> commits = DirectoryReader.listCommits(dir);
-      if (commits.size() > 1) {
-        throw new IllegalArgumentException("This tool was invoked to not delete prior commit points, but the following commits were found: " + commits);
-      }
+
+    private final Directory dir;
+    private final IndexWriterConfig iwc;
+    private final boolean deletePriorCommits;
+
+    /** Creates index upgrader on the given directory, using an {@link IndexWriter} using the given
+     * {@code matchVersion}. The tool refuses to upgrade indexes with multiple commit points. */
+    public IndexUpgrader(Directory dir, Version matchVersion) {
+        this(dir, new IndexWriterConfig(matchVersion, null), false);
     }
-    
-    iwc.setMergePolicy(new UpgradeIndexMergePolicy(iwc.getMergePolicy()));
-    iwc.setIndexDeletionPolicy(new KeepOnlyLastCommitDeletionPolicy());
-    
-    final IndexWriter w = new IndexWriter(dir, iwc);
-    try {
-      InfoStream infoStream = iwc.getInfoStream();
-      if (infoStream.isEnabled("IndexUpgrader")) {
-        infoStream.message("IndexUpgrader", "Upgrading all pre-" + Version.LATEST + " segments of index directory '" + dir + "' to version " + Version.LATEST + "...");
-      }
-      w.forceMerge(1);
-      if (infoStream.isEnabled("IndexUpgrader")) {
-        infoStream.message("IndexUpgrader", "All segments upgraded to version " + Version.LATEST);
-      }
-    } finally {
-      w.close();
+
+    /** Creates index upgrader on the given directory, using an {@link IndexWriter} using the given
+     * {@code matchVersion}. You have the possibility to upgrade indexes with multiple commit points by removing
+     * all older ones. If {@code infoStream} is not {@code null}, all logging output will be sent to this stream. */
+    public IndexUpgrader(Directory dir, Version matchVersion, InfoStream infoStream, boolean deletePriorCommits) {
+        this(dir, new IndexWriterConfig(matchVersion, null), deletePriorCommits);
+        if (null != infoStream) {
+            this.iwc.setInfoStream(infoStream);
+        }
     }
-  }
-  
+
+    /** Creates index upgrader on the given directory, using an {@link IndexWriter} using the given
+     * config. You have the possibility to upgrade indexes with multiple commit points by removing
+     * all older ones. */
+    public IndexUpgrader(Directory dir, IndexWriterConfig iwc, boolean deletePriorCommits) {
+        this.dir = dir;
+        this.iwc = iwc;
+        this.deletePriorCommits = deletePriorCommits;
+    }
+
+    /** Perform the upgrade. */
+    public void upgrade() throws IOException {
+        if (!DirectoryReader.indexExists(dir)) {
+            throw new IndexNotFoundException(dir.toString());
+        }
+
+        if (!deletePriorCommits) {
+            final Collection<IndexCommit> commits = DirectoryReader.listCommits(dir);
+            if (commits.size() > 1) {
+                throw new IllegalArgumentException("This tool was invoked to not delete prior commit points, but the following commits were found: " + commits);
+            }
+        }
+
+        iwc.setMergePolicy(new UpgradeIndexMergePolicy(iwc.getMergePolicy()));
+        iwc.setIndexDeletionPolicy(new KeepOnlyLastCommitDeletionPolicy());
+
+        final IndexWriter w = new IndexWriter(dir, iwc);
+        try {
+            InfoStream infoStream = iwc.getInfoStream();
+            if (infoStream.isEnabled("IndexUpgrader")) {
+                infoStream.message("IndexUpgrader", "Upgrading all pre-" + Version.LATEST + " segments of index directory '" + dir + "' to version " + Version.LATEST + "...");
+            }
+            w.forceMerge(1);
+            if (infoStream.isEnabled("IndexUpgrader")) {
+                infoStream.message("IndexUpgrader", "All segments upgraded to version " + Version.LATEST);
+            }
+        } finally {
+            w.close();
+        }
+    }
+
 }

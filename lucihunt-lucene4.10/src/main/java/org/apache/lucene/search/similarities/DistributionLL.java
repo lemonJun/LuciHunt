@@ -26,16 +26,17 @@ package org.apache.lucene.search.similarities;
  */
 public class DistributionLL extends Distribution {
 
-  /** Sole constructor: parameter-free */
-  public DistributionLL() {}
+    /** Sole constructor: parameter-free */
+    public DistributionLL() {
+    }
 
-  @Override
-  public final float score(BasicStats stats, float tfn, float lambda) {
-    return (float)-Math.log(lambda / (tfn + lambda));
-  }
-  
-  @Override
-  public String toString() {
-    return "LL";
-  }
+    @Override
+    public final float score(BasicStats stats, float tfn, float lambda) {
+        return (float) -Math.log(lambda / (tfn + lambda));
+    }
+
+    @Override
+    public String toString() {
+        return "LL";
+    }
 }

@@ -28,19 +28,19 @@ import java.io.IOException;
 
 public abstract class BulkScorer {
 
-  /** Scores and collects all matching documents.
-   * @param collector The collector to which all matching documents are passed.
-   */
-  public void score(Collector collector) throws IOException {
-    score(collector, Integer.MAX_VALUE);
-  }
+    /** Scores and collects all matching documents.
+     * @param collector The collector to which all matching documents are passed.
+     */
+    public void score(Collector collector) throws IOException {
+        score(collector, Integer.MAX_VALUE);
+    }
 
-  /**
-   * Collects matching documents in a range.
-   * 
-   * @param collector The collector to which all matching documents are passed.
-   * @param max Score up to, but not including, this doc
-   * @return true if more matching documents may remain.
-   */
-  public abstract boolean score(Collector collector, int max) throws IOException;
+    /**
+     * Collects matching documents in a range.
+     * 
+     * @param collector The collector to which all matching documents are passed.
+     * @param max Score up to, but not including, this doc
+     * @return true if more matching documents may remain.
+     */
+    public abstract boolean score(Collector collector, int max) throws IOException;
 }

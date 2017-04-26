@@ -24,28 +24,28 @@ import org.apache.lucene.index.AtomicReaderContext;
  */
 
 public class TotalHitCountCollector extends Collector {
-  private int totalHits;
+    private int totalHits;
 
-  /** Returns how many hits matched the search. */
-  public int getTotalHits() {
-    return totalHits;
-  }
+    /** Returns how many hits matched the search. */
+    public int getTotalHits() {
+        return totalHits;
+    }
 
-  @Override
-  public void setScorer(Scorer scorer) {
-  }
+    @Override
+    public void setScorer(Scorer scorer) {
+    }
 
-  @Override
-  public void collect(int doc) {
-    totalHits++;
-  }
+    @Override
+    public void collect(int doc) {
+        totalHits++;
+    }
 
-  @Override
-  public void setNextReader(AtomicReaderContext context) {
-  }
+    @Override
+    public void setNextReader(AtomicReaderContext context) {
+    }
 
-  @Override
-  public boolean acceptsDocsOutOfOrder() {
-    return true;
-  }
+    @Override
+    public boolean acceptsDocsOutOfOrder() {
+        return true;
+    }
 }

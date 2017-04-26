@@ -71,28 +71,28 @@ import org.apache.lucene.store.DataOutput; // javadocs
  */
 @Deprecated
 public class Lucene40SegmentInfoFormat extends SegmentInfoFormat {
-  private final SegmentInfoReader reader = new Lucene40SegmentInfoReader();
-  private final SegmentInfoWriter writer = new Lucene40SegmentInfoWriter();
+    private final SegmentInfoReader reader = new Lucene40SegmentInfoReader();
+    private final SegmentInfoWriter writer = new Lucene40SegmentInfoWriter();
 
-  /** Sole constructor. */
-  public Lucene40SegmentInfoFormat() {
-  }
-  
-  @Override
-  public SegmentInfoReader getSegmentInfoReader() {
-    return reader;
-  }
+    /** Sole constructor. */
+    public Lucene40SegmentInfoFormat() {
+    }
 
-  // we must unfortunately support write, to allow addIndexes to write a new .si with rewritten filenames:
-  // see LUCENE-5377
-  @Override
-  public SegmentInfoWriter getSegmentInfoWriter() {
-    return writer;
-  }
+    @Override
+    public SegmentInfoReader getSegmentInfoReader() {
+        return reader;
+    }
 
-  /** File extension used to store {@link SegmentInfo}. */
-  public final static String SI_EXTENSION = "si";
-  static final String CODEC_NAME = "Lucene40SegmentInfo";
-  static final int VERSION_START = 0;
-  static final int VERSION_CURRENT = VERSION_START;
+    // we must unfortunately support write, to allow addIndexes to write a new .si with rewritten filenames:
+    // see LUCENE-5377
+    @Override
+    public SegmentInfoWriter getSegmentInfoWriter() {
+        return writer;
+    }
+
+    /** File extension used to store {@link SegmentInfo}. */
+    public final static String SI_EXTENSION = "si";
+    static final String CODEC_NAME = "Lucene40SegmentInfo";
+    static final int VERSION_START = 0;
+    static final int VERSION_CURRENT = VERSION_START;
 }

@@ -17,7 +17,6 @@ package org.apache.lucene.index;
  * limitations under the License.
  */
 
-
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -29,148 +28,147 @@ import java.util.Arrays;
  */
 
 public final class MultiDocsEnum extends DocsEnum {
-  private final MultiTermsEnum parent;
-  final DocsEnum[] subDocsEnum;
-  private final EnumWithSlice[] subs;
-  int numSubs;
-  int upto;
-  DocsEnum current;
-  int currentBase;
-  int doc = -1;
+    private final MultiTermsEnum parent;
+    final DocsEnum[] subDocsEnum;
+    private final EnumWithSlice[] subs;
+    int numSubs;
+    int upto;
+    DocsEnum current;
+    int currentBase;
+    int doc = -1;
 
-  /** Sole constructor
-   * @param parent The {@link MultiTermsEnum} that created us.
-   * @param subReaderCount How many sub-readers are being merged. */
-  public MultiDocsEnum(MultiTermsEnum parent, int subReaderCount) {
-    this.parent = parent;
-    subDocsEnum = new DocsEnum[subReaderCount];
-    this.subs = new EnumWithSlice[subReaderCount];
-    for (int i = 0; i < subs.length; i++) {
-      subs[i] = new EnumWithSlice();
-    }
-  }
-
-  MultiDocsEnum reset(final EnumWithSlice[] subs, final int numSubs) {
-    this.numSubs = numSubs;
-
-    for(int i=0;i<numSubs;i++) {
-      this.subs[i].docsEnum = subs[i].docsEnum;
-      this.subs[i].slice = subs[i].slice;
-    }
-    upto = -1;
-    doc = -1;
-    current = null;
-    return this;
-  }
-
-  /** Returns {@code true} if this instance can be reused by
-   *  the provided {@link MultiTermsEnum}. */
-  public boolean canReuse(MultiTermsEnum parent) {
-    return this.parent == parent;
-  }
-
-  /** How many sub-readers we are merging.
-   *  @see #getSubs */
-  public int getNumSubs() {
-    return numSubs;
-  }
-
-  /** Returns sub-readers we are merging. */
-  public EnumWithSlice[] getSubs() {
-    return subs;
-  }
-
-  @Override
-  public int freq() throws IOException {
-    return current.freq();
-  }
-
-  @Override
-  public int docID() {
-    return doc;
-  }
-
-  @Override
-  public int advance(int target) throws IOException {
-    assert target > doc;
-    while(true) {
-      if (current != null) {
-        final int doc;
-        if (target < currentBase) {
-          // target was in the previous slice but there was no matching doc after it
-          doc = current.nextDoc();
-        } else {
-          doc = current.advance(target-currentBase);
+    /** Sole constructor
+     * @param parent The {@link MultiTermsEnum} that created us.
+     * @param subReaderCount How many sub-readers are being merged. */
+    public MultiDocsEnum(MultiTermsEnum parent, int subReaderCount) {
+        this.parent = parent;
+        subDocsEnum = new DocsEnum[subReaderCount];
+        this.subs = new EnumWithSlice[subReaderCount];
+        for (int i = 0; i < subs.length; i++) {
+            subs[i] = new EnumWithSlice();
         }
-        if (doc == NO_MORE_DOCS) {
-          current = null;
-        } else {
-          return this.doc = doc + currentBase;
-        }
-      } else if (upto == numSubs-1) {
-        return this.doc = NO_MORE_DOCS;
-      } else {
-        upto++;
-        current = subs[upto].docsEnum;
-        currentBase = subs[upto].slice.start;
-      }
     }
-  }
 
-  @Override
-  public int nextDoc() throws IOException {
-    while(true) {
-      if (current == null) {
-        if (upto == numSubs-1) {
-          return this.doc = NO_MORE_DOCS;
-        } else {
-          upto++;
-          current = subs[upto].docsEnum;
-          currentBase = subs[upto].slice.start;
+    MultiDocsEnum reset(final EnumWithSlice[] subs, final int numSubs) {
+        this.numSubs = numSubs;
+
+        for (int i = 0; i < numSubs; i++) {
+            this.subs[i].docsEnum = subs[i].docsEnum;
+            this.subs[i].slice = subs[i].slice;
         }
-      }
-
-      final int doc = current.nextDoc();
-      if (doc != NO_MORE_DOCS) {
-        return this.doc = currentBase + doc;
-      } else {
+        upto = -1;
+        doc = -1;
         current = null;
-      }
-    }
-  }
-  
-  @Override
-  public long cost() {
-    long cost = 0;
-    for (int i = 0; i < numSubs; i++) {
-      cost += subs[i].docsEnum.cost();
-    }
-    return cost;
-  }
-
-  // TODO: implement bulk read more efficiently than super
-  /** Holds a {@link DocsEnum} along with the
-   *  corresponding {@link ReaderSlice}. */
-  public final static class EnumWithSlice {
-    EnumWithSlice() {
+        return this;
     }
 
-    /** {@link DocsEnum} of this sub-reader. */
-    public DocsEnum docsEnum;
+    /** Returns {@code true} if this instance can be reused by
+     *  the provided {@link MultiTermsEnum}. */
+    public boolean canReuse(MultiTermsEnum parent) {
+        return this.parent == parent;
+    }
 
-    /** {@link ReaderSlice} describing how this sub-reader
-     *  fits into the composite reader. */
-    public ReaderSlice slice;
-    
+    /** How many sub-readers we are merging.
+     *  @see #getSubs */
+    public int getNumSubs() {
+        return numSubs;
+    }
+
+    /** Returns sub-readers we are merging. */
+    public EnumWithSlice[] getSubs() {
+        return subs;
+    }
+
+    @Override
+    public int freq() throws IOException {
+        return current.freq();
+    }
+
+    @Override
+    public int docID() {
+        return doc;
+    }
+
+    @Override
+    public int advance(int target) throws IOException {
+        assert target > doc;
+        while (true) {
+            if (current != null) {
+                final int doc;
+                if (target < currentBase) {
+                    // target was in the previous slice but there was no matching doc after it
+                    doc = current.nextDoc();
+                } else {
+                    doc = current.advance(target - currentBase);
+                }
+                if (doc == NO_MORE_DOCS) {
+                    current = null;
+                } else {
+                    return this.doc = doc + currentBase;
+                }
+            } else if (upto == numSubs - 1) {
+                return this.doc = NO_MORE_DOCS;
+            } else {
+                upto++;
+                current = subs[upto].docsEnum;
+                currentBase = subs[upto].slice.start;
+            }
+        }
+    }
+
+    @Override
+    public int nextDoc() throws IOException {
+        while (true) {
+            if (current == null) {
+                if (upto == numSubs - 1) {
+                    return this.doc = NO_MORE_DOCS;
+                } else {
+                    upto++;
+                    current = subs[upto].docsEnum;
+                    currentBase = subs[upto].slice.start;
+                }
+            }
+
+            final int doc = current.nextDoc();
+            if (doc != NO_MORE_DOCS) {
+                return this.doc = currentBase + doc;
+            } else {
+                current = null;
+            }
+        }
+    }
+
+    @Override
+    public long cost() {
+        long cost = 0;
+        for (int i = 0; i < numSubs; i++) {
+            cost += subs[i].docsEnum.cost();
+        }
+        return cost;
+    }
+
+    // TODO: implement bulk read more efficiently than super
+    /** Holds a {@link DocsEnum} along with the
+     *  corresponding {@link ReaderSlice}. */
+    public final static class EnumWithSlice {
+        EnumWithSlice() {
+        }
+
+        /** {@link DocsEnum} of this sub-reader. */
+        public DocsEnum docsEnum;
+
+        /** {@link ReaderSlice} describing how this sub-reader
+         *  fits into the composite reader. */
+        public ReaderSlice slice;
+
+        @Override
+        public String toString() {
+            return slice.toString() + ":" + docsEnum;
+        }
+    }
+
     @Override
     public String toString() {
-      return slice.toString()+":"+docsEnum;
+        return "MultiDocsEnum(" + Arrays.toString(getSubs()) + ")";
     }
-  }
-
-  @Override
-  public String toString() {
-    return "MultiDocsEnum(" + Arrays.toString(getSubs()) + ")";
-  }
 }
-

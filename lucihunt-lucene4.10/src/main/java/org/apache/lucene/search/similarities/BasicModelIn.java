@@ -23,34 +23,33 @@ import static org.apache.lucene.search.similarities.SimilarityBase.log2;
 /**
  * The basic tf-idf model of randomness.
  * @lucene.experimental
- */ 
+ */
 public class BasicModelIn extends BasicModel {
-  
-  /** Sole constructor: parameter-free */
-  public BasicModelIn() {}
 
-  @Override
-  public final float score(BasicStats stats, float tfn) {
-    long N = stats.getNumberOfDocuments();
-    long n = stats.getDocFreq();
-    return tfn * (float)(log2((N + 1) / (n + 0.5)));
-  }
-  
-  @Override
-  public final Explanation explain(BasicStats stats, float tfn) {
-    Explanation result = new Explanation();
-    result.setDescription(getClass().getSimpleName() + ", computed from: ");
-    result.setValue(score(stats, tfn));
-    result.addDetail(new Explanation(tfn, "tfn"));
-    result.addDetail(
-        new Explanation(stats.getNumberOfDocuments(), "numberOfDocuments"));
-    result.addDetail(
-        new Explanation(stats.getDocFreq(), "docFreq"));
-    return result;
-  }
+    /** Sole constructor: parameter-free */
+    public BasicModelIn() {
+    }
 
-  @Override
-  public String toString() {
-    return "I(n)";
-  }
+    @Override
+    public final float score(BasicStats stats, float tfn) {
+        long N = stats.getNumberOfDocuments();
+        long n = stats.getDocFreq();
+        return tfn * (float) (log2((N + 1) / (n + 0.5)));
+    }
+
+    @Override
+    public final Explanation explain(BasicStats stats, float tfn) {
+        Explanation result = new Explanation();
+        result.setDescription(getClass().getSimpleName() + ", computed from: ");
+        result.setValue(score(stats, tfn));
+        result.addDetail(new Explanation(tfn, "tfn"));
+        result.addDetail(new Explanation(stats.getNumberOfDocuments(), "numberOfDocuments"));
+        result.addDetail(new Explanation(stats.getDocFreq(), "docFreq"));
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "I(n)";
+    }
 }

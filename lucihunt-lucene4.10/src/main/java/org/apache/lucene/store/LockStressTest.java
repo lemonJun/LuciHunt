@@ -32,113 +32,99 @@ import java.util.Random;
  *
  * @see VerifyingLockFactory
  * @see LockVerifyServer
- */ 
+ */
 
 public class LockStressTest {
 
-  public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws Exception {
 
-    if (args.length != 7) {
-      System.out.println("Usage: java org.apache.lucene.store.LockStressTest myID verifierHost verifierPort lockFactoryClassName lockDirName sleepTimeMS count\n" +
-                         "\n" +
-                         "  myID = int from 0 .. 255 (should be unique for test process)\n" +
-                         "  verifierHost = hostname that LockVerifyServer is listening on\n" +
-                         "  verifierPort = port that LockVerifyServer is listening on\n" +
-                         "  lockFactoryClassName = primary LockFactory class that we will use\n" +
-                         "  lockDirName = path to the lock directory (only set for Simple/NativeFSLockFactory\n" +
-                         "  sleepTimeMS = milliseconds to pause betweeen each lock obtain/release\n" +
-                         "  count = number of locking tries\n" +
-                         "\n" +
-                         "You should run multiple instances of this process, each with its own\n" +
-                         "unique ID, and each pointing to the same lock directory, to verify\n" +
-                         "that locking is working correctly.\n" +
-                         "\n" +
-                         "Make sure you are first running LockVerifyServer.");
-      System.exit(1);
+        if (args.length != 7) {
+            System.out.println("Usage: java org.apache.lucene.store.LockStressTest myID verifierHost verifierPort lockFactoryClassName lockDirName sleepTimeMS count\n" + "\n" + "  myID = int from 0 .. 255 (should be unique for test process)\n" + "  verifierHost = hostname that LockVerifyServer is listening on\n" + "  verifierPort = port that LockVerifyServer is listening on\n" + "  lockFactoryClassName = primary LockFactory class that we will use\n" + "  lockDirName = path to the lock directory (only set for Simple/NativeFSLockFactory\n" + "  sleepTimeMS = milliseconds to pause betweeen each lock obtain/release\n" + "  count = number of locking tries\n" + "\n" + "You should run multiple instances of this process, each with its own\n" + "unique ID, and each pointing to the same lock directory, to verify\n" + "that locking is working correctly.\n" + "\n" + "Make sure you are first running LockVerifyServer.");
+            System.exit(1);
+        }
+
+        int arg = 0;
+        final int myID = Integer.parseInt(args[arg++]);
+
+        if (myID < 0 || myID > 255) {
+            System.out.println("myID must be a unique int 0..255");
+            System.exit(1);
+        }
+
+        final String verifierHost = args[arg++];
+        final int verifierPort = Integer.parseInt(args[arg++]);
+        final String lockFactoryClassName = args[arg++];
+        final String lockDirName = args[arg++];
+        final int sleepTimeMS = Integer.parseInt(args[arg++]);
+        final int count = Integer.parseInt(args[arg++]);
+
+        final LockFactory lockFactory = getNewLockFactory(lockFactoryClassName, lockDirName);
+        final InetSocketAddress addr = new InetSocketAddress(verifierHost, verifierPort);
+        System.out.println("Connecting to server " + addr + " and registering as client " + myID + "...");
+        try (Socket socket = new Socket()) {
+            socket.setReuseAddress(true);
+            socket.connect(addr, 500);
+            final OutputStream out = socket.getOutputStream();
+            final InputStream in = socket.getInputStream();
+
+            out.write(myID);
+            out.flush();
+            LockFactory verifyLF = new VerifyingLockFactory(lockFactory, in, out);
+            Lock l = verifyLF.makeLock("test.lock");
+            final Random rnd = new Random();
+
+            // wait for starting gun
+            if (in.read() != 43) {
+                throw new IOException("Protocol violation");
+            }
+
+            for (int i = 0; i < count; i++) {
+                boolean obtained = false;
+                try {
+                    obtained = l.obtain(rnd.nextInt(100) + 10);
+                } catch (LockObtainFailedException e) {
+                }
+
+                if (obtained) {
+                    if (rnd.nextInt(10) == 0) {
+                        if (rnd.nextBoolean()) {
+                            verifyLF = new VerifyingLockFactory(getNewLockFactory(lockFactoryClassName, lockDirName), in, out);
+                        }
+                        final Lock secondLock = verifyLF.makeLock("test.lock");
+                        if (secondLock.obtain()) {
+                            throw new IOException("Double Obtain");
+                        }
+                    }
+                    Thread.sleep(sleepTimeMS);
+                    l.close();
+                }
+
+                if (i % 500 == 0) {
+                    System.out.println((i * 100. / count) + "% done.");
+                }
+
+                Thread.sleep(sleepTimeMS);
+            }
+        }
+
+        System.out.println("Finished " + count + " tries.");
     }
 
-    int arg = 0;
-    final int myID = Integer.parseInt(args[arg++]);
-
-    if (myID < 0 || myID > 255) {
-      System.out.println("myID must be a unique int 0..255");
-      System.exit(1);
-    }
-
-    final String verifierHost = args[arg++];
-    final int verifierPort = Integer.parseInt(args[arg++]);
-    final String lockFactoryClassName = args[arg++];
-    final String lockDirName = args[arg++];
-    final int sleepTimeMS = Integer.parseInt(args[arg++]);
-    final int count = Integer.parseInt(args[arg++]);
-
-    final LockFactory lockFactory = getNewLockFactory(lockFactoryClassName, lockDirName);
-    final InetSocketAddress addr = new InetSocketAddress(verifierHost, verifierPort);
-    System.out.println("Connecting to server " + addr +
-        " and registering as client " + myID + "...");
-    try (Socket socket = new Socket()) {
-      socket.setReuseAddress(true);
-      socket.connect(addr, 500);
-      final OutputStream out = socket.getOutputStream();
-      final InputStream in = socket.getInputStream();
-      
-      out.write(myID);
-      out.flush();
-      LockFactory verifyLF = new VerifyingLockFactory(lockFactory, in, out);
-      Lock l = verifyLF.makeLock("test.lock");
-      final Random rnd = new Random();
-      
-      // wait for starting gun
-      if (in.read() != 43) {
-        throw new IOException("Protocol violation");
-      }
-      
-      for (int i = 0; i < count; i++) {
-        boolean obtained = false;
+    private static LockFactory getNewLockFactory(String lockFactoryClassName, String lockDirName) throws IOException {
+        LockFactory lockFactory;
         try {
-          obtained = l.obtain(rnd.nextInt(100) + 10);
-        } catch (LockObtainFailedException e) {}
-        
-        if (obtained) {
-          if (rnd.nextInt(10) == 0) {
-            if (rnd.nextBoolean()) {
-              verifyLF = new VerifyingLockFactory(getNewLockFactory(lockFactoryClassName, lockDirName), in, out);
-            }
-            final Lock secondLock = verifyLF.makeLock("test.lock");
-            if (secondLock.obtain()) {
-              throw new IOException("Double Obtain");
-            }
-          }
-          Thread.sleep(sleepTimeMS);
-          l.close();
+            lockFactory = Class.forName(lockFactoryClassName).asSubclass(LockFactory.class).newInstance();
+        } catch (IllegalAccessException | InstantiationException
+                        | ClassCastException | ClassNotFoundException e) {
+            throw new IOException("Cannot instantiate lock factory " + lockFactoryClassName);
         }
-        
-        if (i % 500 == 0) {
-          System.out.println((i * 100. / count) + "% done.");
+
+        File lockDir = new File(lockDirName);
+
+        if (lockFactory instanceof FSLockFactory) {
+            ((FSLockFactory) lockFactory).setLockDir(lockDir);
         }
-        
-        Thread.sleep(sleepTimeMS);
-      } 
+        lockFactory.setLockPrefix("test");
+        return lockFactory;
     }
-    
-    System.out.println("Finished " + count + " tries.");
-  }
-
-
-  private static LockFactory getNewLockFactory(String lockFactoryClassName, String lockDirName) throws IOException {
-    LockFactory lockFactory;
-    try {
-      lockFactory = Class.forName(lockFactoryClassName).asSubclass(LockFactory.class).newInstance();
-    } catch (IllegalAccessException | InstantiationException | ClassCastException | ClassNotFoundException e) {
-      throw new IOException("Cannot instantiate lock factory " + lockFactoryClassName);
-    }
-
-    File lockDir = new File(lockDirName);
-
-    if (lockFactory instanceof FSLockFactory) {
-      ((FSLockFactory) lockFactory).setLockDir(lockDir);
-    }
-    lockFactory.setLockPrefix("test");
-    return lockFactory;
-  }
 }

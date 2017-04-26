@@ -47,151 +47,129 @@ import org.apache.lucene.util.NumericUtils; // for javadocs
  **/
 public final class NumericRangeFilter<T extends Number> extends MultiTermQueryWrapperFilter<NumericRangeQuery<T>> {
 
-  private NumericRangeFilter(final NumericRangeQuery<T> query) {
-    super(query);
-  }
-  
-  /**
-   * Factory that creates a <code>NumericRangeFilter</code>, that filters a <code>long</code>
-   * range using the given <a href="NumericRangeQuery.html#precisionStepDesc"><code>precisionStep</code></a>.
-   * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
-   * by setting the min or max value to <code>null</code>. By setting inclusive to false, it will
-   * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
-   */
-  public static NumericRangeFilter<Long> newLongRange(final String field, final int precisionStep,
-    Long min, Long max, final boolean minInclusive, final boolean maxInclusive
-  ) {
-    return new NumericRangeFilter<>(
-      NumericRangeQuery.newLongRange(field, precisionStep, min, max, minInclusive, maxInclusive)
-    );
-  }
-  
-  /**
-   * Factory that creates a <code>NumericRangeFilter</code>, that queries a <code>long</code>
-   * range using the default <code>precisionStep</code> {@link NumericUtils#PRECISION_STEP_DEFAULT} (16).
-   * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
-   * by setting the min or max value to <code>null</code>. By setting inclusive to false, it will
-   * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
-   */
-  public static NumericRangeFilter<Long> newLongRange(final String field,
-    Long min, Long max, final boolean minInclusive, final boolean maxInclusive
-  ) {
-    return new NumericRangeFilter<>(
-      NumericRangeQuery.newLongRange(field, min, max, minInclusive, maxInclusive)
-    );
-  }
-  
-  /**
-   * Factory that creates a <code>NumericRangeFilter</code>, that filters a <code>int</code>
-   * range using the given <a href="NumericRangeQuery.html#precisionStepDesc"><code>precisionStep</code></a>.
-   * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
-   * by setting the min or max value to <code>null</code>. By setting inclusive to false, it will
-   * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
-   */
-  public static NumericRangeFilter<Integer> newIntRange(final String field, final int precisionStep,
-    Integer min, Integer max, final boolean minInclusive, final boolean maxInclusive
-  ) {
-    return new NumericRangeFilter<>(
-      NumericRangeQuery.newIntRange(field, precisionStep, min, max, minInclusive, maxInclusive)
-    );
-  }
-  
-  /**
-   * Factory that creates a <code>NumericRangeFilter</code>, that queries a <code>int</code>
-   * range using the default <code>precisionStep</code> {@link NumericUtils#PRECISION_STEP_DEFAULT_32} (8).
-   * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
-   * by setting the min or max value to <code>null</code>. By setting inclusive to false, it will
-   * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
-   */
-  public static NumericRangeFilter<Integer> newIntRange(final String field,
-    Integer min, Integer max, final boolean minInclusive, final boolean maxInclusive
-  ) {
-    return new NumericRangeFilter<>(
-      NumericRangeQuery.newIntRange(field, min, max, minInclusive, maxInclusive)
-    );
-  }
-  
-  /**
-   * Factory that creates a <code>NumericRangeFilter</code>, that filters a <code>double</code>
-   * range using the given <a href="NumericRangeQuery.html#precisionStepDesc"><code>precisionStep</code></a>.
-   * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
-   * by setting the min or max value to <code>null</code>.
-   * {@link Double#NaN} will never match a half-open range, to hit {@code NaN} use a query
-   * with {@code min == max == Double.NaN}. By setting inclusive to false, it will
-   * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
-   */
-  public static NumericRangeFilter<Double> newDoubleRange(final String field, final int precisionStep,
-    Double min, Double max, final boolean minInclusive, final boolean maxInclusive
-  ) {
-    return new NumericRangeFilter<>(
-      NumericRangeQuery.newDoubleRange(field, precisionStep, min, max, minInclusive, maxInclusive)
-    );
-  }
-  
-  /**
-   * Factory that creates a <code>NumericRangeFilter</code>, that queries a <code>double</code>
-   * range using the default <code>precisionStep</code> {@link NumericUtils#PRECISION_STEP_DEFAULT} (16).
-   * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
-   * by setting the min or max value to <code>null</code>.
-   * {@link Double#NaN} will never match a half-open range, to hit {@code NaN} use a query
-   * with {@code min == max == Double.NaN}. By setting inclusive to false, it will
-   * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
-   */
-  public static NumericRangeFilter<Double> newDoubleRange(final String field,
-    Double min, Double max, final boolean minInclusive, final boolean maxInclusive
-  ) {
-    return new NumericRangeFilter<>(
-      NumericRangeQuery.newDoubleRange(field, min, max, minInclusive, maxInclusive)
-    );
-  }
-  
-  /**
-   * Factory that creates a <code>NumericRangeFilter</code>, that filters a <code>float</code>
-   * range using the given <a href="NumericRangeQuery.html#precisionStepDesc"><code>precisionStep</code></a>.
-   * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
-   * by setting the min or max value to <code>null</code>.
-   * {@link Float#NaN} will never match a half-open range, to hit {@code NaN} use a query
-   * with {@code min == max == Float.NaN}. By setting inclusive to false, it will
-   * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
-   */
-  public static NumericRangeFilter<Float> newFloatRange(final String field, final int precisionStep,
-    Float min, Float max, final boolean minInclusive, final boolean maxInclusive
-  ) {
-    return new NumericRangeFilter<>(
-      NumericRangeQuery.newFloatRange(field, precisionStep, min, max, minInclusive, maxInclusive)
-    );
-  }
+    private NumericRangeFilter(final NumericRangeQuery<T> query) {
+        super(query);
+    }
 
-  /**
-   * Factory that creates a <code>NumericRangeFilter</code>, that queries a <code>float</code>
-   * range using the default <code>precisionStep</code> {@link NumericUtils#PRECISION_STEP_DEFAULT_32} (8).
-   * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
-   * by setting the min or max value to <code>null</code>.
-   * {@link Float#NaN} will never match a half-open range, to hit {@code NaN} use a query
-   * with {@code min == max == Float.NaN}. By setting inclusive to false, it will
-   * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
-   */
-  public static NumericRangeFilter<Float> newFloatRange(final String field,
-    Float min, Float max, final boolean minInclusive, final boolean maxInclusive
-  ) {
-    return new NumericRangeFilter<>(
-      NumericRangeQuery.newFloatRange(field, min, max, minInclusive, maxInclusive)
-    );
-  }
+    /**
+     * Factory that creates a <code>NumericRangeFilter</code>, that filters a <code>long</code>
+     * range using the given <a href="NumericRangeQuery.html#precisionStepDesc"><code>precisionStep</code></a>.
+     * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
+     * by setting the min or max value to <code>null</code>. By setting inclusive to false, it will
+     * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
+     */
+    public static NumericRangeFilter<Long> newLongRange(final String field, final int precisionStep, Long min, Long max, final boolean minInclusive, final boolean maxInclusive) {
+        return new NumericRangeFilter<>(NumericRangeQuery.newLongRange(field, precisionStep, min, max, minInclusive, maxInclusive));
+    }
 
-  /** Returns <code>true</code> if the lower endpoint is inclusive */
-  public boolean includesMin() { return query.includesMin(); }
-  
-  /** Returns <code>true</code> if the upper endpoint is inclusive */
-  public boolean includesMax() { return query.includesMax(); }
+    /**
+     * Factory that creates a <code>NumericRangeFilter</code>, that queries a <code>long</code>
+     * range using the default <code>precisionStep</code> {@link NumericUtils#PRECISION_STEP_DEFAULT} (16).
+     * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
+     * by setting the min or max value to <code>null</code>. By setting inclusive to false, it will
+     * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
+     */
+    public static NumericRangeFilter<Long> newLongRange(final String field, Long min, Long max, final boolean minInclusive, final boolean maxInclusive) {
+        return new NumericRangeFilter<>(NumericRangeQuery.newLongRange(field, min, max, minInclusive, maxInclusive));
+    }
 
-  /** Returns the lower value of this range filter */
-  public T getMin() { return query.getMin(); }
+    /**
+     * Factory that creates a <code>NumericRangeFilter</code>, that filters a <code>int</code>
+     * range using the given <a href="NumericRangeQuery.html#precisionStepDesc"><code>precisionStep</code></a>.
+     * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
+     * by setting the min or max value to <code>null</code>. By setting inclusive to false, it will
+     * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
+     */
+    public static NumericRangeFilter<Integer> newIntRange(final String field, final int precisionStep, Integer min, Integer max, final boolean minInclusive, final boolean maxInclusive) {
+        return new NumericRangeFilter<>(NumericRangeQuery.newIntRange(field, precisionStep, min, max, minInclusive, maxInclusive));
+    }
 
-  /** Returns the upper value of this range filter */
-  public T getMax() { return query.getMax(); }
-  
-  /** Returns the precision step. */
-  public int getPrecisionStep() { return query.getPrecisionStep(); }
-  
+    /**
+     * Factory that creates a <code>NumericRangeFilter</code>, that queries a <code>int</code>
+     * range using the default <code>precisionStep</code> {@link NumericUtils#PRECISION_STEP_DEFAULT_32} (8).
+     * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
+     * by setting the min or max value to <code>null</code>. By setting inclusive to false, it will
+     * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
+     */
+    public static NumericRangeFilter<Integer> newIntRange(final String field, Integer min, Integer max, final boolean minInclusive, final boolean maxInclusive) {
+        return new NumericRangeFilter<>(NumericRangeQuery.newIntRange(field, min, max, minInclusive, maxInclusive));
+    }
+
+    /**
+     * Factory that creates a <code>NumericRangeFilter</code>, that filters a <code>double</code>
+     * range using the given <a href="NumericRangeQuery.html#precisionStepDesc"><code>precisionStep</code></a>.
+     * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
+     * by setting the min or max value to <code>null</code>.
+     * {@link Double#NaN} will never match a half-open range, to hit {@code NaN} use a query
+     * with {@code min == max == Double.NaN}. By setting inclusive to false, it will
+     * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
+     */
+    public static NumericRangeFilter<Double> newDoubleRange(final String field, final int precisionStep, Double min, Double max, final boolean minInclusive, final boolean maxInclusive) {
+        return new NumericRangeFilter<>(NumericRangeQuery.newDoubleRange(field, precisionStep, min, max, minInclusive, maxInclusive));
+    }
+
+    /**
+     * Factory that creates a <code>NumericRangeFilter</code>, that queries a <code>double</code>
+     * range using the default <code>precisionStep</code> {@link NumericUtils#PRECISION_STEP_DEFAULT} (16).
+     * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
+     * by setting the min or max value to <code>null</code>.
+     * {@link Double#NaN} will never match a half-open range, to hit {@code NaN} use a query
+     * with {@code min == max == Double.NaN}. By setting inclusive to false, it will
+     * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
+     */
+    public static NumericRangeFilter<Double> newDoubleRange(final String field, Double min, Double max, final boolean minInclusive, final boolean maxInclusive) {
+        return new NumericRangeFilter<>(NumericRangeQuery.newDoubleRange(field, min, max, minInclusive, maxInclusive));
+    }
+
+    /**
+     * Factory that creates a <code>NumericRangeFilter</code>, that filters a <code>float</code>
+     * range using the given <a href="NumericRangeQuery.html#precisionStepDesc"><code>precisionStep</code></a>.
+     * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
+     * by setting the min or max value to <code>null</code>.
+     * {@link Float#NaN} will never match a half-open range, to hit {@code NaN} use a query
+     * with {@code min == max == Float.NaN}. By setting inclusive to false, it will
+     * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
+     */
+    public static NumericRangeFilter<Float> newFloatRange(final String field, final int precisionStep, Float min, Float max, final boolean minInclusive, final boolean maxInclusive) {
+        return new NumericRangeFilter<>(NumericRangeQuery.newFloatRange(field, precisionStep, min, max, minInclusive, maxInclusive));
+    }
+
+    /**
+     * Factory that creates a <code>NumericRangeFilter</code>, that queries a <code>float</code>
+     * range using the default <code>precisionStep</code> {@link NumericUtils#PRECISION_STEP_DEFAULT_32} (8).
+     * You can have half-open ranges (which are in fact &lt;/&le; or &gt;/&ge; queries)
+     * by setting the min or max value to <code>null</code>.
+     * {@link Float#NaN} will never match a half-open range, to hit {@code NaN} use a query
+     * with {@code min == max == Float.NaN}. By setting inclusive to false, it will
+     * match all documents excluding the bounds, with inclusive on, the boundaries are hits, too.
+     */
+    public static NumericRangeFilter<Float> newFloatRange(final String field, Float min, Float max, final boolean minInclusive, final boolean maxInclusive) {
+        return new NumericRangeFilter<>(NumericRangeQuery.newFloatRange(field, min, max, minInclusive, maxInclusive));
+    }
+
+    /** Returns <code>true</code> if the lower endpoint is inclusive */
+    public boolean includesMin() {
+        return query.includesMin();
+    }
+
+    /** Returns <code>true</code> if the upper endpoint is inclusive */
+    public boolean includesMax() {
+        return query.includesMax();
+    }
+
+    /** Returns the lower value of this range filter */
+    public T getMin() {
+        return query.getMin();
+    }
+
+    /** Returns the upper value of this range filter */
+    public T getMax() {
+        return query.getMax();
+    }
+
+    /** Returns the precision step. */
+    public int getPrecisionStep() {
+        return query.getPrecisionStep();
+    }
+
 }

@@ -42,51 +42,51 @@ import org.apache.lucene.index.FieldInfo;
 // TermsDict + PostingsReader/WriterBase == PostingsConsumer/Producer
 public abstract class PostingsWriterBase extends PostingsConsumer implements Closeable {
 
-  /** Sole constructor. (For invocation by subclass 
-   *  constructors, typically implicit.) */
-  protected PostingsWriterBase() {
-  }
+    /** Sole constructor. (For invocation by subclass 
+     *  constructors, typically implicit.) */
+    protected PostingsWriterBase() {
+    }
 
-  /** Called once after startup, before any terms have been
-   *  added.  Implementations typically write a header to
-   *  the provided {@code termsOut}. */
-  public abstract void init(IndexOutput termsOut) throws IOException;
+    /** Called once after startup, before any terms have been
+     *  added.  Implementations typically write a header to
+     *  the provided {@code termsOut}. */
+    public abstract void init(IndexOutput termsOut) throws IOException;
 
-  /** Return a newly created empty TermState */
-  public abstract BlockTermState newTermState() throws IOException;
+    /** Return a newly created empty TermState */
+    public abstract BlockTermState newTermState() throws IOException;
 
-  /** Start a new term.  Note that a matching call to {@link
-   *  #finishTerm(BlockTermState)} is done, only if the term has at least one
-   *  document. */
-  public abstract void startTerm() throws IOException;
+    /** Start a new term.  Note that a matching call to {@link
+     *  #finishTerm(BlockTermState)} is done, only if the term has at least one
+     *  document. */
+    public abstract void startTerm() throws IOException;
 
-  /** Finishes the current term.  The provided {@link
-   *  BlockTermState} contains the term's summary statistics, 
-   *  and will holds metadata from PBF when returned */
-  public abstract void finishTerm(BlockTermState state) throws IOException;
+    /** Finishes the current term.  The provided {@link
+     *  BlockTermState} contains the term's summary statistics, 
+     *  and will holds metadata from PBF when returned */
+    public abstract void finishTerm(BlockTermState state) throws IOException;
 
-  /**
-   * Encode metadata as long[] and byte[]. {@code absolute} controls whether 
-   * current term is delta encoded according to latest term. 
-   * Usually elements in {@code longs} are file pointers, so each one always 
-   * increases when a new term is consumed. {@code out} is used to write generic
-   * bytes, which are not monotonic.
-   *
-   * NOTE: sometimes long[] might contain "don't care" values that are unused, e.g. 
-   * the pointer to postings list may not be defined for some terms but is defined
-   * for others, if it is designed to inline  some postings data in term dictionary.
-   * In this case, the postings writer should always use the last value, so that each
-   * element in metadata long[] remains monotonic.
-   */
-  public abstract void encodeTerm(long[] longs, DataOutput out, FieldInfo fieldInfo, BlockTermState state, boolean absolute) throws IOException;
+    /**
+     * Encode metadata as long[] and byte[]. {@code absolute} controls whether 
+     * current term is delta encoded according to latest term. 
+     * Usually elements in {@code longs} are file pointers, so each one always 
+     * increases when a new term is consumed. {@code out} is used to write generic
+     * bytes, which are not monotonic.
+     *
+     * NOTE: sometimes long[] might contain "don't care" values that are unused, e.g. 
+     * the pointer to postings list may not be defined for some terms but is defined
+     * for others, if it is designed to inline  some postings data in term dictionary.
+     * In this case, the postings writer should always use the last value, so that each
+     * element in metadata long[] remains monotonic.
+     */
+    public abstract void encodeTerm(long[] longs, DataOutput out, FieldInfo fieldInfo, BlockTermState state, boolean absolute) throws IOException;
 
-  /** 
-   * Sets the current field for writing, and returns the
-   * fixed length of long[] metadata (which is fixed per
-   * field), called when the writing switches to another field. */
-  // TODO: better name?
-  public abstract int setField(FieldInfo fieldInfo);
+    /** 
+     * Sets the current field for writing, and returns the
+     * fixed length of long[] metadata (which is fixed per
+     * field), called when the writing switches to another field. */
+    // TODO: better name?
+    public abstract int setField(FieldInfo fieldInfo);
 
-  @Override
-  public abstract void close() throws IOException;
+    @Override
+    public abstract void close() throws IOException;
 }

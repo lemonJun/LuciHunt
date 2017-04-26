@@ -22,51 +22,51 @@ import java.util.Collection;
 /** Used by {@link BulkScorer}s that need to pass a {@link
  *  Scorer} to {@link Collector#setScorer}. */
 final class FakeScorer extends Scorer {
-  float score;
-  int doc = -1;
-  int freq = 1;
+    float score;
+    int doc = -1;
+    int freq = 1;
 
-  public FakeScorer() {
-    super(null);
-  }
-    
-  @Override
-  public int advance(int target) {
-    throw new UnsupportedOperationException("FakeScorer doesn't support advance(int)");
-  }
+    public FakeScorer() {
+        super(null);
+    }
 
-  @Override
-  public int docID() {
-    return doc;
-  }
+    @Override
+    public int advance(int target) {
+        throw new UnsupportedOperationException("FakeScorer doesn't support advance(int)");
+    }
 
-  @Override
-  public int freq() {
-    return freq;
-  }
+    @Override
+    public int docID() {
+        return doc;
+    }
 
-  @Override
-  public int nextDoc() {
-    throw new UnsupportedOperationException("FakeScorer doesn't support nextDoc()");
-  }
-    
-  @Override
-  public float score() {
-    return score;
-  }
+    @Override
+    public int freq() {
+        return freq;
+    }
 
-  @Override
-  public long cost() {
-    return 1;
-  }
+    @Override
+    public int nextDoc() {
+        throw new UnsupportedOperationException("FakeScorer doesn't support nextDoc()");
+    }
 
-  @Override
-  public Weight getWeight() {
-    throw new UnsupportedOperationException();
-  }
+    @Override
+    public float score() {
+        return score;
+    }
 
-  @Override
-  public Collection<ChildScorer> getChildren() {
-    throw new UnsupportedOperationException();
-  }
+    @Override
+    public long cost() {
+        return 1;
+    }
+
+    @Override
+    public Weight getWeight() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Collection<ChildScorer> getChildren() {
+        throw new UnsupportedOperationException();
+    }
 }

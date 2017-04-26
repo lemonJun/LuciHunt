@@ -32,25 +32,26 @@ import static org.apache.lucene.search.similarities.SimilarityBase.log2;
  * @lucene.experimental
  */
 public class BasicModelD extends BasicModel {
-  
-  /** Sole constructor: parameter-free */
-  public BasicModelD() {}
-  
-  @Override
-  public final float score(BasicStats stats, float tfn) {
-    // we have to ensure phi is always < 1 for tiny TTF values, otherwise nphi can go negative,
-    // resulting in NaN. cleanest way is to unconditionally always add tfn to totalTermFreq
-    // to create a 'normalized' F.
-    double F = stats.getTotalTermFreq() + 1 + tfn;
-    double phi = (double)tfn / F;
-    double nphi = 1 - phi;
-    double p = 1.0 / (stats.getNumberOfDocuments() + 1);
-    double D = phi * log2(phi / p) + nphi * log2(nphi / (1 - p));
-    return (float)(D * F + 0.5 * log2(1 + 2 * Math.PI * tfn * nphi));
-  }
-  
-  @Override
-  public String toString() {
-    return "D";
-  }
+
+    /** Sole constructor: parameter-free */
+    public BasicModelD() {
+    }
+
+    @Override
+    public final float score(BasicStats stats, float tfn) {
+        // we have to ensure phi is always < 1 for tiny TTF values, otherwise nphi can go negative,
+        // resulting in NaN. cleanest way is to unconditionally always add tfn to totalTermFreq
+        // to create a 'normalized' F.
+        double F = stats.getTotalTermFreq() + 1 + tfn;
+        double phi = (double) tfn / F;
+        double nphi = 1 - phi;
+        double p = 1.0 / (stats.getNumberOfDocuments() + 1);
+        double D = phi * log2(phi / p) + nphi * log2(nphi / (1 - p));
+        return (float) (D * F + 0.5 * log2(1 + 2 * Math.PI * tfn * nphi));
+    }
+
+    @Override
+    public String toString() {
+        return "D";
+    }
 }

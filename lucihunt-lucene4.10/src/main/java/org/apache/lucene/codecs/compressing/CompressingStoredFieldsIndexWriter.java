@@ -71,140 +71,138 @@ import org.apache.lucene.util.packed.PackedInts;
  * @lucene.internal
  */
 public final class CompressingStoredFieldsIndexWriter implements Closeable {
-  
-  static final int BLOCK_SIZE = 1024; // number of chunks to serialize at once
 
-  final IndexOutput fieldsIndexOut;
-  int totalDocs;
-  int blockDocs;
-  int blockChunks;
-  long firstStartPointer;
-  long maxStartPointer;
-  final int[] docBaseDeltas;
-  final long[] startPointerDeltas;
+    static final int BLOCK_SIZE = 1024; // number of chunks to serialize at once
 
-  CompressingStoredFieldsIndexWriter(IndexOutput indexOutput) throws IOException {
-    this.fieldsIndexOut = indexOutput;
-    reset();
-    totalDocs = 0;
-    docBaseDeltas = new int[BLOCK_SIZE];
-    startPointerDeltas = new long[BLOCK_SIZE];
-    fieldsIndexOut.writeVInt(PackedInts.VERSION_CURRENT);
-  }
+    final IndexOutput fieldsIndexOut;
+    int totalDocs;
+    int blockDocs;
+    int blockChunks;
+    long firstStartPointer;
+    long maxStartPointer;
+    final int[] docBaseDeltas;
+    final long[] startPointerDeltas;
 
-  private void reset() {
-    blockChunks = 0;
-    blockDocs = 0;
-    firstStartPointer = -1; // means unset
-  }
-
-  private void writeBlock() throws IOException {
-    assert blockChunks > 0;
-    fieldsIndexOut.writeVInt(blockChunks);
-
-    // The trick here is that we only store the difference from the average start
-    // pointer or doc base, this helps save bits per value.
-    // And in order to prevent a few chunks that would be far from the average to
-    // raise the number of bits per value for all of them, we only encode blocks
-    // of 1024 chunks at once
-    // See LUCENE-4512
-
-    // doc bases
-    final int avgChunkDocs;
-    if (blockChunks == 1) {
-      avgChunkDocs = 0;
-    } else {
-      avgChunkDocs = Math.round((float) (blockDocs - docBaseDeltas[blockChunks - 1]) / (blockChunks - 1));
-    }
-    fieldsIndexOut.writeVInt(totalDocs - blockDocs); // docBase
-    fieldsIndexOut.writeVInt(avgChunkDocs);
-    int docBase = 0;
-    long maxDelta = 0;
-    for (int i = 0; i < blockChunks; ++i) {
-      final int delta = docBase - avgChunkDocs * i;
-      maxDelta |= zigZagEncode(delta);
-      docBase += docBaseDeltas[i];
+    CompressingStoredFieldsIndexWriter(IndexOutput indexOutput) throws IOException {
+        this.fieldsIndexOut = indexOutput;
+        reset();
+        totalDocs = 0;
+        docBaseDeltas = new int[BLOCK_SIZE];
+        startPointerDeltas = new long[BLOCK_SIZE];
+        fieldsIndexOut.writeVInt(PackedInts.VERSION_CURRENT);
     }
 
-    final int bitsPerDocBase = PackedInts.bitsRequired(maxDelta);
-    fieldsIndexOut.writeVInt(bitsPerDocBase);
-    PackedInts.Writer writer = PackedInts.getWriterNoHeader(fieldsIndexOut,
-        PackedInts.Format.PACKED, blockChunks, bitsPerDocBase, 1);
-    docBase = 0;
-    for (int i = 0; i < blockChunks; ++i) {
-      final long delta = docBase - avgChunkDocs * i;
-      assert PackedInts.bitsRequired(zigZagEncode(delta)) <= writer.bitsPerValue();
-      writer.add(zigZagEncode(delta));
-      docBase += docBaseDeltas[i];
-    }
-    writer.finish();
-
-    // start pointers
-    fieldsIndexOut.writeVLong(firstStartPointer);
-    final long avgChunkSize;
-    if (blockChunks == 1) {
-      avgChunkSize = 0;
-    } else {
-      avgChunkSize = (maxStartPointer - firstStartPointer) / (blockChunks - 1);
-    }
-    fieldsIndexOut.writeVLong(avgChunkSize);
-    long startPointer = 0;
-    maxDelta = 0;
-    for (int i = 0; i < blockChunks; ++i) {
-      startPointer += startPointerDeltas[i];
-      final long delta = startPointer - avgChunkSize * i;
-      maxDelta |= zigZagEncode(delta);
+    private void reset() {
+        blockChunks = 0;
+        blockDocs = 0;
+        firstStartPointer = -1; // means unset
     }
 
-    final int bitsPerStartPointer = PackedInts.bitsRequired(maxDelta);
-    fieldsIndexOut.writeVInt(bitsPerStartPointer);
-    writer = PackedInts.getWriterNoHeader(fieldsIndexOut, PackedInts.Format.PACKED,
-        blockChunks, bitsPerStartPointer, 1);
-    startPointer = 0;
-    for (int i = 0; i < blockChunks; ++i) {
-      startPointer += startPointerDeltas[i];
-      final long delta = startPointer - avgChunkSize * i;
-      assert PackedInts.bitsRequired(zigZagEncode(delta)) <= writer.bitsPerValue();
-      writer.add(zigZagEncode(delta));
+    private void writeBlock() throws IOException {
+        assert blockChunks > 0;
+        fieldsIndexOut.writeVInt(blockChunks);
+
+        // The trick here is that we only store the difference from the average start
+        // pointer or doc base, this helps save bits per value.
+        // And in order to prevent a few chunks that would be far from the average to
+        // raise the number of bits per value for all of them, we only encode blocks
+        // of 1024 chunks at once
+        // See LUCENE-4512
+
+        // doc bases
+        final int avgChunkDocs;
+        if (blockChunks == 1) {
+            avgChunkDocs = 0;
+        } else {
+            avgChunkDocs = Math.round((float) (blockDocs - docBaseDeltas[blockChunks - 1]) / (blockChunks - 1));
+        }
+        fieldsIndexOut.writeVInt(totalDocs - blockDocs); // docBase
+        fieldsIndexOut.writeVInt(avgChunkDocs);
+        int docBase = 0;
+        long maxDelta = 0;
+        for (int i = 0; i < blockChunks; ++i) {
+            final int delta = docBase - avgChunkDocs * i;
+            maxDelta |= zigZagEncode(delta);
+            docBase += docBaseDeltas[i];
+        }
+
+        final int bitsPerDocBase = PackedInts.bitsRequired(maxDelta);
+        fieldsIndexOut.writeVInt(bitsPerDocBase);
+        PackedInts.Writer writer = PackedInts.getWriterNoHeader(fieldsIndexOut, PackedInts.Format.PACKED, blockChunks, bitsPerDocBase, 1);
+        docBase = 0;
+        for (int i = 0; i < blockChunks; ++i) {
+            final long delta = docBase - avgChunkDocs * i;
+            assert PackedInts.bitsRequired(zigZagEncode(delta)) <= writer.bitsPerValue();
+            writer.add(zigZagEncode(delta));
+            docBase += docBaseDeltas[i];
+        }
+        writer.finish();
+
+        // start pointers
+        fieldsIndexOut.writeVLong(firstStartPointer);
+        final long avgChunkSize;
+        if (blockChunks == 1) {
+            avgChunkSize = 0;
+        } else {
+            avgChunkSize = (maxStartPointer - firstStartPointer) / (blockChunks - 1);
+        }
+        fieldsIndexOut.writeVLong(avgChunkSize);
+        long startPointer = 0;
+        maxDelta = 0;
+        for (int i = 0; i < blockChunks; ++i) {
+            startPointer += startPointerDeltas[i];
+            final long delta = startPointer - avgChunkSize * i;
+            maxDelta |= zigZagEncode(delta);
+        }
+
+        final int bitsPerStartPointer = PackedInts.bitsRequired(maxDelta);
+        fieldsIndexOut.writeVInt(bitsPerStartPointer);
+        writer = PackedInts.getWriterNoHeader(fieldsIndexOut, PackedInts.Format.PACKED, blockChunks, bitsPerStartPointer, 1);
+        startPointer = 0;
+        for (int i = 0; i < blockChunks; ++i) {
+            startPointer += startPointerDeltas[i];
+            final long delta = startPointer - avgChunkSize * i;
+            assert PackedInts.bitsRequired(zigZagEncode(delta)) <= writer.bitsPerValue();
+            writer.add(zigZagEncode(delta));
+        }
+        writer.finish();
     }
-    writer.finish();
-  }
 
-  void writeIndex(int numDocs, long startPointer) throws IOException {
-    if (blockChunks == BLOCK_SIZE) {
-      writeBlock();
-      reset();
+    void writeIndex(int numDocs, long startPointer) throws IOException {
+        if (blockChunks == BLOCK_SIZE) {
+            writeBlock();
+            reset();
+        }
+
+        if (firstStartPointer == -1) {
+            firstStartPointer = maxStartPointer = startPointer;
+        }
+        assert firstStartPointer > 0 && startPointer >= firstStartPointer;
+
+        docBaseDeltas[blockChunks] = numDocs;
+        startPointerDeltas[blockChunks] = startPointer - maxStartPointer;
+
+        ++blockChunks;
+        blockDocs += numDocs;
+        totalDocs += numDocs;
+        maxStartPointer = startPointer;
     }
 
-    if (firstStartPointer == -1) {
-      firstStartPointer = maxStartPointer = startPointer;
+    void finish(int numDocs, long maxPointer) throws IOException {
+        if (numDocs != totalDocs) {
+            throw new IllegalStateException("Expected " + numDocs + " docs, but got " + totalDocs);
+        }
+        if (blockChunks > 0) {
+            writeBlock();
+        }
+        fieldsIndexOut.writeVInt(0); // end marker
+        fieldsIndexOut.writeVLong(maxPointer);
+        CodecUtil.writeFooter(fieldsIndexOut);
     }
-    assert firstStartPointer > 0 && startPointer >= firstStartPointer;
 
-    docBaseDeltas[blockChunks] = numDocs;
-    startPointerDeltas[blockChunks] = startPointer - maxStartPointer;
-
-    ++blockChunks;
-    blockDocs += numDocs;
-    totalDocs += numDocs;
-    maxStartPointer = startPointer;
-  }
-
-  void finish(int numDocs, long maxPointer) throws IOException {
-    if (numDocs != totalDocs) {
-      throw new IllegalStateException("Expected " + numDocs + " docs, but got " + totalDocs);
+    @Override
+    public void close() throws IOException {
+        fieldsIndexOut.close();
     }
-    if (blockChunks > 0) {
-      writeBlock();
-    }
-    fieldsIndexOut.writeVInt(0); // end marker
-    fieldsIndexOut.writeVLong(maxPointer);
-    CodecUtil.writeFooter(fieldsIndexOut);
-  }
-
-  @Override
-  public void close() throws IOException {
-    fieldsIndexOut.close();
-  }
 
 }

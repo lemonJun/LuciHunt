@@ -46,17 +46,17 @@ import org.apache.lucene.util.Attribute;
  * @see org.apache.lucene.index.DocsAndPositionsEnum
  */
 public interface PositionIncrementAttribute extends Attribute {
-  /** Set the position increment. The default value is one.
-   *
-   * @param positionIncrement the distance from the prior term
-   * @throws IllegalArgumentException if <code>positionIncrement</code> 
-   *         is negative.
-   * @see #getPositionIncrement()
-   */
-  public void setPositionIncrement(int positionIncrement);
+    /** Set the position increment. The default value is one.
+     *
+     * @param positionIncrement the distance from the prior term
+     * @throws IllegalArgumentException if <code>positionIncrement</code> 
+     *         is negative.
+     * @see #getPositionIncrement()
+     */
+    public void setPositionIncrement(int positionIncrement);
 
-  /** Returns the position increment of this Token.
-   * @see #setPositionIncrement(int)
-   */
-  public int getPositionIncrement();
+    /** Returns the position increment of this Token.
+     * @see #setPositionIncrement(int)
+     */
+    public int getPositionIncrement();
 }

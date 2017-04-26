@@ -25,7 +25,7 @@ import java.io.IOException;
  * @see Lock#close()
  */
 public class LockReleaseFailedException extends IOException {
-  public LockReleaseFailedException(String message) {
-    super(message);
-  }
+    public LockReleaseFailedException(String message) {
+        super(message);
+    }
 }

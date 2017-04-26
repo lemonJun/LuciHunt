@@ -43,76 +43,76 @@ import org.apache.lucene.codecs.perfield.PerFieldPostingsFormat;
 // (it writes a minor version, etc).
 @Deprecated
 public class Lucene40Codec extends Codec {
-  private final StoredFieldsFormat fieldsFormat = new Lucene40StoredFieldsFormat();
-  private final TermVectorsFormat vectorsFormat = new Lucene40TermVectorsFormat();
-  private final FieldInfosFormat fieldInfosFormat = new Lucene40FieldInfosFormat();
-  private final SegmentInfoFormat infosFormat = new Lucene40SegmentInfoFormat();
-  private final LiveDocsFormat liveDocsFormat = new Lucene40LiveDocsFormat();
-  
-  private final PostingsFormat postingsFormat = new PerFieldPostingsFormat() {
-    @Override
-    public PostingsFormat getPostingsFormatForField(String field) {
-      return Lucene40Codec.this.getPostingsFormatForField(field);
+    private final StoredFieldsFormat fieldsFormat = new Lucene40StoredFieldsFormat();
+    private final TermVectorsFormat vectorsFormat = new Lucene40TermVectorsFormat();
+    private final FieldInfosFormat fieldInfosFormat = new Lucene40FieldInfosFormat();
+    private final SegmentInfoFormat infosFormat = new Lucene40SegmentInfoFormat();
+    private final LiveDocsFormat liveDocsFormat = new Lucene40LiveDocsFormat();
+
+    private final PostingsFormat postingsFormat = new PerFieldPostingsFormat() {
+        @Override
+        public PostingsFormat getPostingsFormatForField(String field) {
+            return Lucene40Codec.this.getPostingsFormatForField(field);
+        }
+    };
+
+    /** Sole constructor. */
+    public Lucene40Codec() {
+        super("Lucene40");
     }
-  };
 
-  /** Sole constructor. */
-  public Lucene40Codec() {
-    super("Lucene40");
-  }
-  
-  @Override
-  public final StoredFieldsFormat storedFieldsFormat() {
-    return fieldsFormat;
-  }
-  
-  @Override
-  public final TermVectorsFormat termVectorsFormat() {
-    return vectorsFormat;
-  }
+    @Override
+    public final StoredFieldsFormat storedFieldsFormat() {
+        return fieldsFormat;
+    }
 
-  @Override
-  public final PostingsFormat postingsFormat() {
-    return postingsFormat;
-  }
-  
-  @Override
-  public FieldInfosFormat fieldInfosFormat() {
-    return fieldInfosFormat;
-  }
-  
-  @Override
-  public SegmentInfoFormat segmentInfoFormat() {
-    return infosFormat;
-  }
-  
-  private final DocValuesFormat defaultDVFormat = new Lucene40DocValuesFormat();
+    @Override
+    public final TermVectorsFormat termVectorsFormat() {
+        return vectorsFormat;
+    }
 
-  @Override
-  public DocValuesFormat docValuesFormat() {
-    return defaultDVFormat;
-  }
+    @Override
+    public final PostingsFormat postingsFormat() {
+        return postingsFormat;
+    }
 
-  private final NormsFormat normsFormat = new Lucene40NormsFormat();
+    @Override
+    public FieldInfosFormat fieldInfosFormat() {
+        return fieldInfosFormat;
+    }
 
-  @Override
-  public NormsFormat normsFormat() {
-    return normsFormat;
-  }
+    @Override
+    public SegmentInfoFormat segmentInfoFormat() {
+        return infosFormat;
+    }
 
-  @Override
-  public final LiveDocsFormat liveDocsFormat() {
-    return liveDocsFormat;
-  }
+    private final DocValuesFormat defaultDVFormat = new Lucene40DocValuesFormat();
 
-  /** Returns the postings format that should be used for writing 
-   *  new segments of <code>field</code>.
-   *  
-   *  The default implementation always returns "Lucene40"
-   */
-  public PostingsFormat getPostingsFormatForField(String field) {
-    return defaultFormat;
-  }
-  
-  private final PostingsFormat defaultFormat = PostingsFormat.forName("Lucene40");
+    @Override
+    public DocValuesFormat docValuesFormat() {
+        return defaultDVFormat;
+    }
+
+    private final NormsFormat normsFormat = new Lucene40NormsFormat();
+
+    @Override
+    public NormsFormat normsFormat() {
+        return normsFormat;
+    }
+
+    @Override
+    public final LiveDocsFormat liveDocsFormat() {
+        return liveDocsFormat;
+    }
+
+    /** Returns the postings format that should be used for writing 
+     *  new segments of <code>field</code>.
+     *  
+     *  The default implementation always returns "Lucene40"
+     */
+    public PostingsFormat getPostingsFormatForField(String field) {
+        return defaultFormat;
+    }
+
+    private final PostingsFormat defaultFormat = PostingsFormat.forName("Lucene40");
 }

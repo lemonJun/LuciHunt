@@ -31,89 +31,88 @@ import org.apache.lucene.index.AtomicReaderContext;
 
 public class SortRescorer extends Rescorer {
 
-  private final Sort sort;
+    private final Sort sort;
 
-  /** Sole constructor. */
-  public SortRescorer(Sort sort) {
-    this.sort = sort;
-  }
-
-  @Override
-  public TopDocs rescore(IndexSearcher searcher, TopDocs firstPassTopDocs, int topN) throws IOException {
-
-    // Copy ScoreDoc[] and sort by ascending docID:
-    ScoreDoc[] hits = firstPassTopDocs.scoreDocs.clone();
-    Arrays.sort(hits,
-                new Comparator<ScoreDoc>() {
-                  @Override
-                  public int compare(ScoreDoc a, ScoreDoc b) {
-                    return a.doc - b.doc;
-                  }
-                });
-
-    List<AtomicReaderContext> leaves = searcher.getIndexReader().leaves();
-
-    TopFieldCollector collector = TopFieldCollector.create(sort, topN, true, true, true, false);
-
-    // Now merge sort docIDs from hits, with reader's leaves:
-    int hitUpto = 0;
-    int readerUpto = -1;
-    int endDoc = 0;
-    int docBase = 0;
-
-    FakeScorer fakeScorer = new FakeScorer();
-
-    while (hitUpto < hits.length) {
-      ScoreDoc hit = hits[hitUpto];
-      int docID = hit.doc;
-      AtomicReaderContext readerContext = null;
-      while (docID >= endDoc) {
-        readerUpto++;
-        readerContext = leaves.get(readerUpto);
-        endDoc = readerContext.docBase + readerContext.reader().maxDoc();
-      }
-
-      if (readerContext != null) {
-        // We advanced to another segment:
-        collector.setNextReader(readerContext);
-        collector.setScorer(fakeScorer);
-        docBase = readerContext.docBase;
-      }
-
-      fakeScorer.score = hit.score;
-      fakeScorer.doc = docID - docBase;
-
-      collector.collect(fakeScorer.doc);
-
-      hitUpto++;
+    /** Sole constructor. */
+    public SortRescorer(Sort sort) {
+        this.sort = sort;
     }
 
-    return collector.topDocs();
-  }
+    @Override
+    public TopDocs rescore(IndexSearcher searcher, TopDocs firstPassTopDocs, int topN) throws IOException {
 
-  @Override
-  public Explanation explain(IndexSearcher searcher, Explanation firstPassExplanation, int docID) throws IOException {
-    TopDocs oneHit = new TopDocs(1, new ScoreDoc[] {new ScoreDoc(docID, firstPassExplanation.getValue())});
-    TopDocs hits = rescore(searcher, oneHit, 1);
-    assert hits.totalHits == 1;
+        // Copy ScoreDoc[] and sort by ascending docID:
+        ScoreDoc[] hits = firstPassTopDocs.scoreDocs.clone();
+        Arrays.sort(hits, new Comparator<ScoreDoc>() {
+            @Override
+            public int compare(ScoreDoc a, ScoreDoc b) {
+                return a.doc - b.doc;
+            }
+        });
 
-    // TODO: if we could ask the Sort to explain itself then
-    // we wouldn't need the separate ExpressionRescorer...
-    Explanation result = new Explanation(0.0f, "sort field values for sort=" + sort.toString());
+        List<AtomicReaderContext> leaves = searcher.getIndexReader().leaves();
 
-    // Add first pass:
-    Explanation first = new Explanation(firstPassExplanation.getValue(), "first pass score");
-    first.addDetail(firstPassExplanation);
-    result.addDetail(first);
+        TopFieldCollector collector = TopFieldCollector.create(sort, topN, true, true, true, false);
 
-    FieldDoc fieldDoc = (FieldDoc) hits.scoreDocs[0];
+        // Now merge sort docIDs from hits, with reader's leaves:
+        int hitUpto = 0;
+        int readerUpto = -1;
+        int endDoc = 0;
+        int docBase = 0;
 
-    // Add sort values:
-    SortField[] sortFields = sort.getSort();
-    for(int i=0;i<sortFields.length;i++) {
-      result.addDetail(new Explanation(0.0f, "sort field " + sortFields[i].toString() + " value=" + fieldDoc.fields[i]));
+        FakeScorer fakeScorer = new FakeScorer();
+
+        while (hitUpto < hits.length) {
+            ScoreDoc hit = hits[hitUpto];
+            int docID = hit.doc;
+            AtomicReaderContext readerContext = null;
+            while (docID >= endDoc) {
+                readerUpto++;
+                readerContext = leaves.get(readerUpto);
+                endDoc = readerContext.docBase + readerContext.reader().maxDoc();
+            }
+
+            if (readerContext != null) {
+                // We advanced to another segment:
+                collector.setNextReader(readerContext);
+                collector.setScorer(fakeScorer);
+                docBase = readerContext.docBase;
+            }
+
+            fakeScorer.score = hit.score;
+            fakeScorer.doc = docID - docBase;
+
+            collector.collect(fakeScorer.doc);
+
+            hitUpto++;
+        }
+
+        return collector.topDocs();
     }
 
-    return result;
-  }
+    @Override
+    public Explanation explain(IndexSearcher searcher, Explanation firstPassExplanation, int docID) throws IOException {
+        TopDocs oneHit = new TopDocs(1, new ScoreDoc[] { new ScoreDoc(docID, firstPassExplanation.getValue()) });
+        TopDocs hits = rescore(searcher, oneHit, 1);
+        assert hits.totalHits == 1;
+
+        // TODO: if we could ask the Sort to explain itself then
+        // we wouldn't need the separate ExpressionRescorer...
+        Explanation result = new Explanation(0.0f, "sort field values for sort=" + sort.toString());
+
+        // Add first pass:
+        Explanation first = new Explanation(firstPassExplanation.getValue(), "first pass score");
+        first.addDetail(firstPassExplanation);
+        result.addDetail(first);
+
+        FieldDoc fieldDoc = (FieldDoc) hits.scoreDocs[0];
+
+        // Add sort values:
+        SortField[] sortFields = sort.getSort();
+        for (int i = 0; i < sortFields.length; i++) {
+            result.addDetail(new Explanation(0.0f, "sort field " + sortFields[i].toString() + " value=" + fieldDoc.fields[i]));
+        }
+
+        return result;
+    }
 }

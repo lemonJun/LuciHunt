@@ -34,13 +34,13 @@ import org.apache.lucene.index.SegmentWriteState;
 @Deprecated
 class Lucene3xNormsFormat extends NormsFormat {
 
-  @Override
-  public DocValuesConsumer normsConsumer(SegmentWriteState state) throws IOException {
-    throw new UnsupportedOperationException("this codec can only be used for reading");
-  }
+    @Override
+    public DocValuesConsumer normsConsumer(SegmentWriteState state) throws IOException {
+        throw new UnsupportedOperationException("this codec can only be used for reading");
+    }
 
-  @Override
-  public DocValuesProducer normsProducer(SegmentReadState state) throws IOException {
-    return new Lucene3xNormsProducer(state.directory, state.segmentInfo, state.fieldInfos, state.context);
-  }
+    @Override
+    public DocValuesProducer normsProducer(SegmentReadState state) throws IOException {
+        return new Lucene3xNormsProducer(state.directory, state.segmentInfo, state.fieldInfos, state.context);
+    }
 }

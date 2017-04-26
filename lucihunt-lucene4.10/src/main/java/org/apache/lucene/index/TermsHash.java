@@ -33,70 +33,70 @@ import org.apache.lucene.util.IntBlockPool;
  *  write their own byte streams under each term. */
 abstract class TermsHash {
 
-  final TermsHash nextTermsHash;
+    final TermsHash nextTermsHash;
 
-  final IntBlockPool intPool;
-  final ByteBlockPool bytePool;
-  ByteBlockPool termBytePool;
-  final Counter bytesUsed;
+    final IntBlockPool intPool;
+    final ByteBlockPool bytePool;
+    ByteBlockPool termBytePool;
+    final Counter bytesUsed;
 
-  final DocumentsWriterPerThread.DocState docState;
+    final DocumentsWriterPerThread.DocState docState;
 
-  final boolean trackAllocations;
+    final boolean trackAllocations;
 
-  TermsHash(final DocumentsWriterPerThread docWriter, boolean trackAllocations, TermsHash nextTermsHash) {
-    this.docState = docWriter.docState;
-    this.trackAllocations = trackAllocations; 
-    this.nextTermsHash = nextTermsHash;
-    this.bytesUsed = trackAllocations ? docWriter.bytesUsed : Counter.newCounter();
-    intPool = new IntBlockPool(docWriter.intBlockAllocator);
-    bytePool = new ByteBlockPool(docWriter.byteBlockAllocator);
+    TermsHash(final DocumentsWriterPerThread docWriter, boolean trackAllocations, TermsHash nextTermsHash) {
+        this.docState = docWriter.docState;
+        this.trackAllocations = trackAllocations;
+        this.nextTermsHash = nextTermsHash;
+        this.bytesUsed = trackAllocations ? docWriter.bytesUsed : Counter.newCounter();
+        intPool = new IntBlockPool(docWriter.intBlockAllocator);
+        bytePool = new ByteBlockPool(docWriter.byteBlockAllocator);
 
-    if (nextTermsHash != null) {
-      // We are primary
-      termBytePool = bytePool;
-      nextTermsHash.termBytePool = bytePool;
+        if (nextTermsHash != null) {
+            // We are primary
+            termBytePool = bytePool;
+            nextTermsHash.termBytePool = bytePool;
+        }
     }
-  }
 
-  public void abort() {
-    try {
-      reset();
-    } finally {
-      if (nextTermsHash != null) {
-        nextTermsHash.abort();
-      }
+    public void abort() {
+        try {
+            reset();
+        } finally {
+            if (nextTermsHash != null) {
+                nextTermsHash.abort();
+            }
+        }
     }
-  }
 
-  // Clear all state
-  void reset() {
-    // we don't reuse so we drop everything and don't fill with 0
-    intPool.reset(false, false); 
-    bytePool.reset(false, false);
-  }
-
-  void flush(Map<String,TermsHashPerField> fieldsToFlush, final SegmentWriteState state) throws IOException {
-    if (nextTermsHash != null) {
-      Map<String,TermsHashPerField> nextChildFields = new HashMap<>();
-      for (final Map.Entry<String,TermsHashPerField> entry : fieldsToFlush.entrySet()) {
-        nextChildFields.put(entry.getKey(), entry.getValue().nextPerField);
-      }
-      nextTermsHash.flush(nextChildFields, state);
+    // Clear all state
+    void reset() {
+        // we don't reuse so we drop everything and don't fill with 0
+        intPool.reset(false, false);
+        bytePool.reset(false, false);
     }
-  }
 
-  abstract TermsHashPerField addField(FieldInvertState fieldInvertState, final FieldInfo fieldInfo);
-
-  void finishDocument() throws IOException {
-    if (nextTermsHash != null) {
-      nextTermsHash.finishDocument();
+    void flush(Map<String, TermsHashPerField> fieldsToFlush, final SegmentWriteState state) throws IOException {
+        if (nextTermsHash != null) {
+            Map<String, TermsHashPerField> nextChildFields = new HashMap<>();
+            for (final Map.Entry<String, TermsHashPerField> entry : fieldsToFlush.entrySet()) {
+                nextChildFields.put(entry.getKey(), entry.getValue().nextPerField);
+            }
+            nextTermsHash.flush(nextChildFields, state);
+        }
     }
-  }
 
-  void startDocument() throws IOException {
-    if (nextTermsHash != null) {
-      nextTermsHash.startDocument();
+    abstract TermsHashPerField addField(FieldInvertState fieldInvertState, final FieldInfo fieldInfo);
+
+    void finishDocument() throws IOException {
+        if (nextTermsHash != null) {
+            nextTermsHash.finishDocument();
+        }
     }
-  }
+
+    void startDocument() throws IOException {
+        if (nextTermsHash != null) {
+            nextTermsHash.startDocument();
+        }
+    }
 }

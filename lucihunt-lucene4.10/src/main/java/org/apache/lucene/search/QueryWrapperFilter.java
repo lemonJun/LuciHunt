@@ -32,51 +32,54 @@ import org.apache.lucene.util.Bits;
  * within the last week.  This would only need to be reconstructed once per day.
  */
 public class QueryWrapperFilter extends Filter {
-  private final Query query;
+    private final Query query;
 
-  /** Constructs a filter which only matches documents matching
-   * <code>query</code>.
-   */
-  public QueryWrapperFilter(Query query) {
-    if (query == null)
-      throw new NullPointerException("Query may not be null");
-    this.query = query;
-  }
-  
-  /** returns the inner Query */
-  public final Query getQuery() {
-    return query;
-  }
+    /** Constructs a filter which only matches documents matching
+     * <code>query</code>.
+     */
+    public QueryWrapperFilter(Query query) {
+        if (query == null)
+            throw new NullPointerException("Query may not be null");
+        this.query = query;
+    }
 
-  @Override
-  public DocIdSet getDocIdSet(final AtomicReaderContext context, final Bits acceptDocs) throws IOException {
-    // get a private context that is used to rewrite, createWeight and score eventually
-    final AtomicReaderContext privateContext = context.reader().getContext();
-    final Weight weight = new IndexSearcher(privateContext).createNormalizedWeight(query);
-    return new DocIdSet() {
-      @Override
-      public DocIdSetIterator iterator() throws IOException {
-        return weight.scorer(privateContext, acceptDocs);
-      }
-      @Override
-      public boolean isCacheable() { return false; }
-    };
-  }
+    /** returns the inner Query */
+    public final Query getQuery() {
+        return query;
+    }
 
-  @Override
-  public String toString() {
-    return "QueryWrapperFilter(" + query + ")";
-  }
+    @Override
+    public DocIdSet getDocIdSet(final AtomicReaderContext context, final Bits acceptDocs) throws IOException {
+        // get a private context that is used to rewrite, createWeight and score eventually
+        final AtomicReaderContext privateContext = context.reader().getContext();
+        final Weight weight = new IndexSearcher(privateContext).createNormalizedWeight(query);
+        return new DocIdSet() {
+            @Override
+            public DocIdSetIterator iterator() throws IOException {
+                return weight.scorer(privateContext, acceptDocs);
+            }
 
-  @Override
-  public boolean equals(Object o) {
-    if (!(o instanceof QueryWrapperFilter))
-      return false;
-    return this.query.equals(((QueryWrapperFilter)o).query);
-  }
+            @Override
+            public boolean isCacheable() {
+                return false;
+            }
+        };
+    }
 
-  @Override
-  public int hashCode() {
-    return query.hashCode() ^ 0x923F64B9;
-  }
+    @Override
+    public String toString() {
+        return "QueryWrapperFilter(" + query + ")";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof QueryWrapperFilter))
+            return false;
+        return this.query.equals(((QueryWrapperFilter) o).query);
+    }
+
+    @Override
+    public int hashCode() {
+        return query.hashCode() ^ 0x923F64B9;
+    }
 }

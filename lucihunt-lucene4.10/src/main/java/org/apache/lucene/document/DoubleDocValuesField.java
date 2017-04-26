@@ -33,23 +33,23 @@ import org.apache.lucene.search.FieldCache; // javadocs
  */
 public class DoubleDocValuesField extends NumericDocValuesField {
 
-  /** 
-   * Creates a new DocValues field with the specified 64-bit double value 
-   * @param name field name
-   * @param value 64-bit double value
-   * @throws IllegalArgumentException if the field name is null
-   */
-  public DoubleDocValuesField(String name, double value) {
-    super(name, Double.doubleToRawLongBits(value));
-  }
+    /** 
+     * Creates a new DocValues field with the specified 64-bit double value 
+     * @param name field name
+     * @param value 64-bit double value
+     * @throws IllegalArgumentException if the field name is null
+     */
+    public DoubleDocValuesField(String name, double value) {
+        super(name, Double.doubleToRawLongBits(value));
+    }
 
-  @Override
-  public void setDoubleValue(double value) {
-    super.setLongValue(Double.doubleToRawLongBits(value));
-  }
-  
-  @Override
-  public void setLongValue(long value) {
-    throw new IllegalArgumentException("cannot change value type from Double to Long");
-  }
+    @Override
+    public void setDoubleValue(double value) {
+        super.setLongValue(Double.doubleToRawLongBits(value));
+    }
+
+    @Override
+    public void setLongValue(long value) {
+        throw new IllegalArgumentException("cannot change value type from Double to Long");
+    }
 }

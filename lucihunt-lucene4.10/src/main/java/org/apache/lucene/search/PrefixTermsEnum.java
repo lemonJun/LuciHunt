@@ -31,19 +31,19 @@ import org.apache.lucene.util.StringHelper;
  */
 public class PrefixTermsEnum extends FilteredTermsEnum {
 
-  private final BytesRef prefixRef;
+    private final BytesRef prefixRef;
 
-  public PrefixTermsEnum(TermsEnum tenum, BytesRef prefixText) {
-    super(tenum);
-    setInitialSeekTerm(this.prefixRef = prefixText);
-  }
-
-  @Override
-  protected AcceptStatus accept(BytesRef term) {
-    if (StringHelper.startsWith(term, prefixRef)) {
-      return AcceptStatus.YES;
-    } else {
-      return AcceptStatus.END;
+    public PrefixTermsEnum(TermsEnum tenum, BytesRef prefixText) {
+        super(tenum);
+        setInitialSeekTerm(this.prefixRef = prefixText);
     }
-  }
+
+    @Override
+    protected AcceptStatus accept(BytesRef term) {
+        if (StringHelper.startsWith(term, prefixRef)) {
+            return AcceptStatus.YES;
+        } else {
+            return AcceptStatus.END;
+        }
+    }
 }

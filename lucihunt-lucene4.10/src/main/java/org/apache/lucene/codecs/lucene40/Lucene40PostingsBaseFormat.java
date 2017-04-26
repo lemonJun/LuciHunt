@@ -35,18 +35,18 @@ import org.apache.lucene.index.SegmentWriteState;
 @Deprecated
 public final class Lucene40PostingsBaseFormat extends PostingsBaseFormat {
 
-  /** Sole constructor. */
-  public Lucene40PostingsBaseFormat() {
-    super("Lucene40");
-  }
+    /** Sole constructor. */
+    public Lucene40PostingsBaseFormat() {
+        super("Lucene40");
+    }
 
-  @Override
-  public PostingsReaderBase postingsReaderBase(SegmentReadState state) throws IOException {
-    return new Lucene40PostingsReader(state.directory, state.fieldInfos, state.segmentInfo, state.context, state.segmentSuffix);
-  }
+    @Override
+    public PostingsReaderBase postingsReaderBase(SegmentReadState state) throws IOException {
+        return new Lucene40PostingsReader(state.directory, state.fieldInfos, state.segmentInfo, state.context, state.segmentSuffix);
+    }
 
-  @Override
-  public PostingsWriterBase postingsWriterBase(SegmentWriteState state) throws IOException {
-    throw new UnsupportedOperationException("this codec can only be used for reading");
-  }
+    @Override
+    public PostingsWriterBase postingsWriterBase(SegmentWriteState state) throws IOException {
+        throw new UnsupportedOperationException("this codec can only be used for reading");
+    }
 }

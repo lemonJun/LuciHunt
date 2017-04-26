@@ -34,27 +34,27 @@ import java.util.Collections;
  */
 public class ScoreCachingWrappingScorer extends FilterScorer {
 
-  private int curDoc = -1;
-  private float curScore;
-  
-  /** Creates a new instance by wrapping the given scorer. */
-  public ScoreCachingWrappingScorer(Scorer scorer) {
-    super(scorer);
-  }
+    private int curDoc = -1;
+    private float curScore;
 
-  @Override
-  public float score() throws IOException {
-    int doc = in.docID();
-    if (doc != curDoc) {
-      curScore = in.score();
-      curDoc = doc;
+    /** Creates a new instance by wrapping the given scorer. */
+    public ScoreCachingWrappingScorer(Scorer scorer) {
+        super(scorer);
     }
-    
-    return curScore;
-  }
 
-  @Override
-  public Collection<ChildScorer> getChildren() {
-    return Collections.singleton(new ChildScorer(in, "CACHED"));
-  }
+    @Override
+    public float score() throws IOException {
+        int doc = in.docID();
+        if (doc != curDoc) {
+            curScore = in.score();
+            curDoc = doc;
+        }
+
+        return curScore;
+    }
+
+    @Override
+    public Collection<ChildScorer> getChildren() {
+        return Collections.singleton(new ChildScorer(in, "CACHED"));
+    }
 }

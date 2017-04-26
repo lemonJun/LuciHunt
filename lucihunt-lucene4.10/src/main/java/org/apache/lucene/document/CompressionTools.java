@@ -33,118 +33,119 @@ import org.apache.lucene.util.UnicodeUtil;
 
 public class CompressionTools {
 
-  // Export only static methods
-  private CompressionTools() {}
-
-  /** Compresses the specified byte range using the
-   *  specified compressionLevel (constants are defined in
-   *  java.util.zip.Deflater). */
-  public static byte[] compress(byte[] value, int offset, int length, int compressionLevel) {
-
-    /* Create an expandable byte array to hold the compressed data.
-     * You cannot use an array that's the same size as the orginal because
-     * there is no guarantee that the compressed data will be smaller than
-     * the uncompressed data. */
-    ByteArrayOutputStream bos = new ByteArrayOutputStream(length);
-
-    Deflater compressor = new Deflater();
-
-    try {
-      compressor.setLevel(compressionLevel);
-      compressor.setInput(value, offset, length);
-      compressor.finish();
-
-      // Compress the data
-      final byte[] buf = new byte[1024];
-      while (!compressor.finished()) {
-        int count = compressor.deflate(buf);
-        bos.write(buf, 0, count);
-      }
-    } finally {
-      compressor.end();
+    // Export only static methods
+    private CompressionTools() {
     }
 
-    return bos.toByteArray();
-  }
+    /** Compresses the specified byte range using the
+     *  specified compressionLevel (constants are defined in
+     *  java.util.zip.Deflater). */
+    public static byte[] compress(byte[] value, int offset, int length, int compressionLevel) {
 
-  /** Compresses the specified byte range, with default BEST_COMPRESSION level */
-  public static byte[] compress(byte[] value, int offset, int length) {
-    return compress(value, offset, length, Deflater.BEST_COMPRESSION);
-  }
-  
-  /** Compresses all bytes in the array, with default BEST_COMPRESSION level */
-  public static byte[] compress(byte[] value) {
-    return compress(value, 0, value.length, Deflater.BEST_COMPRESSION);
-  }
+        /* Create an expandable byte array to hold the compressed data.
+         * You cannot use an array that's the same size as the orginal because
+         * there is no guarantee that the compressed data will be smaller than
+         * the uncompressed data. */
+        ByteArrayOutputStream bos = new ByteArrayOutputStream(length);
 
-  /** Compresses the String value, with default BEST_COMPRESSION level */
-  public static byte[] compressString(String value) {
-    return compressString(value, Deflater.BEST_COMPRESSION);
-  }
+        Deflater compressor = new Deflater();
 
-  /** Compresses the String value using the specified
-   *  compressionLevel (constants are defined in
-   *  java.util.zip.Deflater). */
-  public static byte[] compressString(String value, int compressionLevel) {
-    byte[] b = new byte[UnicodeUtil.MAX_UTF8_BYTES_PER_CHAR * value.length()];
-    final int len = UnicodeUtil.UTF16toUTF8(value, 0, value.length(), b);
-    return compress(b, 0, len, compressionLevel);
-  }
+        try {
+            compressor.setLevel(compressionLevel);
+            compressor.setInput(value, offset, length);
+            compressor.finish();
 
-  /** Decompress the byte array previously returned by
-   *  compress (referenced by the provided BytesRef) */
-  public static byte[] decompress(BytesRef bytes) throws DataFormatException {
-    return decompress(bytes.bytes, bytes.offset, bytes.length);
-  }
+            // Compress the data
+            final byte[] buf = new byte[1024];
+            while (!compressor.finished()) {
+                int count = compressor.deflate(buf);
+                bos.write(buf, 0, count);
+            }
+        } finally {
+            compressor.end();
+        }
 
-  /** Decompress the byte array previously returned by
-   *  compress */
-  public static byte[] decompress(byte[] value) throws DataFormatException {
-    return decompress(value, 0, value.length);
-  }
-
-  /** Decompress the byte array previously returned by
-   *  compress */
-  public static byte[] decompress(byte[] value, int offset, int length) throws DataFormatException {
-    // Create an expandable byte array to hold the decompressed data
-    ByteArrayOutputStream bos = new ByteArrayOutputStream(length);
-
-    Inflater decompressor = new Inflater();
-
-    try {
-      decompressor.setInput(value, offset, length);
-
-      // Decompress the data
-      final byte[] buf = new byte[1024];
-      while (!decompressor.finished()) {
-        int count = decompressor.inflate(buf);
-        bos.write(buf, 0, count);
-      }
-    } finally {  
-      decompressor.end();
+        return bos.toByteArray();
     }
-    
-    return bos.toByteArray();
-  }
 
-  /** Decompress the byte array previously returned by
-   *  compressString back into a String */
-  public static String decompressString(byte[] value) throws DataFormatException {
-    return decompressString(value, 0, value.length);
-  }
+    /** Compresses the specified byte range, with default BEST_COMPRESSION level */
+    public static byte[] compress(byte[] value, int offset, int length) {
+        return compress(value, offset, length, Deflater.BEST_COMPRESSION);
+    }
 
-  /** Decompress the byte array previously returned by
-   *  compressString back into a String */
-  public static String decompressString(byte[] value, int offset, int length) throws DataFormatException {
-    final byte[] bytes = decompress(value, offset, length);
-    final char[] result = new char[bytes.length];
-    final int len = UnicodeUtil.UTF8toUTF16(bytes, 0, bytes.length, result);
-    return new String(result, 0, len);
-  }
+    /** Compresses all bytes in the array, with default BEST_COMPRESSION level */
+    public static byte[] compress(byte[] value) {
+        return compress(value, 0, value.length, Deflater.BEST_COMPRESSION);
+    }
 
-  /** Decompress the byte array (referenced by the provided BytesRef) 
-   *  previously returned by compressString back into a String */
-  public static String decompressString(BytesRef bytes) throws DataFormatException {
-    return decompressString(bytes.bytes, bytes.offset, bytes.length);
-  }
+    /** Compresses the String value, with default BEST_COMPRESSION level */
+    public static byte[] compressString(String value) {
+        return compressString(value, Deflater.BEST_COMPRESSION);
+    }
+
+    /** Compresses the String value using the specified
+     *  compressionLevel (constants are defined in
+     *  java.util.zip.Deflater). */
+    public static byte[] compressString(String value, int compressionLevel) {
+        byte[] b = new byte[UnicodeUtil.MAX_UTF8_BYTES_PER_CHAR * value.length()];
+        final int len = UnicodeUtil.UTF16toUTF8(value, 0, value.length(), b);
+        return compress(b, 0, len, compressionLevel);
+    }
+
+    /** Decompress the byte array previously returned by
+     *  compress (referenced by the provided BytesRef) */
+    public static byte[] decompress(BytesRef bytes) throws DataFormatException {
+        return decompress(bytes.bytes, bytes.offset, bytes.length);
+    }
+
+    /** Decompress the byte array previously returned by
+     *  compress */
+    public static byte[] decompress(byte[] value) throws DataFormatException {
+        return decompress(value, 0, value.length);
+    }
+
+    /** Decompress the byte array previously returned by
+     *  compress */
+    public static byte[] decompress(byte[] value, int offset, int length) throws DataFormatException {
+        // Create an expandable byte array to hold the decompressed data
+        ByteArrayOutputStream bos = new ByteArrayOutputStream(length);
+
+        Inflater decompressor = new Inflater();
+
+        try {
+            decompressor.setInput(value, offset, length);
+
+            // Decompress the data
+            final byte[] buf = new byte[1024];
+            while (!decompressor.finished()) {
+                int count = decompressor.inflate(buf);
+                bos.write(buf, 0, count);
+            }
+        } finally {
+            decompressor.end();
+        }
+
+        return bos.toByteArray();
+    }
+
+    /** Decompress the byte array previously returned by
+     *  compressString back into a String */
+    public static String decompressString(byte[] value) throws DataFormatException {
+        return decompressString(value, 0, value.length);
+    }
+
+    /** Decompress the byte array previously returned by
+     *  compressString back into a String */
+    public static String decompressString(byte[] value, int offset, int length) throws DataFormatException {
+        final byte[] bytes = decompress(value, offset, length);
+        final char[] result = new char[bytes.length];
+        final int len = UnicodeUtil.UTF8toUTF16(bytes, 0, bytes.length, result);
+        return new String(result, 0, len);
+    }
+
+    /** Decompress the byte array (referenced by the provided BytesRef) 
+     *  previously returned by compressString back into a String */
+    public static String decompressString(BytesRef bytes) throws DataFormatException {
+        return decompressString(bytes.bytes, bytes.offset, bytes.length);
+    }
 }

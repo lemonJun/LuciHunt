@@ -38,13 +38,13 @@ import org.apache.lucene.index.NumericDocValues;
 @Deprecated
 public class PackedLongDocValuesField extends NumericDocValuesField {
 
-  /** 
-   * Creates a new DocValues field with the specified long value 
-   * @param name field name
-   * @param value 64-bit long value
-   * @throws IllegalArgumentException if the field name is null
-   */
-  public PackedLongDocValuesField(String name, long value) {
-    super(name, value);
-  }
+    /** 
+     * Creates a new DocValues field with the specified long value 
+     * @param name field name
+     * @param value 64-bit long value
+     * @throws IllegalArgumentException if the field name is null
+     */
+    public PackedLongDocValuesField(String name, long value) {
+        super(name, value);
+    }
 }

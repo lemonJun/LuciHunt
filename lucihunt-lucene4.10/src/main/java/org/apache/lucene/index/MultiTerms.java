@@ -34,192 +34,191 @@ import org.apache.lucene.util.automaton.CompiledAutomaton;
  */
 
 public final class MultiTerms extends Terms {
-  private final Terms[] subs;
-  private final ReaderSlice[] subSlices;
-  private final Comparator<BytesRef> termComp;
-  private final boolean hasFreqs;
-  private final boolean hasOffsets;
-  private final boolean hasPositions;
-  private final boolean hasPayloads;
+    private final Terms[] subs;
+    private final ReaderSlice[] subSlices;
+    private final Comparator<BytesRef> termComp;
+    private final boolean hasFreqs;
+    private final boolean hasOffsets;
+    private final boolean hasPositions;
+    private final boolean hasPayloads;
 
-  /** Sole constructor.
-   *
-   * @param subs The {@link Terms} instances of all sub-readers. 
-   * @param subSlices A parallel array (matching {@code
-   *        subs}) describing the sub-reader slices.
-   */
-  public MultiTerms(Terms[] subs, ReaderSlice[] subSlices) throws IOException {
-    this.subs = subs;
-    this.subSlices = subSlices;
-    
-    Comparator<BytesRef> _termComp = null;
-    assert subs.length > 0 : "inefficient: don't use MultiTerms over one sub";
-    boolean _hasFreqs = true;
-    boolean _hasOffsets = true;
-    boolean _hasPositions = true;
-    boolean _hasPayloads = false;
-    for(int i=0;i<subs.length;i++) {
-      if (_termComp == null) {
-        _termComp = subs[i].getComparator();
-      } else {
-        // We cannot merge sub-readers that have
-        // different TermComps
-        final Comparator<BytesRef> subTermComp = subs[i].getComparator();
-        if (subTermComp != null && !subTermComp.equals(_termComp)) {
-          throw new IllegalStateException("sub-readers have different BytesRef.Comparators; cannot merge");
+    /** Sole constructor.
+     *
+     * @param subs The {@link Terms} instances of all sub-readers. 
+     * @param subSlices A parallel array (matching {@code
+     *        subs}) describing the sub-reader slices.
+     */
+    public MultiTerms(Terms[] subs, ReaderSlice[] subSlices) throws IOException {
+        this.subs = subs;
+        this.subSlices = subSlices;
+
+        Comparator<BytesRef> _termComp = null;
+        assert subs.length > 0 : "inefficient: don't use MultiTerms over one sub";
+        boolean _hasFreqs = true;
+        boolean _hasOffsets = true;
+        boolean _hasPositions = true;
+        boolean _hasPayloads = false;
+        for (int i = 0; i < subs.length; i++) {
+            if (_termComp == null) {
+                _termComp = subs[i].getComparator();
+            } else {
+                // We cannot merge sub-readers that have
+                // different TermComps
+                final Comparator<BytesRef> subTermComp = subs[i].getComparator();
+                if (subTermComp != null && !subTermComp.equals(_termComp)) {
+                    throw new IllegalStateException("sub-readers have different BytesRef.Comparators; cannot merge");
+                }
+            }
+            _hasFreqs &= subs[i].hasFreqs();
+            _hasOffsets &= subs[i].hasOffsets();
+            _hasPositions &= subs[i].hasPositions();
+            _hasPayloads |= subs[i].hasPayloads();
         }
-      }
-      _hasFreqs &= subs[i].hasFreqs();
-      _hasOffsets &= subs[i].hasOffsets();
-      _hasPositions &= subs[i].hasPositions();
-      _hasPayloads |= subs[i].hasPayloads();
+
+        termComp = _termComp;
+        hasFreqs = _hasFreqs;
+        hasOffsets = _hasOffsets;
+        hasPositions = _hasPositions;
+        hasPayloads = hasPositions && _hasPayloads; // if all subs have pos, and at least one has payloads.
     }
 
-    termComp = _termComp;
-    hasFreqs = _hasFreqs;
-    hasOffsets = _hasOffsets;
-    hasPositions = _hasPositions;
-    hasPayloads = hasPositions && _hasPayloads; // if all subs have pos, and at least one has payloads.
-  }
-
-  /** Expert: returns the Terms being merged. */
-  public Terms[] getSubTerms() {
-    return subs;
-  }
-
-  /** Expert: returns  pointers to the sub-readers corresponding to the Terms being merged. */
-  public ReaderSlice[] getSubSlices() {
-    return subSlices;
-  }
-
-  @Override
-  public TermsEnum intersect(CompiledAutomaton compiled, BytesRef startTerm) throws IOException {
-    final List<MultiTermsEnum.TermsEnumIndex> termsEnums = new ArrayList<>();
-    for(int i=0;i<subs.length;i++) {
-      final TermsEnum termsEnum = subs[i].intersect(compiled, startTerm);
-      if (termsEnum != null) {
-        termsEnums.add(new MultiTermsEnum.TermsEnumIndex(termsEnum, i));
-      }
+    /** Expert: returns the Terms being merged. */
+    public Terms[] getSubTerms() {
+        return subs;
     }
 
-    if (termsEnums.size() > 0) {
-      return new MultiTermsEnum(subSlices).reset(termsEnums.toArray(MultiTermsEnum.TermsEnumIndex.EMPTY_ARRAY));
-    } else {
-      return TermsEnum.EMPTY;
-    }
-  }
-  
-  @Override
-  public BytesRef getMin() throws IOException {
-    BytesRef minTerm = null;
-    for(Terms terms : subs) {
-      BytesRef term = terms.getMin();
-      if (minTerm == null || term.compareTo(minTerm) < 0) {
-        minTerm = term;
-      }
+    /** Expert: returns  pointers to the sub-readers corresponding to the Terms being merged. */
+    public ReaderSlice[] getSubSlices() {
+        return subSlices;
     }
 
-    return minTerm;
-  }
+    @Override
+    public TermsEnum intersect(CompiledAutomaton compiled, BytesRef startTerm) throws IOException {
+        final List<MultiTermsEnum.TermsEnumIndex> termsEnums = new ArrayList<>();
+        for (int i = 0; i < subs.length; i++) {
+            final TermsEnum termsEnum = subs[i].intersect(compiled, startTerm);
+            if (termsEnum != null) {
+                termsEnums.add(new MultiTermsEnum.TermsEnumIndex(termsEnum, i));
+            }
+        }
 
-  @Override
-  public BytesRef getMax() throws IOException {
-    BytesRef maxTerm = null;
-    for(Terms terms : subs) {
-      BytesRef term = terms.getMax();
-      if (maxTerm == null || term.compareTo(maxTerm) > 0) {
-        maxTerm = term;
-      }
+        if (termsEnums.size() > 0) {
+            return new MultiTermsEnum(subSlices).reset(termsEnums.toArray(MultiTermsEnum.TermsEnumIndex.EMPTY_ARRAY));
+        } else {
+            return TermsEnum.EMPTY;
+        }
     }
 
-    return maxTerm;
-  }
+    @Override
+    public BytesRef getMin() throws IOException {
+        BytesRef minTerm = null;
+        for (Terms terms : subs) {
+            BytesRef term = terms.getMin();
+            if (minTerm == null || term.compareTo(minTerm) < 0) {
+                minTerm = term;
+            }
+        }
 
-  @Override
-  public TermsEnum iterator(TermsEnum reuse) throws IOException {
-
-    final List<MultiTermsEnum.TermsEnumIndex> termsEnums = new ArrayList<>();
-    for(int i=0;i<subs.length;i++) {
-      final TermsEnum termsEnum = subs[i].iterator(null);
-      if (termsEnum != null) {
-        termsEnums.add(new MultiTermsEnum.TermsEnumIndex(termsEnum, i));
-      }
+        return minTerm;
     }
 
-    if (termsEnums.size() > 0) {
-      return new MultiTermsEnum(subSlices).reset(termsEnums.toArray(MultiTermsEnum.TermsEnumIndex.EMPTY_ARRAY));
-    } else {
-      return TermsEnum.EMPTY;
+    @Override
+    public BytesRef getMax() throws IOException {
+        BytesRef maxTerm = null;
+        for (Terms terms : subs) {
+            BytesRef term = terms.getMax();
+            if (maxTerm == null || term.compareTo(maxTerm) > 0) {
+                maxTerm = term;
+            }
+        }
+
+        return maxTerm;
     }
-  }
 
-  @Override
-  public long size() {
-    return -1;
-  }
+    @Override
+    public TermsEnum iterator(TermsEnum reuse) throws IOException {
 
-  @Override
-  public long getSumTotalTermFreq() throws IOException {
-    long sum = 0;
-    for(Terms terms : subs) {
-      final long v = terms.getSumTotalTermFreq();
-      if (v == -1) {
+        final List<MultiTermsEnum.TermsEnumIndex> termsEnums = new ArrayList<>();
+        for (int i = 0; i < subs.length; i++) {
+            final TermsEnum termsEnum = subs[i].iterator(null);
+            if (termsEnum != null) {
+                termsEnums.add(new MultiTermsEnum.TermsEnumIndex(termsEnum, i));
+            }
+        }
+
+        if (termsEnums.size() > 0) {
+            return new MultiTermsEnum(subSlices).reset(termsEnums.toArray(MultiTermsEnum.TermsEnumIndex.EMPTY_ARRAY));
+        } else {
+            return TermsEnum.EMPTY;
+        }
+    }
+
+    @Override
+    public long size() {
         return -1;
-      }
-      sum += v;
     }
-    return sum;
-  }
-  
-  @Override
-  public long getSumDocFreq() throws IOException {
-    long sum = 0;
-    for(Terms terms : subs) {
-      final long v = terms.getSumDocFreq();
-      if (v == -1) {
-        return -1;
-      }
-      sum += v;
+
+    @Override
+    public long getSumTotalTermFreq() throws IOException {
+        long sum = 0;
+        for (Terms terms : subs) {
+            final long v = terms.getSumTotalTermFreq();
+            if (v == -1) {
+                return -1;
+            }
+            sum += v;
+        }
+        return sum;
     }
-    return sum;
-  }
-  
-  @Override
-  public int getDocCount() throws IOException {
-    int sum = 0;
-    for(Terms terms : subs) {
-      final int v = terms.getDocCount();
-      if (v == -1) {
-        return -1;
-      }
-      sum += v;
+
+    @Override
+    public long getSumDocFreq() throws IOException {
+        long sum = 0;
+        for (Terms terms : subs) {
+            final long v = terms.getSumDocFreq();
+            if (v == -1) {
+                return -1;
+            }
+            sum += v;
+        }
+        return sum;
     }
-    return sum;
-  }
 
-  @Override
-  public Comparator<BytesRef> getComparator() {
-    return termComp;
-  }
+    @Override
+    public int getDocCount() throws IOException {
+        int sum = 0;
+        for (Terms terms : subs) {
+            final int v = terms.getDocCount();
+            if (v == -1) {
+                return -1;
+            }
+            sum += v;
+        }
+        return sum;
+    }
 
-  @Override
-  public boolean hasFreqs() {
-    return hasFreqs;
-  }
+    @Override
+    public Comparator<BytesRef> getComparator() {
+        return termComp;
+    }
 
-  @Override
-  public boolean hasOffsets() {
-    return hasOffsets;
-  }
+    @Override
+    public boolean hasFreqs() {
+        return hasFreqs;
+    }
 
-  @Override
-  public boolean hasPositions() {
-    return hasPositions;
-  }
-  
-  @Override
-  public boolean hasPayloads() {
-    return hasPayloads;
-  }
+    @Override
+    public boolean hasOffsets() {
+        return hasOffsets;
+    }
+
+    @Override
+    public boolean hasPositions() {
+        return hasPositions;
+    }
+
+    @Override
+    public boolean hasPayloads() {
+        return hasPayloads;
+    }
 }
-

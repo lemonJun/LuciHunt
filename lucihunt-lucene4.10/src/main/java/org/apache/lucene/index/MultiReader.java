@@ -38,48 +38,50 @@ import java.io.IOException;
  * (non-Lucene) objects instead.
  */
 public class MultiReader extends BaseCompositeReader<IndexReader> {
-  private final boolean closeSubReaders;
-  
- /**
-  * <p>Construct a MultiReader aggregating the named set of (sub)readers.
-  * <p>Note that all subreaders are closed if this Multireader is closed.</p>
-  * @param subReaders set of (sub)readers
-  */
-  public MultiReader(IndexReader... subReaders) {
-    this(subReaders, true);
-  }
+    private final boolean closeSubReaders;
 
-  /**
-   * <p>Construct a MultiReader aggregating the named set of (sub)readers.
-   * @param subReaders set of (sub)readers; this array will be cloned.
-   * @param closeSubReaders indicates whether the subreaders should be closed
-   * when this MultiReader is closed
-   */
-  public MultiReader(IndexReader[] subReaders, boolean closeSubReaders) {
-    super(subReaders.clone());
-    this.closeSubReaders = closeSubReaders;
-    if (!closeSubReaders) {
-      for (int i = 0; i < subReaders.length; i++) {
-        subReaders[i].incRef();
-      }
+    /**
+     * <p>Construct a MultiReader aggregating the named set of (sub)readers.
+     * <p>Note that all subreaders are closed if this Multireader is closed.</p>
+     * @param subReaders set of (sub)readers
+     */
+    public MultiReader(IndexReader... subReaders) {
+        this(subReaders, true);
     }
-  }
 
-  @Override
-  protected synchronized void doClose() throws IOException {
-    IOException ioe = null;
-    for (final IndexReader r : getSequentialSubReaders()) {
-      try {
-        if (closeSubReaders) {
-          r.close();
-        } else {
-          r.decRef();
+    /**
+     * <p>Construct a MultiReader aggregating the named set of (sub)readers.
+     * @param subReaders set of (sub)readers; this array will be cloned.
+     * @param closeSubReaders indicates whether the subreaders should be closed
+     * when this MultiReader is closed
+     */
+    public MultiReader(IndexReader[] subReaders, boolean closeSubReaders) {
+        super(subReaders.clone());
+        this.closeSubReaders = closeSubReaders;
+        if (!closeSubReaders) {
+            for (int i = 0; i < subReaders.length; i++) {
+                subReaders[i].incRef();
+            }
         }
-      } catch (IOException e) {
-        if (ioe == null) ioe = e;
-      }
     }
-    // throw the first exception
-    if (ioe != null) throw ioe;
-  }
+
+    @Override
+    protected synchronized void doClose() throws IOException {
+        IOException ioe = null;
+        for (final IndexReader r : getSequentialSubReaders()) {
+            try {
+                if (closeSubReaders) {
+                    r.close();
+                } else {
+                    r.decRef();
+                }
+            } catch (IOException e) {
+                if (ioe == null)
+                    ioe = e;
+            }
+        }
+        // throw the first exception
+        if (ioe != null)
+            throw ioe;
+    }
 }

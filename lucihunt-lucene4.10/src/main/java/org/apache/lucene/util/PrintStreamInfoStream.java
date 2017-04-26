@@ -29,39 +29,39 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @lucene.internal
  */
 public class PrintStreamInfoStream extends InfoStream {
-  // Used for printing messages
-  private static final AtomicInteger MESSAGE_ID = new AtomicInteger();
-  protected final int messageID;
-  
-  protected final PrintStream stream;
-  
-  public PrintStreamInfoStream(PrintStream stream) {
-    this(stream, MESSAGE_ID.getAndIncrement());
-  }
-  
-  public PrintStreamInfoStream(PrintStream stream, int messageID) {
-    this.stream = stream;
-    this.messageID = messageID;
-  }
-  
-  @Override
-  public void message(String component, String message) {
-    stream.println(component + " " + messageID + " [" + new Date() + "; " + Thread.currentThread().getName() + "]: " + message);    
-  }
+    // Used for printing messages
+    private static final AtomicInteger MESSAGE_ID = new AtomicInteger();
+    protected final int messageID;
 
-  @Override
-  public boolean isEnabled(String component) {
-    return true;
-  }
+    protected final PrintStream stream;
 
-  @Override
-  public void close() throws IOException {
-    if (!isSystemStream()) {
-      stream.close();
+    public PrintStreamInfoStream(PrintStream stream) {
+        this(stream, MESSAGE_ID.getAndIncrement());
     }
-  }
-  
-  public boolean isSystemStream() {
-    return stream == System.out || stream == System.err;
-  }
+
+    public PrintStreamInfoStream(PrintStream stream, int messageID) {
+        this.stream = stream;
+        this.messageID = messageID;
+    }
+
+    @Override
+    public void message(String component, String message) {
+        stream.println(component + " " + messageID + " [" + new Date() + "; " + Thread.currentThread().getName() + "]: " + message);
+    }
+
+    @Override
+    public boolean isEnabled(String component) {
+        return true;
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (!isSystemStream()) {
+            stream.close();
+        }
+    }
+
+    public boolean isSystemStream() {
+        return stream == System.out || stream == System.err;
+    }
 }

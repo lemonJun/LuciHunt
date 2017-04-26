@@ -28,80 +28,80 @@ import org.apache.lucene.util.IOUtils;
 
 final class FreqProxTermsWriter extends TermsHash {
 
-  public FreqProxTermsWriter(DocumentsWriterPerThread docWriter, TermsHash termVectors) {
-    super(docWriter, true, termVectors);
-  }
-
-  @Override
-  public void flush(Map<String,TermsHashPerField> fieldsToFlush, final SegmentWriteState state) throws IOException {
-    super.flush(fieldsToFlush, state);
-
-    // Gather all fields that saw any postings:
-    List<FreqProxTermsWriterPerField> allFields = new ArrayList<>();
-
-    for (TermsHashPerField f : fieldsToFlush.values()) {
-      final FreqProxTermsWriterPerField perField = (FreqProxTermsWriterPerField) f;
-      if (perField.bytesHash.size() > 0) {
-        allFields.add(perField);
-      }
+    public FreqProxTermsWriter(DocumentsWriterPerThread docWriter, TermsHash termVectors) {
+        super(docWriter, true, termVectors);
     }
 
-    final int numAllFields = allFields.size();
+    @Override
+    public void flush(Map<String, TermsHashPerField> fieldsToFlush, final SegmentWriteState state) throws IOException {
+        super.flush(fieldsToFlush, state);
 
-    // Sort by field name
-    CollectionUtil.introSort(allFields);
+        // Gather all fields that saw any postings:
+        List<FreqProxTermsWriterPerField> allFields = new ArrayList<>();
 
-    final FieldsConsumer consumer = state.segmentInfo.getCodec().postingsFormat().fieldsConsumer(state);
+        for (TermsHashPerField f : fieldsToFlush.values()) {
+            final FreqProxTermsWriterPerField perField = (FreqProxTermsWriterPerField) f;
+            if (perField.bytesHash.size() > 0) {
+                allFields.add(perField);
+            }
+        }
 
-    boolean success = false;
+        final int numAllFields = allFields.size();
 
-    try {
-      TermsHash termsHash = null;
-      
-      /*
-    Current writer chain:
-      FieldsConsumer
-        -> IMPL: FormatPostingsTermsDictWriter
-          -> TermsConsumer
+        // Sort by field name
+        CollectionUtil.introSort(allFields);
+
+        final FieldsConsumer consumer = state.segmentInfo.getCodec().postingsFormat().fieldsConsumer(state);
+
+        boolean success = false;
+
+        try {
+            TermsHash termsHash = null;
+
+            /*
+            Current writer chain:
+            FieldsConsumer
+              -> IMPL: FormatPostingsTermsDictWriter
+                -> TermsConsumer
             -> IMPL: FormatPostingsTermsDictWriter.TermsWriter
               -> DocsConsumer
                 -> IMPL: FormatPostingsDocsWriter
                   -> PositionsConsumer
                     -> IMPL: FormatPostingsPositionsWriter
-       */
-      
-      for (int fieldNumber = 0; fieldNumber < numAllFields; fieldNumber++) {
-        final FieldInfo fieldInfo = allFields.get(fieldNumber).fieldInfo;
-        
-        final FreqProxTermsWriterPerField fieldWriter = allFields.get(fieldNumber);
+             */
 
-        // If this field has postings then add them to the
-        // segment
-        fieldWriter.flush(fieldInfo.name, consumer, state);
-        
-        TermsHashPerField perField = fieldWriter;
-        assert termsHash == null || termsHash == perField.termsHash;
-        termsHash = perField.termsHash;
-        int numPostings = perField.bytesHash.size();
-        perField.reset();
-        fieldWriter.reset();
-      }
-      
-      if (termsHash != null) {
-        termsHash.reset();
-      }
-      success = true;
-    } finally {
-      if (success) {
-        IOUtils.close(consumer);
-      } else {
-        IOUtils.closeWhileHandlingException(consumer);
-      }
+            for (int fieldNumber = 0; fieldNumber < numAllFields; fieldNumber++) {
+                final FieldInfo fieldInfo = allFields.get(fieldNumber).fieldInfo;
+
+                final FreqProxTermsWriterPerField fieldWriter = allFields.get(fieldNumber);
+
+                // If this field has postings then add them to the
+                // segment
+                fieldWriter.flush(fieldInfo.name, consumer, state);
+
+                TermsHashPerField perField = fieldWriter;
+                assert termsHash == null || termsHash == perField.termsHash;
+                termsHash = perField.termsHash;
+                int numPostings = perField.bytesHash.size();
+                perField.reset();
+                fieldWriter.reset();
+            }
+
+            if (termsHash != null) {
+                termsHash.reset();
+            }
+            success = true;
+        } finally {
+            if (success) {
+                IOUtils.close(consumer);
+            } else {
+                IOUtils.closeWhileHandlingException(consumer);
+            }
+        }
     }
-  }
 
-  @Override
-  public TermsHashPerField addField(FieldInvertState invertState, FieldInfo fieldInfo) {
-    return new FreqProxTermsWriterPerField(invertState, this, fieldInfo, nextTermsHash.addField(invertState, fieldInfo));
-  }
+    @Override
+    public TermsHashPerField addField(FieldInvertState invertState, FieldInfo fieldInfo) {
+        return new FreqProxTermsWriterPerField(invertState, this, fieldInfo, nextTermsHash.addField(invertState, fieldInfo));
+    }
 }

@@ -27,68 +27,61 @@ import org.apache.lucene.store.IOContext;
  * @lucene.experimental
  */
 public class SegmentReadState {
-  /** {@link Directory} where this segment is read from. */ 
-  public final Directory directory;
+    /** {@link Directory} where this segment is read from. */
+    public final Directory directory;
 
-  /** {@link SegmentInfo} describing this segment. */
-  public final SegmentInfo segmentInfo;
+    /** {@link SegmentInfo} describing this segment. */
+    public final SegmentInfo segmentInfo;
 
-  /** {@link FieldInfos} describing all fields in this
-   *  segment. */
-  public final FieldInfos fieldInfos;
+    /** {@link FieldInfos} describing all fields in this
+     *  segment. */
+    public final FieldInfos fieldInfos;
 
-  /** {@link IOContext} to pass to {@link
-   *  Directory#openInput(String,IOContext)}. */
-  public final IOContext context;
+    /** {@link IOContext} to pass to {@link
+     *  Directory#openInput(String,IOContext)}. */
+    public final IOContext context;
 
-  /** The {@code termInfosIndexDivisor} to use, if
-   *  appropriate (not all {@link PostingsFormat}s support
-   *  it; in particular the current default does not).
-   *
-   * <p>  NOTE: if this is &lt; 0, that means "defer terms index
-   *  load until needed".  But if the codec must load the
-   *  terms index on init (preflex is the only once currently
-   *  that must do so), then it should negate this value to
-   *  get the app's terms divisor */
-  public int termsIndexDivisor;
+    /** The {@code termInfosIndexDivisor} to use, if
+     *  appropriate (not all {@link PostingsFormat}s support
+     *  it; in particular the current default does not).
+     *
+     * <p>  NOTE: if this is &lt; 0, that means "defer terms index
+     *  load until needed".  But if the codec must load the
+     *  terms index on init (preflex is the only once currently
+     *  that must do so), then it should negate this value to
+     *  get the app's terms divisor */
+    public int termsIndexDivisor;
 
-  /** Unique suffix for any postings files read for this
-   *  segment.  {@link PerFieldPostingsFormat} sets this for
-   *  each of the postings formats it wraps.  If you create
-   *  a new {@link PostingsFormat} then any files you
-   *  write/read must be derived using this suffix (use
-   *  {@link IndexFileNames#segmentFileName(String,String,String)}). */
-  public final String segmentSuffix;
+    /** Unique suffix for any postings files read for this
+     *  segment.  {@link PerFieldPostingsFormat} sets this for
+     *  each of the postings formats it wraps.  If you create
+     *  a new {@link PostingsFormat} then any files you
+     *  write/read must be derived using this suffix (use
+     *  {@link IndexFileNames#segmentFileName(String,String,String)}). */
+    public final String segmentSuffix;
 
-  /** Create a {@code SegmentReadState}. */
-  public SegmentReadState(Directory dir, SegmentInfo info,
-      FieldInfos fieldInfos, IOContext context, int termsIndexDivisor) {
-    this(dir, info, fieldInfos,  context, termsIndexDivisor, "");
-  }
-  
-  /** Create a {@code SegmentReadState}. */
-  public SegmentReadState(Directory dir,
-                          SegmentInfo info,
-                          FieldInfos fieldInfos,
-                          IOContext context,
-                          int termsIndexDivisor,
-                          String segmentSuffix) {
-    this.directory = dir;
-    this.segmentInfo = info;
-    this.fieldInfos = fieldInfos;
-    this.context = context;
-    this.termsIndexDivisor = termsIndexDivisor;
-    this.segmentSuffix = segmentSuffix;
-  }
+    /** Create a {@code SegmentReadState}. */
+    public SegmentReadState(Directory dir, SegmentInfo info, FieldInfos fieldInfos, IOContext context, int termsIndexDivisor) {
+        this(dir, info, fieldInfos, context, termsIndexDivisor, "");
+    }
 
-  /** Create a {@code SegmentReadState}. */
-  public SegmentReadState(SegmentReadState other,
-                          String newSegmentSuffix) {
-    this.directory = other.directory;
-    this.segmentInfo = other.segmentInfo;
-    this.fieldInfos = other.fieldInfos;
-    this.context = other.context;
-    this.termsIndexDivisor = other.termsIndexDivisor;
-    this.segmentSuffix = newSegmentSuffix;
-  }
+    /** Create a {@code SegmentReadState}. */
+    public SegmentReadState(Directory dir, SegmentInfo info, FieldInfos fieldInfos, IOContext context, int termsIndexDivisor, String segmentSuffix) {
+        this.directory = dir;
+        this.segmentInfo = info;
+        this.fieldInfos = fieldInfos;
+        this.context = context;
+        this.termsIndexDivisor = termsIndexDivisor;
+        this.segmentSuffix = segmentSuffix;
+    }
+
+    /** Create a {@code SegmentReadState}. */
+    public SegmentReadState(SegmentReadState other, String newSegmentSuffix) {
+        this.directory = other.directory;
+        this.segmentInfo = other.segmentInfo;
+        this.fieldInfos = other.fieldInfos;
+        this.context = other.context;
+        this.termsIndexDivisor = other.termsIndexDivisor;
+        this.segmentSuffix = newSegmentSuffix;
+    }
 }

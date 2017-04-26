@@ -17,7 +17,7 @@ package org.apache.lucene.index;
  * limitations under the License.
  */
 
-import org.apache.lucene.search.MultiTermQuery;  // javadocs
+import org.apache.lucene.search.MultiTermQuery; // javadocs
 import org.apache.lucene.util.BytesRef;
 
 /**
@@ -29,23 +29,23 @@ import org.apache.lucene.util.BytesRef;
  * MultiTermQuery#getRewriteMethod}.
  */
 public final class SingleTermsEnum extends FilteredTermsEnum {
-  private final BytesRef singleRef;
-  
-  /**
-   * Creates a new <code>SingleTermsEnum</code>.
-   * <p>
-   * After calling the constructor the enumeration is already pointing to the term,
-   * if it exists.
-   */
-  public SingleTermsEnum(TermsEnum tenum, BytesRef termText) {
-    super(tenum);
-    singleRef = termText;
-    setInitialSeekTerm(termText);
-  }
+    private final BytesRef singleRef;
 
-  @Override
-  protected AcceptStatus accept(BytesRef term) {
-    return term.equals(singleRef) ? AcceptStatus.YES : AcceptStatus.END;
-  }
-  
+    /**
+     * Creates a new <code>SingleTermsEnum</code>.
+     * <p>
+     * After calling the constructor the enumeration is already pointing to the term,
+     * if it exists.
+     */
+    public SingleTermsEnum(TermsEnum tenum, BytesRef termText) {
+        super(tenum);
+        singleRef = termText;
+        setInitialSeekTerm(termText);
+    }
+
+    @Override
+    protected AcceptStatus accept(BytesRef term) {
+        return term.equals(singleRef) ? AcceptStatus.YES : AcceptStatus.END;
+    }
+
 }

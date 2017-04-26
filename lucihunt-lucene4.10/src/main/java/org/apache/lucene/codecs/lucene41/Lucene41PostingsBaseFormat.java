@@ -34,18 +34,18 @@ import org.apache.lucene.index.SegmentWriteState;
 // TODO: should these also be named / looked up via SPI?
 public final class Lucene41PostingsBaseFormat extends PostingsBaseFormat {
 
-  /** Sole constructor. */
-  public Lucene41PostingsBaseFormat() {
-    super("Lucene41");
-  }
+    /** Sole constructor. */
+    public Lucene41PostingsBaseFormat() {
+        super("Lucene41");
+    }
 
-  @Override
-  public PostingsReaderBase postingsReaderBase(SegmentReadState state) throws IOException {
-    return new Lucene41PostingsReader(state.directory, state.fieldInfos, state.segmentInfo, state.context, state.segmentSuffix);
-  }
+    @Override
+    public PostingsReaderBase postingsReaderBase(SegmentReadState state) throws IOException {
+        return new Lucene41PostingsReader(state.directory, state.fieldInfos, state.segmentInfo, state.context, state.segmentSuffix);
+    }
 
-  @Override
-  public PostingsWriterBase postingsWriterBase(SegmentWriteState state) throws IOException {
-    return new Lucene41PostingsWriter(state);
-  }
+    @Override
+    public PostingsWriterBase postingsWriterBase(SegmentWriteState state) throws IOException {
+        return new Lucene41PostingsWriter(state);
+    }
 }

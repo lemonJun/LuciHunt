@@ -26,22 +26,24 @@ import java.util.List;
  */
 public final class NoDeletionPolicy extends IndexDeletionPolicy {
 
-  /** The single instance of this class. */
-  public static final IndexDeletionPolicy INSTANCE = new NoDeletionPolicy();
-  
-  private NoDeletionPolicy() {
-    // keep private to avoid instantiation
-  }
-  
-  @Override
-  public void onCommit(List<? extends IndexCommit> commits) {}
+    /** The single instance of this class. */
+    public static final IndexDeletionPolicy INSTANCE = new NoDeletionPolicy();
 
-  @Override
-  public void onInit(List<? extends IndexCommit> commits) {}
+    private NoDeletionPolicy() {
+        // keep private to avoid instantiation
+    }
 
-  @Override
-  public IndexDeletionPolicy clone() {
-    return this;
-  }
+    @Override
+    public void onCommit(List<? extends IndexCommit> commits) {
+    }
+
+    @Override
+    public void onInit(List<? extends IndexCommit> commits) {
+    }
+
+    @Override
+    public IndexDeletionPolicy clone() {
+        return this;
+    }
 
 }

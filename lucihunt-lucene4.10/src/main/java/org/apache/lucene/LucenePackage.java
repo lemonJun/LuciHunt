@@ -20,10 +20,11 @@ package org.apache.lucene;
 /** Lucene's package information, including version. **/
 public final class LucenePackage {
 
-  private LucenePackage() {}                      // can't construct
+    private LucenePackage() {
+    } // can't construct
 
-  /** Return Lucene's package, including version information. */
-  public static Package get() {
-    return LucenePackage.class.getPackage();
-  }
+    /** Return Lucene's package, including version information. */
+    public static Package get() {
+        return LucenePackage.class.getPackage();
+    }
 }

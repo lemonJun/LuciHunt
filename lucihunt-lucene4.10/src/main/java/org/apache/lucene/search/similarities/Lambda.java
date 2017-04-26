@@ -26,24 +26,26 @@ import org.apache.lucene.search.Explanation;
  * @lucene.experimental
  */
 public abstract class Lambda {
-  
-  /**
-   * Sole constructor. (For invocation by subclass 
-   * constructors, typically implicit.)
-   */
-  public Lambda() {}
 
-  /** Computes the lambda parameter. */
-  public abstract float lambda(BasicStats stats);
-  /** Explains the lambda parameter. */
-  public abstract Explanation explain(BasicStats stats);
-  
-  /**
-   * Subclasses must override this method to return the code of the lambda
-   * formula. Since the original paper is not very clear on this matter, and
-   * also uses the DFR naming scheme incorrectly, the codes here were chosen
-   * arbitrarily.
-   */
-  @Override
-  public abstract String toString();
+    /**
+     * Sole constructor. (For invocation by subclass 
+     * constructors, typically implicit.)
+     */
+    public Lambda() {
+    }
+
+    /** Computes the lambda parameter. */
+    public abstract float lambda(BasicStats stats);
+
+    /** Explains the lambda parameter. */
+    public abstract Explanation explain(BasicStats stats);
+
+    /**
+     * Subclasses must override this method to return the code of the lambda
+     * formula. Since the original paper is not very clear on this matter, and
+     * also uses the DFR naming scheme incorrectly, the codes here were chosen
+     * arbitrarily.
+     */
+    @Override
+    public abstract String toString();
 }

@@ -22,25 +22,26 @@ package org.apache.lucene.index;
  * according to {@link Long#compare(long, long)}.
  */
 public abstract class SortedNumericDocValues {
-  
-  /** Sole constructor. (For invocation by subclass 
-   * constructors, typically implicit.) */
-  protected SortedNumericDocValues() {}
 
-  /** 
-   * Positions to the specified document 
-   */
-  public abstract void setDocument(int doc);
-  
-  /** 
-   * Retrieve the value for the current document at the specified index. 
-   * An index ranges from {@code 0} to {@code count()-1}. 
-   */
-  public abstract long valueAt(int index);
-  
-  /** 
-   * Retrieves the count of values for the current document. 
-   * This may be zero if a document has no values.
-   */
-  public abstract int count();
+    /** Sole constructor. (For invocation by subclass 
+     * constructors, typically implicit.) */
+    protected SortedNumericDocValues() {
+    }
+
+    /** 
+     * Positions to the specified document 
+     */
+    public abstract void setDocument(int doc);
+
+    /** 
+     * Retrieve the value for the current document at the specified index. 
+     * An index ranges from {@code 0} to {@code count()-1}. 
+     */
+    public abstract long valueAt(int index);
+
+    /** 
+     * Retrieves the count of values for the current document. 
+     * This may be zero if a document has no values.
+     */
+    public abstract int count();
 }

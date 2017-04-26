@@ -42,81 +42,81 @@ import java.util.Map;
  * @lucene.internal
  */
 
-final public class DoubleBarrelLRUCache<K extends DoubleBarrelLRUCache.CloneableKey,V> {
+final public class DoubleBarrelLRUCache<K extends DoubleBarrelLRUCache.CloneableKey, V> {
 
-  /** Object providing clone(); the key class must subclass this. */
-  public static abstract class CloneableKey {
-    @Override
-    abstract public CloneableKey clone();
-  }
-
-  private final Map<K,V> cache1;
-  private final Map<K,V> cache2;
-  private final AtomicInteger countdown;
-  private volatile boolean swapped;
-  private final int maxSize;
-
-  public DoubleBarrelLRUCache(int maxSize) {
-    this.maxSize = maxSize;
-    countdown = new AtomicInteger(maxSize);
-    cache1 = new ConcurrentHashMap<>();
-    cache2 = new ConcurrentHashMap<>();
-  }
-
-  @SuppressWarnings("unchecked") 
-  public V get(K key) {
-    final Map<K,V> primary;
-    final Map<K,V> secondary;
-    if (swapped) {
-      primary = cache2;
-      secondary = cache1;
-    } else {
-      primary = cache1;
-      secondary = cache2;
+    /** Object providing clone(); the key class must subclass this. */
+    public static abstract class CloneableKey {
+        @Override
+        abstract public CloneableKey clone();
     }
 
-    // Try primary first
-    V result = primary.get(key);
-    if (result == null) {
-      // Not found -- try secondary
-      result = secondary.get(key);
-      if (result != null) {
-        // Promote to primary
-        put((K) key.clone(), result);
-      }
+    private final Map<K, V> cache1;
+    private final Map<K, V> cache2;
+    private final AtomicInteger countdown;
+    private volatile boolean swapped;
+    private final int maxSize;
+
+    public DoubleBarrelLRUCache(int maxSize) {
+        this.maxSize = maxSize;
+        countdown = new AtomicInteger(maxSize);
+        cache1 = new ConcurrentHashMap<>();
+        cache2 = new ConcurrentHashMap<>();
     }
-    return result;
-  }
 
-  public void put(K key, V value) {
-    final Map<K,V> primary;
-    final Map<K,V> secondary;
-    if (swapped) {
-      primary = cache2;
-      secondary = cache1;
-    } else {
-      primary = cache1;
-      secondary = cache2;
+    @SuppressWarnings("unchecked")
+    public V get(K key) {
+        final Map<K, V> primary;
+        final Map<K, V> secondary;
+        if (swapped) {
+            primary = cache2;
+            secondary = cache1;
+        } else {
+            primary = cache1;
+            secondary = cache2;
+        }
+
+        // Try primary first
+        V result = primary.get(key);
+        if (result == null) {
+            // Not found -- try secondary
+            result = secondary.get(key);
+            if (result != null) {
+                // Promote to primary
+                put((K) key.clone(), result);
+            }
+        }
+        return result;
     }
-    primary.put(key, value);
 
-    if (countdown.decrementAndGet() == 0) {
-      // Time to swap
+    public void put(K key, V value) {
+        final Map<K, V> primary;
+        final Map<K, V> secondary;
+        if (swapped) {
+            primary = cache2;
+            secondary = cache1;
+        } else {
+            primary = cache1;
+            secondary = cache2;
+        }
+        primary.put(key, value);
 
-      // NOTE: there is saturation risk here, that the
-      // thread that's doing the clear() takes too long to
-      // do so, while other threads continue to add to
-      // primary, but in practice this seems not to be an
-      // issue (see LUCENE-2075 for benchmark & details)
+        if (countdown.decrementAndGet() == 0) {
+            // Time to swap
 
-      // First, clear secondary
-      secondary.clear();
+            // NOTE: there is saturation risk here, that the
+            // thread that's doing the clear() takes too long to
+            // do so, while other threads continue to add to
+            // primary, but in practice this seems not to be an
+            // issue (see LUCENE-2075 for benchmark & details)
 
-      // Second, swap
-      swapped = !swapped;
+            // First, clear secondary
+            secondary.clear();
 
-      // Third, reset countdown
-      countdown.set(maxSize);
+            // Second, swap
+            swapped = !swapped;
+
+            // Third, reset countdown
+            countdown.set(maxSize);
+        }
     }
-  }
 }

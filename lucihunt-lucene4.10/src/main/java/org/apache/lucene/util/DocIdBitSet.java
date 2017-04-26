@@ -22,97 +22,93 @@ import java.util.BitSet;
 import org.apache.lucene.search.DocIdSet;
 import org.apache.lucene.search.DocIdSetIterator;
 
-
 /** Simple DocIdSet and DocIdSetIterator backed by a BitSet */
 public class DocIdBitSet extends DocIdSet implements Bits {
 
-  private static final long BASE_RAM_BYTES_USED =
-        RamUsageEstimator.shallowSizeOfInstance(DocIdBitSet.class)
-      + RamUsageEstimator.shallowSizeOfInstance(BitSet.class)
-      + RamUsageEstimator.NUM_BYTES_ARRAY_HEADER; // the array that stores the bits
+    private static final long BASE_RAM_BYTES_USED = RamUsageEstimator.shallowSizeOfInstance(DocIdBitSet.class) + RamUsageEstimator.shallowSizeOfInstance(BitSet.class) + RamUsageEstimator.NUM_BYTES_ARRAY_HEADER; // the array that stores the bits
 
-  private final BitSet bitSet;
-    
-  public DocIdBitSet(BitSet bitSet) {
-    this.bitSet = bitSet;
-  }
+    private final BitSet bitSet;
 
-  @Override
-  public DocIdSetIterator iterator() {
-    return new DocIdBitSetIterator(bitSet);
-  }
-
-  @Override
-  public Bits bits() {
-    return this;
-  }
-
-  /** This DocIdSet implementation is cacheable. */
-  @Override
-  public boolean isCacheable() {
-    return true;
-  }
-  
-  /**
-   * Returns the underlying BitSet. 
-   */
-  public BitSet getBitSet() {
-    return this.bitSet;
-  }
-  
-  @Override
-  public boolean get(int index) {
-    return bitSet.get(index);
-  }
-  
-  @Override
-  public int length() {
-    // the size may not be correct...
-    return bitSet.size(); 
-  }
-
-  @Override
-  public long ramBytesUsed() {
-    // unfortunately this is likely underestimated if the Bitset implementation
-    // over-sizes the array that stores the bits
-    return BASE_RAM_BYTES_USED + (bitSet.size() + 7) >>> 3;
-  }
-
-  private static class DocIdBitSetIterator extends DocIdSetIterator {
-    private int docId;
-    private BitSet bitSet;
-    
-    DocIdBitSetIterator(BitSet bitSet) {
-      this.bitSet = bitSet;
-      this.docId = -1;
+    public DocIdBitSet(BitSet bitSet) {
+        this.bitSet = bitSet;
     }
-    
+
     @Override
-    public int docID() {
-      return docId;
+    public DocIdSetIterator iterator() {
+        return new DocIdBitSetIterator(bitSet);
     }
-    
+
     @Override
-    public int nextDoc() {
-      // (docId + 1) on next line requires -1 initial value for docNr:
-      int d = bitSet.nextSetBit(docId + 1);
-      // -1 returned by BitSet.nextSetBit() when exhausted
-      docId = d == -1 ? NO_MORE_DOCS : d;
-      return docId;
+    public Bits bits() {
+        return this;
     }
-  
+
+    /** This DocIdSet implementation is cacheable. */
     @Override
-    public int advance(int target) {
-      int d = bitSet.nextSetBit(target);
-      // -1 returned by BitSet.nextSetBit() when exhausted
-      docId = d == -1 ? NO_MORE_DOCS : d;
-      return docId;
+    public boolean isCacheable() {
+        return true;
     }
-    
+
+    /**
+     * Returns the underlying BitSet. 
+     */
+    public BitSet getBitSet() {
+        return this.bitSet;
+    }
+
     @Override
-    public long cost() {
-      // upper bound
-      return bitSet.length();
+    public boolean get(int index) {
+        return bitSet.get(index);
     }
-  }
+
+    @Override
+    public int length() {
+        // the size may not be correct...
+        return bitSet.size();
+    }
+
+    @Override
+    public long ramBytesUsed() {
+        // unfortunately this is likely underestimated if the Bitset implementation
+        // over-sizes the array that stores the bits
+        return BASE_RAM_BYTES_USED + (bitSet.size() + 7) >>> 3;
+    }
+
+    private static class DocIdBitSetIterator extends DocIdSetIterator {
+        private int docId;
+        private BitSet bitSet;
+
+        DocIdBitSetIterator(BitSet bitSet) {
+            this.bitSet = bitSet;
+            this.docId = -1;
+        }
+
+        @Override
+        public int docID() {
+            return docId;
+        }
+
+        @Override
+        public int nextDoc() {
+            // (docId + 1) on next line requires -1 initial value for docNr:
+            int d = bitSet.nextSetBit(docId + 1);
+            // -1 returned by BitSet.nextSetBit() when exhausted
+            docId = d == -1 ? NO_MORE_DOCS : d;
+            return docId;
+        }
+
+        @Override
+        public int advance(int target) {
+            int d = bitSet.nextSetBit(target);
+            // -1 returned by BitSet.nextSetBit() when exhausted
+            docId = d == -1 ? NO_MORE_DOCS : d;
+            return docId;
+        }
+
+        @Override
+        public long cost() {
+            // upper bound
+            return bitSet.length();
+        }
+    }
 }

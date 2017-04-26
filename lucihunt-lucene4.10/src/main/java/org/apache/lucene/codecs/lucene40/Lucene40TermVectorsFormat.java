@@ -115,17 +115,17 @@ import org.apache.lucene.store.IOContext;
  */
 public class Lucene40TermVectorsFormat extends TermVectorsFormat {
 
-  /** Sole constructor. */
-  public Lucene40TermVectorsFormat() {
-  }
-  
-  @Override
-  public TermVectorsReader vectorsReader(Directory directory, SegmentInfo segmentInfo, FieldInfos fieldInfos, IOContext context) throws IOException {
-    return new Lucene40TermVectorsReader(directory, segmentInfo, fieldInfos, context);
-  }
+    /** Sole constructor. */
+    public Lucene40TermVectorsFormat() {
+    }
 
-  @Override
-  public TermVectorsWriter vectorsWriter(Directory directory, SegmentInfo segmentInfo, IOContext context) throws IOException {
-    return new Lucene40TermVectorsWriter(directory, segmentInfo.name, context);
-  }
+    @Override
+    public TermVectorsReader vectorsReader(Directory directory, SegmentInfo segmentInfo, FieldInfos fieldInfos, IOContext context) throws IOException {
+        return new Lucene40TermVectorsReader(directory, segmentInfo, fieldInfos, context);
+    }
+
+    @Override
+    public TermVectorsWriter vectorsWriter(Directory directory, SegmentInfo segmentInfo, IOContext context) throws IOException {
+        return new Lucene40TermVectorsWriter(directory, segmentInfo.name, context);
+    }
 }

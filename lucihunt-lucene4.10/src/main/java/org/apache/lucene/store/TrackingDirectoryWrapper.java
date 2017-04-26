@@ -26,34 +26,34 @@ import java.util.Set;
  *  written to and deleted. */
 public final class TrackingDirectoryWrapper extends FilterDirectory {
 
-  private final Set<String> createdFileNames = Collections.synchronizedSet(new HashSet<String>());
+    private final Set<String> createdFileNames = Collections.synchronizedSet(new HashSet<String>());
 
-  public TrackingDirectoryWrapper(Directory in) {
-    super(in);
-  }
+    public TrackingDirectoryWrapper(Directory in) {
+        super(in);
+    }
 
-  @Override
-  public void deleteFile(String name) throws IOException {
-    createdFileNames.remove(name);
-    in.deleteFile(name);
-  }
+    @Override
+    public void deleteFile(String name) throws IOException {
+        createdFileNames.remove(name);
+        in.deleteFile(name);
+    }
 
-  @Override
-  public IndexOutput createOutput(String name, IOContext context) throws IOException {
-    createdFileNames.add(name);
-    return in.createOutput(name, context);
-  }
+    @Override
+    public IndexOutput createOutput(String name, IOContext context) throws IOException {
+        createdFileNames.add(name);
+        return in.createOutput(name, context);
+    }
 
-  @Override
-  public void copy(Directory to, String src, String dest, IOContext context) throws IOException {
-    createdFileNames.add(dest);
-    in.copy(to, src, dest, context);
-  }
+    @Override
+    public void copy(Directory to, String src, String dest, IOContext context) throws IOException {
+        createdFileNames.add(dest);
+        in.copy(to, src, dest, context);
+    }
 
-  // maybe clone before returning.... all callers are
-  // cloning anyway....
-  public Set<String> getCreatedFiles() {
-    return createdFileNames;
-  }
+    // maybe clone before returning.... all callers are
+    // cloning anyway....
+    public Set<String> getCreatedFiles() {
+        return createdFileNames;
+    }
 
 }

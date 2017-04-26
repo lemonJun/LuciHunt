@@ -99,23 +99,24 @@ import org.apache.lucene.util.packed.PackedInts;
  */
 public class Lucene49NormsFormat extends NormsFormat {
 
-  /** Sole Constructor */
-  public Lucene49NormsFormat() {}
-  
-  @Override
-  public DocValuesConsumer normsConsumer(SegmentWriteState state) throws IOException {
-    return new Lucene49NormsConsumer(state, DATA_CODEC, DATA_EXTENSION, METADATA_CODEC, METADATA_EXTENSION);
-  }
+    /** Sole Constructor */
+    public Lucene49NormsFormat() {
+    }
 
-  @Override
-  public DocValuesProducer normsProducer(SegmentReadState state) throws IOException {
-    return new Lucene49NormsProducer(state, DATA_CODEC, DATA_EXTENSION, METADATA_CODEC, METADATA_EXTENSION);
-  }
-  
-  private static final String DATA_CODEC = "Lucene49NormsData";
-  private static final String DATA_EXTENSION = "nvd";
-  private static final String METADATA_CODEC = "Lucene49NormsMetadata";
-  private static final String METADATA_EXTENSION = "nvm";
-  static final int VERSION_START = 0;
-  static final int VERSION_CURRENT = VERSION_START;
+    @Override
+    public DocValuesConsumer normsConsumer(SegmentWriteState state) throws IOException {
+        return new Lucene49NormsConsumer(state, DATA_CODEC, DATA_EXTENSION, METADATA_CODEC, METADATA_EXTENSION);
+    }
+
+    @Override
+    public DocValuesProducer normsProducer(SegmentReadState state) throws IOException {
+        return new Lucene49NormsProducer(state, DATA_CODEC, DATA_EXTENSION, METADATA_CODEC, METADATA_EXTENSION);
+    }
+
+    private static final String DATA_CODEC = "Lucene49NormsData";
+    private static final String DATA_EXTENSION = "nvd";
+    private static final String METADATA_CODEC = "Lucene49NormsMetadata";
+    private static final String METADATA_EXTENSION = "nvm";
+    static final int VERSION_START = 0;
+    static final int VERSION_CURRENT = VERSION_START;
 }

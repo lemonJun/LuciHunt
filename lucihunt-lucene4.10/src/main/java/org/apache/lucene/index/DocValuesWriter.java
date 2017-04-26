@@ -22,6 +22,7 @@ import java.io.IOException;
 import org.apache.lucene.codecs.DocValuesConsumer;
 
 abstract class DocValuesWriter {
-  abstract void finish(int numDoc);
-  abstract void flush(SegmentWriteState state, DocValuesConsumer consumer) throws IOException;
+    abstract void finish(int numDoc);
+
+    abstract void flush(SegmentWriteState state, DocValuesConsumer consumer) throws IOException;
 }

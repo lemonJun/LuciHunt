@@ -65,52 +65,52 @@ import org.apache.lucene.util.MutableBits;
  */
 public class Lucene40LiveDocsFormat extends LiveDocsFormat {
 
-  /** Extension of deletes */
-  static final String DELETES_EXTENSION = "del";
+    /** Extension of deletes */
+    static final String DELETES_EXTENSION = "del";
 
-  /** Sole constructor. */
-  public Lucene40LiveDocsFormat() {
-  }
-  
-  @Override
-  public MutableBits newLiveDocs(int size) throws IOException {
-    BitVector bitVector = new BitVector(size);
-    bitVector.invertAll();
-    return bitVector;
-  }
-
-  @Override
-  public MutableBits newLiveDocs(Bits existing) throws IOException {
-    final BitVector liveDocs = (BitVector) existing;
-    return liveDocs.clone();
-  }
-
-  @Override
-  public Bits readLiveDocs(Directory dir, SegmentCommitInfo info, IOContext context) throws IOException {
-    String filename = IndexFileNames.fileNameFromGeneration(info.info.name, DELETES_EXTENSION, info.getDelGen());
-    final BitVector liveDocs = new BitVector(dir, filename, context);
-    if (liveDocs.length() != info.info.getDocCount()) {
-      throw new CorruptIndexException("liveDocs.length()=" + liveDocs.length() + "info.docCount=" + info.info.getDocCount() + " (filename=" + filename + ")");
+    /** Sole constructor. */
+    public Lucene40LiveDocsFormat() {
     }
-    if (liveDocs.count() != info.info.getDocCount() - info.getDelCount()) {
-      throw new CorruptIndexException("liveDocs.count()=" + liveDocs.count() + " info.docCount=" + info.info.getDocCount() + " info.getDelCount()=" + info.getDelCount() + " (filename=" + filename + ")");
-    }
-    return liveDocs;
-  }
 
-  @Override
-  public void writeLiveDocs(MutableBits bits, Directory dir, SegmentCommitInfo info, int newDelCount, IOContext context) throws IOException {
-    String filename = IndexFileNames.fileNameFromGeneration(info.info.name, DELETES_EXTENSION, info.getNextDelGen());
-    final BitVector liveDocs = (BitVector) bits;
-    assert liveDocs.count() == info.info.getDocCount() - info.getDelCount() - newDelCount;
-    assert liveDocs.length() == info.info.getDocCount();
-    liveDocs.write(dir, filename, context);
-  }
-
-  @Override
-  public void files(SegmentCommitInfo info, Collection<String> files) throws IOException {
-    if (info.hasDeletions()) {
-      files.add(IndexFileNames.fileNameFromGeneration(info.info.name, DELETES_EXTENSION, info.getDelGen()));
+    @Override
+    public MutableBits newLiveDocs(int size) throws IOException {
+        BitVector bitVector = new BitVector(size);
+        bitVector.invertAll();
+        return bitVector;
     }
-  }
+
+    @Override
+    public MutableBits newLiveDocs(Bits existing) throws IOException {
+        final BitVector liveDocs = (BitVector) existing;
+        return liveDocs.clone();
+    }
+
+    @Override
+    public Bits readLiveDocs(Directory dir, SegmentCommitInfo info, IOContext context) throws IOException {
+        String filename = IndexFileNames.fileNameFromGeneration(info.info.name, DELETES_EXTENSION, info.getDelGen());
+        final BitVector liveDocs = new BitVector(dir, filename, context);
+        if (liveDocs.length() != info.info.getDocCount()) {
+            throw new CorruptIndexException("liveDocs.length()=" + liveDocs.length() + "info.docCount=" + info.info.getDocCount() + " (filename=" + filename + ")");
+        }
+        if (liveDocs.count() != info.info.getDocCount() - info.getDelCount()) {
+            throw new CorruptIndexException("liveDocs.count()=" + liveDocs.count() + " info.docCount=" + info.info.getDocCount() + " info.getDelCount()=" + info.getDelCount() + " (filename=" + filename + ")");
+        }
+        return liveDocs;
+    }
+
+    @Override
+    public void writeLiveDocs(MutableBits bits, Directory dir, SegmentCommitInfo info, int newDelCount, IOContext context) throws IOException {
+        String filename = IndexFileNames.fileNameFromGeneration(info.info.name, DELETES_EXTENSION, info.getNextDelGen());
+        final BitVector liveDocs = (BitVector) bits;
+        assert liveDocs.count() == info.info.getDocCount() - info.getDelCount() - newDelCount;
+        assert liveDocs.length() == info.info.getDocCount();
+        liveDocs.write(dir, filename, context);
+    }
+
+    @Override
+    public void files(SegmentCommitInfo info, Collection<String> files) throws IOException {
+        if (info.hasDeletions()) {
+            files.add(IndexFileNames.fileNameFromGeneration(info.info.name, DELETES_EXTENSION, info.getDelGen()));
+        }
+    }
 }

@@ -113,63 +113,63 @@ import org.apache.lucene.util.NumericUtils;
  */
 
 public final class DoubleField extends Field {
-  
-  /** 
-   * Type for a DoubleField that is not stored:
-   * normalization factors, frequencies, and positions are omitted.
-   */
-  public static final FieldType TYPE_NOT_STORED = new FieldType();
-  static {
-    TYPE_NOT_STORED.setIndexed(true);
-    TYPE_NOT_STORED.setTokenized(true);
-    TYPE_NOT_STORED.setOmitNorms(true);
-    TYPE_NOT_STORED.setIndexOptions(IndexOptions.DOCS_ONLY);
-    TYPE_NOT_STORED.setNumericType(FieldType.NumericType.DOUBLE);
-    TYPE_NOT_STORED.freeze();
-  }
 
-  /** 
-   * Type for a stored DoubleField:
-   * normalization factors, frequencies, and positions are omitted.
-   */
-  public static final FieldType TYPE_STORED = new FieldType();
-  static {
-    TYPE_STORED.setIndexed(true);
-    TYPE_STORED.setTokenized(true);
-    TYPE_STORED.setOmitNorms(true);
-    TYPE_STORED.setIndexOptions(IndexOptions.DOCS_ONLY);
-    TYPE_STORED.setNumericType(FieldType.NumericType.DOUBLE);
-    TYPE_STORED.setStored(true);
-    TYPE_STORED.freeze();
-  }
-
-  /** Creates a stored or un-stored DoubleField with the provided value
-   *  and default <code>precisionStep</code> {@link
-   *  NumericUtils#PRECISION_STEP_DEFAULT} (16). 
-   *  @param name field name
-   *  @param value 64-bit double value
-   *  @param stored Store.YES if the content should also be stored
-   *  @throws IllegalArgumentException if the field name is null. 
-   */
-  public DoubleField(String name, double value, Store stored) {
-    super(name, stored == Store.YES ? TYPE_STORED : TYPE_NOT_STORED);
-    fieldsData = Double.valueOf(value);
-  }
-  
-  /** Expert: allows you to customize the {@link
-   *  FieldType}. 
-   *  @param name field name
-   *  @param value 64-bit double value
-   *  @param type customized field type: must have {@link FieldType#numericType()}
-   *         of {@link FieldType.NumericType#DOUBLE}.
-   *  @throws IllegalArgumentException if the field name or type is null, or
-   *          if the field type does not have a DOUBLE numericType()
-   */
-  public DoubleField(String name, double value, FieldType type) {
-    super(name, type);
-    if (type.numericType() != FieldType.NumericType.DOUBLE) {
-      throw new IllegalArgumentException("type.numericType() must be DOUBLE but got " + type.numericType());
+    /** 
+     * Type for a DoubleField that is not stored:
+     * normalization factors, frequencies, and positions are omitted.
+     */
+    public static final FieldType TYPE_NOT_STORED = new FieldType();
+    static {
+        TYPE_NOT_STORED.setIndexed(true);
+        TYPE_NOT_STORED.setTokenized(true);
+        TYPE_NOT_STORED.setOmitNorms(true);
+        TYPE_NOT_STORED.setIndexOptions(IndexOptions.DOCS_ONLY);
+        TYPE_NOT_STORED.setNumericType(FieldType.NumericType.DOUBLE);
+        TYPE_NOT_STORED.freeze();
     }
-    fieldsData = Double.valueOf(value);
-  }
+
+    /** 
+     * Type for a stored DoubleField:
+     * normalization factors, frequencies, and positions are omitted.
+     */
+    public static final FieldType TYPE_STORED = new FieldType();
+    static {
+        TYPE_STORED.setIndexed(true);
+        TYPE_STORED.setTokenized(true);
+        TYPE_STORED.setOmitNorms(true);
+        TYPE_STORED.setIndexOptions(IndexOptions.DOCS_ONLY);
+        TYPE_STORED.setNumericType(FieldType.NumericType.DOUBLE);
+        TYPE_STORED.setStored(true);
+        TYPE_STORED.freeze();
+    }
+
+    /** Creates a stored or un-stored DoubleField with the provided value
+     *  and default <code>precisionStep</code> {@link
+     *  NumericUtils#PRECISION_STEP_DEFAULT} (16). 
+     *  @param name field name
+     *  @param value 64-bit double value
+     *  @param stored Store.YES if the content should also be stored
+     *  @throws IllegalArgumentException if the field name is null. 
+     */
+    public DoubleField(String name, double value, Store stored) {
+        super(name, stored == Store.YES ? TYPE_STORED : TYPE_NOT_STORED);
+        fieldsData = Double.valueOf(value);
+    }
+
+    /** Expert: allows you to customize the {@link
+     *  FieldType}. 
+     *  @param name field name
+     *  @param value 64-bit double value
+     *  @param type customized field type: must have {@link FieldType#numericType()}
+     *         of {@link FieldType.NumericType#DOUBLE}.
+     *  @throws IllegalArgumentException if the field name or type is null, or
+     *          if the field type does not have a DOUBLE numericType()
+     */
+    public DoubleField(String name, double value, FieldType type) {
+        super(name, type);
+        if (type.numericType() != FieldType.NumericType.DOUBLE) {
+            throw new IllegalArgumentException("type.numericType() must be DOUBLE but got " + type.numericType());
+        }
+        fieldsData = Double.valueOf(value);
+    }
 }

@@ -130,44 +130,44 @@ import org.apache.lucene.util.packed.BlockPackedWriter;
 @Deprecated
 public class Lucene42DocValuesFormat extends DocValuesFormat {
 
-  /** Maximum length for each binary doc values field. */
-  public static final int MAX_BINARY_FIELD_LENGTH = (1 << 15) - 2;
-  
-  final float acceptableOverheadRatio;
-  
-  /** 
-   * Calls {@link #Lucene42DocValuesFormat(float) 
-   * Lucene42DocValuesFormat(PackedInts.DEFAULT)} 
-   */
-  public Lucene42DocValuesFormat() {
-    this(PackedInts.DEFAULT);
-  }
-  
-  /**
-   * Creates a new Lucene42DocValuesFormat with the specified
-   * <code>acceptableOverheadRatio</code> for NumericDocValues.
-   * @param acceptableOverheadRatio compression parameter for numerics. 
-   *        Currently this is only used when the number of unique values is small.
-   *        
-   * @lucene.experimental
-   */
-  public Lucene42DocValuesFormat(float acceptableOverheadRatio) {
-    super("Lucene42");
-    this.acceptableOverheadRatio = acceptableOverheadRatio;
-  }
+    /** Maximum length for each binary doc values field. */
+    public static final int MAX_BINARY_FIELD_LENGTH = (1 << 15) - 2;
 
-  @Override
-  public DocValuesConsumer fieldsConsumer(SegmentWriteState state) throws IOException {
-    throw new UnsupportedOperationException("this codec can only be used for reading");
-  }
-  
-  @Override
-  public DocValuesProducer fieldsProducer(SegmentReadState state) throws IOException {
-    return new Lucene42DocValuesProducer(state, DATA_CODEC, DATA_EXTENSION, METADATA_CODEC, METADATA_EXTENSION);
-  }
-  
-  static final String DATA_CODEC = "Lucene42DocValuesData";
-  static final String DATA_EXTENSION = "dvd";
-  static final String METADATA_CODEC = "Lucene42DocValuesMetadata";
-  static final String METADATA_EXTENSION = "dvm";
+    final float acceptableOverheadRatio;
+
+    /** 
+     * Calls {@link #Lucene42DocValuesFormat(float) 
+     * Lucene42DocValuesFormat(PackedInts.DEFAULT)} 
+     */
+    public Lucene42DocValuesFormat() {
+        this(PackedInts.DEFAULT);
+    }
+
+    /**
+     * Creates a new Lucene42DocValuesFormat with the specified
+     * <code>acceptableOverheadRatio</code> for NumericDocValues.
+     * @param acceptableOverheadRatio compression parameter for numerics. 
+     *        Currently this is only used when the number of unique values is small.
+     *        
+     * @lucene.experimental
+     */
+    public Lucene42DocValuesFormat(float acceptableOverheadRatio) {
+        super("Lucene42");
+        this.acceptableOverheadRatio = acceptableOverheadRatio;
+    }
+
+    @Override
+    public DocValuesConsumer fieldsConsumer(SegmentWriteState state) throws IOException {
+        throw new UnsupportedOperationException("this codec can only be used for reading");
+    }
+
+    @Override
+    public DocValuesProducer fieldsProducer(SegmentReadState state) throws IOException {
+        return new Lucene42DocValuesProducer(state, DATA_CODEC, DATA_EXTENSION, METADATA_CODEC, METADATA_EXTENSION);
+    }
+
+    static final String DATA_CODEC = "Lucene42DocValuesData";
+    static final String DATA_EXTENSION = "dvd";
+    static final String METADATA_CODEC = "Lucene42DocValuesMetadata";
+    static final String METADATA_EXTENSION = "dvm";
 }

@@ -119,9 +119,9 @@ import org.apache.lucene.util.packed.PackedInts;
  */
 public final class Lucene41StoredFieldsFormat extends CompressingStoredFieldsFormat {
 
-  /** Sole constructor. */
-  public Lucene41StoredFieldsFormat() {
-    super("Lucene41StoredFields", CompressionMode.FAST, 1 << 14);
-  }
+    /** Sole constructor. */
+    public Lucene41StoredFieldsFormat() {
+        super("Lucene41StoredFields", CompressionMode.FAST, 1 << 14);
+    }
 
 }

@@ -26,50 +26,51 @@ import org.apache.lucene.util.BytesRefBuilder;
  * have a <code>value</code> with a length set to 0.
  */
 public class MutableValueStr extends MutableValue {
-  public BytesRef value = new BytesRef();
+    public BytesRef value = new BytesRef();
 
-  @Override
-  public Object toObject() {
-    assert exists || 0 == value.length;
-    return exists ? value.utf8ToString() : null;
-  }
+    @Override
+    public Object toObject() {
+        assert exists || 0 == value.length;
+        return exists ? value.utf8ToString() : null;
+    }
 
-  @Override
-  public void copy(MutableValue source) {
-    MutableValueStr s = (MutableValueStr) source;
-    exists = s.exists;
-    value.copyBytes(s.value);
-  }
+    @Override
+    public void copy(MutableValue source) {
+        MutableValueStr s = (MutableValueStr) source;
+        exists = s.exists;
+        value.copyBytes(s.value);
+    }
 
-  @Override
-  public MutableValue duplicate() {
-    MutableValueStr v = new MutableValueStr();
-    v.value.copyBytes(value);
-    v.exists = this.exists;
-    return v;
-  }
+    @Override
+    public MutableValue duplicate() {
+        MutableValueStr v = new MutableValueStr();
+        v.value.copyBytes(value);
+        v.exists = this.exists;
+        return v;
+    }
 
-  @Override
-  public boolean equalsSameType(Object other) {
-    assert exists || 0 == value.length;
-    MutableValueStr b = (MutableValueStr)other;
-    return value.equals(b.value) && exists == b.exists;
-  }
+    @Override
+    public boolean equalsSameType(Object other) {
+        assert exists || 0 == value.length;
+        MutableValueStr b = (MutableValueStr) other;
+        return value.equals(b.value) && exists == b.exists;
+    }
 
-  @Override
-  public int compareSameType(Object other) {
-    assert exists || 0 == value.length;
-    MutableValueStr b = (MutableValueStr)other;
-    int c = value.compareTo(b.value);
-    if (c != 0) return c;
-    if (exists == b.exists) return 0;
-    return exists ? 1 : -1;
-  }
+    @Override
+    public int compareSameType(Object other) {
+        assert exists || 0 == value.length;
+        MutableValueStr b = (MutableValueStr) other;
+        int c = value.compareTo(b.value);
+        if (c != 0)
+            return c;
+        if (exists == b.exists)
+            return 0;
+        return exists ? 1 : -1;
+    }
 
-
-  @Override
-  public int hashCode() {
-    assert exists || 0 == value.length;
-    return value.hashCode();
-  }
+    @Override
+    public int hashCode() {
+        assert exists || 0 == value.length;
+        return value.hashCode();
+    }
 }

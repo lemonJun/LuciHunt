@@ -56,51 +56,51 @@ import org.apache.lucene.util.BitUtil;
  */
 public final class MonotonicBlockPackedWriter extends AbstractBlockPackedWriter {
 
-  /**
-   * Sole constructor.
-   * @param blockSize the number of values of a single block, must be a power of 2
-   */
-  public MonotonicBlockPackedWriter(DataOutput out, int blockSize) {
-    super(out, blockSize);
-  }
-
-  @Override
-  public void add(long l) throws IOException {
-    assert l >= 0;
-    super.add(l);
-  }
-
-  protected void flush() throws IOException {
-    assert off > 0;
-
-    final float avg = off == 1 ? 0f : (float) (values[off - 1] - values[0]) / (off - 1);
-    long min = values[0];
-    // adjust min so that all deltas will be positive
-    for (int i = 1; i < off; ++i) {
-      final long actual = values[i];
-      final long expected = expected(min, avg, i);
-      if (expected > actual) {
-        min -= (expected - actual);
-      }
+    /**
+     * Sole constructor.
+     * @param blockSize the number of values of a single block, must be a power of 2
+     */
+    public MonotonicBlockPackedWriter(DataOutput out, int blockSize) {
+        super(out, blockSize);
     }
 
-    long maxDelta = 0;
-    for (int i = 0; i < off; ++i) {
-      values[i] = values[i] - expected(min, avg, i);
-      maxDelta = Math.max(maxDelta, values[i]);
+    @Override
+    public void add(long l) throws IOException {
+        assert l >= 0;
+        super.add(l);
     }
 
-    out.writeZLong(min);
-    out.writeInt(Float.floatToIntBits(avg));
-    if (maxDelta == 0) {
-      out.writeVInt(0);
-    } else {
-      final int bitsRequired = PackedInts.bitsRequired(maxDelta);
-      out.writeVInt(bitsRequired);
-      writeValues(bitsRequired);
-    }
+    protected void flush() throws IOException {
+        assert off > 0;
 
-    off = 0;
-  }
+        final float avg = off == 1 ? 0f : (float) (values[off - 1] - values[0]) / (off - 1);
+        long min = values[0];
+        // adjust min so that all deltas will be positive
+        for (int i = 1; i < off; ++i) {
+            final long actual = values[i];
+            final long expected = expected(min, avg, i);
+            if (expected > actual) {
+                min -= (expected - actual);
+            }
+        }
+
+        long maxDelta = 0;
+        for (int i = 0; i < off; ++i) {
+            values[i] = values[i] - expected(min, avg, i);
+            maxDelta = Math.max(maxDelta, values[i]);
+        }
+
+        out.writeZLong(min);
+        out.writeInt(Float.floatToIntBits(avg));
+        if (maxDelta == 0) {
+            out.writeVInt(0);
+        } else {
+            final int bitsRequired = PackedInts.bitsRequired(maxDelta);
+            out.writeVInt(bitsRequired);
+            writeValues(bitsRequired);
+        }
+
+        off = 0;
+    }
 
 }

@@ -31,15 +31,13 @@ import org.apache.lucene.store.IOContext;
 @Deprecated
 class Lucene3xStoredFieldsFormat extends StoredFieldsFormat {
 
-  @Override
-  public StoredFieldsReader fieldsReader(Directory directory, SegmentInfo si,
-      FieldInfos fn, IOContext context) throws IOException {
-    return new Lucene3xStoredFieldsReader(directory, si, fn, context);
-  }
+    @Override
+    public StoredFieldsReader fieldsReader(Directory directory, SegmentInfo si, FieldInfos fn, IOContext context) throws IOException {
+        return new Lucene3xStoredFieldsReader(directory, si, fn, context);
+    }
 
-  @Override
-  public StoredFieldsWriter fieldsWriter(Directory directory, SegmentInfo si,
-      IOContext context) throws IOException {
-    throw new UnsupportedOperationException("this codec can only be used for reading");
-  }
+    @Override
+    public StoredFieldsWriter fieldsWriter(Directory directory, SegmentInfo si, IOContext context) throws IOException {
+        throw new UnsupportedOperationException("this codec can only be used for reading");
+    }
 }

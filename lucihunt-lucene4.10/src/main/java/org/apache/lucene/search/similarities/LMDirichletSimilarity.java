@@ -37,63 +37,58 @@ import org.apache.lucene.search.Explanation;
  * @lucene.experimental
  */
 public class LMDirichletSimilarity extends LMSimilarity {
-  /** The &mu; parameter. */
-  private final float mu;
-  
-  /** Instantiates the similarity with the provided &mu; parameter. */
-  public LMDirichletSimilarity(CollectionModel collectionModel, float mu) {
-    super(collectionModel);
-    this.mu = mu;
-  }
-  
-  /** Instantiates the similarity with the provided &mu; parameter. */
-  public LMDirichletSimilarity(float mu) {
-    this.mu = mu;
-  }
+    /** The &mu; parameter. */
+    private final float mu;
 
-  /** Instantiates the similarity with the default &mu; value of 2000. */
-  public LMDirichletSimilarity(CollectionModel collectionModel) {
-    this(collectionModel, 2000);
-  }
-  
-  /** Instantiates the similarity with the default &mu; value of 2000. */
-  public LMDirichletSimilarity() {
-    this(2000);
-  }
-  
-  @Override
-  protected float score(BasicStats stats, float freq, float docLen) {
-    float score = stats.getTotalBoost() * (float)(Math.log(1 + freq /
-        (mu * ((LMStats)stats).getCollectionProbability())) +
-        Math.log(mu / (docLen + mu)));
-    return score > 0.0f ? score : 0.0f;
-  }
-  
-  @Override
-  protected void explain(Explanation expl, BasicStats stats, int doc,
-      float freq, float docLen) {
-    if (stats.getTotalBoost() != 1.0f) {
-      expl.addDetail(new Explanation(stats.getTotalBoost(), "boost"));
+    /** Instantiates the similarity with the provided &mu; parameter. */
+    public LMDirichletSimilarity(CollectionModel collectionModel, float mu) {
+        super(collectionModel);
+        this.mu = mu;
     }
 
-    expl.addDetail(new Explanation(mu, "mu"));
-    Explanation weightExpl = new Explanation();
-    weightExpl.setValue((float)Math.log(1 + freq /
-        (mu * ((LMStats)stats).getCollectionProbability())));
-    weightExpl.setDescription("term weight");
-    expl.addDetail(weightExpl);
-    expl.addDetail(new Explanation(
-        (float)Math.log(mu / (docLen + mu)), "document norm"));
-    super.explain(expl, stats, doc, freq, docLen);
-  }
+    /** Instantiates the similarity with the provided &mu; parameter. */
+    public LMDirichletSimilarity(float mu) {
+        this.mu = mu;
+    }
 
-  /** Returns the &mu; parameter. */
-  public float getMu() {
-    return mu;
-  }
-  
-  @Override
-  public String getName() {
-    return String.format(Locale.ROOT, "Dirichlet(%f)", getMu());
-  }
+    /** Instantiates the similarity with the default &mu; value of 2000. */
+    public LMDirichletSimilarity(CollectionModel collectionModel) {
+        this(collectionModel, 2000);
+    }
+
+    /** Instantiates the similarity with the default &mu; value of 2000. */
+    public LMDirichletSimilarity() {
+        this(2000);
+    }
+
+    @Override
+    protected float score(BasicStats stats, float freq, float docLen) {
+        float score = stats.getTotalBoost() * (float) (Math.log(1 + freq / (mu * ((LMStats) stats).getCollectionProbability())) + Math.log(mu / (docLen + mu)));
+        return score > 0.0f ? score : 0.0f;
+    }
+
+    @Override
+    protected void explain(Explanation expl, BasicStats stats, int doc, float freq, float docLen) {
+        if (stats.getTotalBoost() != 1.0f) {
+            expl.addDetail(new Explanation(stats.getTotalBoost(), "boost"));
+        }
+
+        expl.addDetail(new Explanation(mu, "mu"));
+        Explanation weightExpl = new Explanation();
+        weightExpl.setValue((float) Math.log(1 + freq / (mu * ((LMStats) stats).getCollectionProbability())));
+        weightExpl.setDescription("term weight");
+        expl.addDetail(weightExpl);
+        expl.addDetail(new Explanation((float) Math.log(mu / (docLen + mu)), "document norm"));
+        super.explain(expl, stats, doc, freq, docLen);
+    }
+
+    /** Returns the &mu; parameter. */
+    public float getMu() {
+        return mu;
+    }
+
+    @Override
+    public String getName() {
+        return String.format(Locale.ROOT, "Dirichlet(%f)", getMu());
+    }
 }

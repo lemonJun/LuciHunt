@@ -33,49 +33,50 @@ import org.apache.lucene.search.TermStatistics;
  * @lucene.experimental
  */
 public abstract class PerFieldSimilarityWrapper extends Similarity {
-  
-  /**
-   * Sole constructor. (For invocation by subclass 
-   * constructors, typically implicit.)
-   */
-  public PerFieldSimilarityWrapper() {}
 
-  @Override
-  public final long computeNorm(FieldInvertState state) {
-    return get(state.getName()).computeNorm(state);
-  }
-
-  @Override
-  public final SimWeight computeWeight(float queryBoost, CollectionStatistics collectionStats, TermStatistics... termStats) {
-    PerFieldSimWeight weight = new PerFieldSimWeight();
-    weight.delegate = get(collectionStats.field());
-    weight.delegateWeight = weight.delegate.computeWeight(queryBoost, collectionStats, termStats);
-    return weight;
-  }
-
-  @Override
-  public final SimScorer simScorer(SimWeight weight, AtomicReaderContext context) throws IOException {
-    PerFieldSimWeight perFieldWeight = (PerFieldSimWeight) weight;
-    return perFieldWeight.delegate.simScorer(perFieldWeight.delegateWeight, context);
-  }
-  
-  /** 
-   * Returns a {@link Similarity} for scoring a field.
-   */
-  public abstract Similarity get(String name);
-  
-  static class PerFieldSimWeight extends SimWeight {
-    Similarity delegate;
-    SimWeight delegateWeight;
-    
-    @Override
-    public float getValueForNormalization() {
-      return delegateWeight.getValueForNormalization();
+    /**
+     * Sole constructor. (For invocation by subclass 
+     * constructors, typically implicit.)
+     */
+    public PerFieldSimilarityWrapper() {
     }
-    
+
     @Override
-    public void normalize(float queryNorm, float topLevelBoost) {
-      delegateWeight.normalize(queryNorm, topLevelBoost);
+    public final long computeNorm(FieldInvertState state) {
+        return get(state.getName()).computeNorm(state);
     }
-  }
+
+    @Override
+    public final SimWeight computeWeight(float queryBoost, CollectionStatistics collectionStats, TermStatistics... termStats) {
+        PerFieldSimWeight weight = new PerFieldSimWeight();
+        weight.delegate = get(collectionStats.field());
+        weight.delegateWeight = weight.delegate.computeWeight(queryBoost, collectionStats, termStats);
+        return weight;
+    }
+
+    @Override
+    public final SimScorer simScorer(SimWeight weight, AtomicReaderContext context) throws IOException {
+        PerFieldSimWeight perFieldWeight = (PerFieldSimWeight) weight;
+        return perFieldWeight.delegate.simScorer(perFieldWeight.delegateWeight, context);
+    }
+
+    /** 
+     * Returns a {@link Similarity} for scoring a field.
+     */
+    public abstract Similarity get(String name);
+
+    static class PerFieldSimWeight extends SimWeight {
+        Similarity delegate;
+        SimWeight delegateWeight;
+
+        @Override
+        public float getValueForNormalization() {
+            return delegateWeight.getValueForNormalization();
+        }
+
+        @Override
+        public void normalize(float queryNorm, float topLevelBoost) {
+            delegateWeight.normalize(queryNorm, topLevelBoost);
+        }
+    }
 }

@@ -20,42 +20,46 @@ package org.apache.lucene.index;
 import java.io.IOException;
 import java.util.Map;
 
-
 /**
  * A {@link MergePolicy} which never returns merges to execute. Use it if you
  * want to prevent segment merges.
  */
 public final class NoMergePolicy extends MergePolicy {
 
-  /** Singleton instance. */
-  public static final MergePolicy INSTANCE = new NoMergePolicy();
+    /** Singleton instance. */
+    public static final MergePolicy INSTANCE = new NoMergePolicy();
 
-  private NoMergePolicy() {
-    super();
-  }
+    private NoMergePolicy() {
+        super();
+    }
 
-  @Override
-  public MergeSpecification findMerges(MergeTrigger mergeTrigger, SegmentInfos segmentInfos, IndexWriter writer) { return null; }
+    @Override
+    public MergeSpecification findMerges(MergeTrigger mergeTrigger, SegmentInfos segmentInfos, IndexWriter writer) {
+        return null;
+    }
 
-  @Override
-  public MergeSpecification findForcedMerges(SegmentInfos segmentInfos,
-             int maxSegmentCount, Map<SegmentCommitInfo,Boolean> segmentsToMerge, IndexWriter writer) { return null; }
+    @Override
+    public MergeSpecification findForcedMerges(SegmentInfos segmentInfos, int maxSegmentCount, Map<SegmentCommitInfo, Boolean> segmentsToMerge, IndexWriter writer) {
+        return null;
+    }
 
-  @Override
-  public MergeSpecification findForcedDeletesMerges(SegmentInfos segmentInfos, IndexWriter writer) { return null; }
+    @Override
+    public MergeSpecification findForcedDeletesMerges(SegmentInfos segmentInfos, IndexWriter writer) {
+        return null;
+    }
 
-  @Override
-  public boolean useCompoundFile(SegmentInfos segments, SegmentCommitInfo newSegment, IndexWriter writer) {
-    return newSegment.info.getUseCompoundFile();
-  }
+    @Override
+    public boolean useCompoundFile(SegmentInfos segments, SegmentCommitInfo newSegment, IndexWriter writer) {
+        return newSegment.info.getUseCompoundFile();
+    }
 
-  @Override
-  protected long size(SegmentCommitInfo info, IndexWriter writer) throws IOException {
-    return Long.MAX_VALUE;
-  }
+    @Override
+    protected long size(SegmentCommitInfo info, IndexWriter writer) throws IOException {
+        return Long.MAX_VALUE;
+    }
 
-  @Override
-  public String toString() {
-    return "NoMergePolicy";
-  }
+    @Override
+    public String toString() {
+        return "NoMergePolicy";
+    }
 }

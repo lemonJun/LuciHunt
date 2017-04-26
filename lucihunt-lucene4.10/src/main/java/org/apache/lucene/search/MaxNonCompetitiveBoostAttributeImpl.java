@@ -24,39 +24,39 @@ import org.apache.lucene.util.BytesRef;
  * @lucene.internal
  */
 public final class MaxNonCompetitiveBoostAttributeImpl extends AttributeImpl implements MaxNonCompetitiveBoostAttribute {
-  private float maxNonCompetitiveBoost = Float.NEGATIVE_INFINITY;
-  private BytesRef competitiveTerm = null;
+    private float maxNonCompetitiveBoost = Float.NEGATIVE_INFINITY;
+    private BytesRef competitiveTerm = null;
 
-  @Override
-  public void setMaxNonCompetitiveBoost(final float maxNonCompetitiveBoost) {
-    this.maxNonCompetitiveBoost = maxNonCompetitiveBoost;
-  }
-  
-  @Override
-  public float getMaxNonCompetitiveBoost() {
-    return maxNonCompetitiveBoost;
-  }
+    @Override
+    public void setMaxNonCompetitiveBoost(final float maxNonCompetitiveBoost) {
+        this.maxNonCompetitiveBoost = maxNonCompetitiveBoost;
+    }
 
-  @Override
-  public void setCompetitiveTerm(final BytesRef competitiveTerm) {
-    this.competitiveTerm = competitiveTerm;
-  }
-  
-  @Override
-  public BytesRef getCompetitiveTerm() {
-    return competitiveTerm;
-  }
+    @Override
+    public float getMaxNonCompetitiveBoost() {
+        return maxNonCompetitiveBoost;
+    }
 
-  @Override
-  public void clear() {
-    maxNonCompetitiveBoost = Float.NEGATIVE_INFINITY;
-    competitiveTerm = null;
-  }
-  
-  @Override
-  public void copyTo(AttributeImpl target) {
-    final MaxNonCompetitiveBoostAttributeImpl t = (MaxNonCompetitiveBoostAttributeImpl) target;
-    t.setMaxNonCompetitiveBoost(maxNonCompetitiveBoost);
-    t.setCompetitiveTerm(competitiveTerm);
-  }
+    @Override
+    public void setCompetitiveTerm(final BytesRef competitiveTerm) {
+        this.competitiveTerm = competitiveTerm;
+    }
+
+    @Override
+    public BytesRef getCompetitiveTerm() {
+        return competitiveTerm;
+    }
+
+    @Override
+    public void clear() {
+        maxNonCompetitiveBoost = Float.NEGATIVE_INFINITY;
+        competitiveTerm = null;
+    }
+
+    @Override
+    public void copyTo(AttributeImpl target) {
+        final MaxNonCompetitiveBoostAttributeImpl t = (MaxNonCompetitiveBoostAttributeImpl) target;
+        t.setMaxNonCompetitiveBoost(maxNonCompetitiveBoost);
+        t.setCompetitiveTerm(competitiveTerm);
+    }
 }

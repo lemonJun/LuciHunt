@@ -25,45 +25,45 @@ import java.io.IOException;
  * for the other subqueries that generate the document.
  */
 final class DisjunctionMaxScorer extends DisjunctionScorer {
-  /* Multiplier applied to non-maximum-scoring subqueries for a document as they are summed into the result. */
-  private final float tieBreakerMultiplier;
+    /* Multiplier applied to non-maximum-scoring subqueries for a document as they are summed into the result. */
+    private final float tieBreakerMultiplier;
 
-  /* Used when scoring currently matching doc. */
-  private float scoreSum;
-  private float scoreMax;
+    /* Used when scoring currently matching doc. */
+    private float scoreSum;
+    private float scoreMax;
 
-  /**
-   * Creates a new instance of DisjunctionMaxScorer
-   * 
-   * @param weight
-   *          The Weight to be used.
-   * @param tieBreakerMultiplier
-   *          Multiplier applied to non-maximum-scoring subqueries for a
-   *          document as they are summed into the result.
-   * @param subScorers
-   *          The sub scorers this Scorer should iterate on
-   */
-  DisjunctionMaxScorer(Weight weight, float tieBreakerMultiplier, Scorer[] subScorers) {
-    super(weight, subScorers);
-    this.tieBreakerMultiplier = tieBreakerMultiplier;
-  }
-  
-  @Override
-  protected void reset() {
-    scoreSum = scoreMax = 0;
-  }
-  
-  @Override
-  protected void accum(Scorer subScorer) throws IOException {
-    float subScore = subScorer.score();
-    scoreSum += subScore;
-    if (subScore > scoreMax) {
-      scoreMax = subScore;
+    /**
+     * Creates a new instance of DisjunctionMaxScorer
+     * 
+     * @param weight
+     *          The Weight to be used.
+     * @param tieBreakerMultiplier
+     *          Multiplier applied to non-maximum-scoring subqueries for a
+     *          document as they are summed into the result.
+     * @param subScorers
+     *          The sub scorers this Scorer should iterate on
+     */
+    DisjunctionMaxScorer(Weight weight, float tieBreakerMultiplier, Scorer[] subScorers) {
+        super(weight, subScorers);
+        this.tieBreakerMultiplier = tieBreakerMultiplier;
     }
-  }
-  
-  @Override
-  protected float getFinal() {
-    return scoreMax + (scoreSum - scoreMax) * tieBreakerMultiplier; 
-  }
+
+    @Override
+    protected void reset() {
+        scoreSum = scoreMax = 0;
+    }
+
+    @Override
+    protected void accum(Scorer subScorer) throws IOException {
+        float subScore = subScorer.score();
+        scoreSum += subScore;
+        if (subScore > scoreMax) {
+            scoreMax = subScore;
+        }
+    }
+
+    @Override
+    protected float getFinal() {
+        return scoreMax + (scoreSum - scoreMax) * tieBreakerMultiplier;
+    }
 }

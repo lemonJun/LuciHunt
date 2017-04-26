@@ -30,45 +30,47 @@ import org.apache.lucene.search.Explanation;
  * @lucene.experimental
  */
 public abstract class AfterEffect {
-  
-  /**
-   * Sole constructor. (For invocation by subclass 
-   * constructors, typically implicit.)
-   */
-  public AfterEffect() {}
 
-  /** Returns the aftereffect score. */
-  public abstract float score(BasicStats stats, float tfn);
-  
-  /** Returns an explanation for the score. */
-  public abstract Explanation explain(BasicStats stats, float tfn);
-
-  /** Implementation used when there is no aftereffect. */
-  public static final class NoAfterEffect extends AfterEffect {
-    
-    /** Sole constructor: parameter-free */
-    public NoAfterEffect() {}
-    
-    @Override
-    public final float score(BasicStats stats, float tfn) {
-      return 1f;
+    /**
+     * Sole constructor. (For invocation by subclass 
+     * constructors, typically implicit.)
+     */
+    public AfterEffect() {
     }
 
-    @Override
-    public final Explanation explain(BasicStats stats, float tfn) {
-      return new Explanation(1, "no aftereffect");
+    /** Returns the aftereffect score. */
+    public abstract float score(BasicStats stats, float tfn);
+
+    /** Returns an explanation for the score. */
+    public abstract Explanation explain(BasicStats stats, float tfn);
+
+    /** Implementation used when there is no aftereffect. */
+    public static final class NoAfterEffect extends AfterEffect {
+
+        /** Sole constructor: parameter-free */
+        public NoAfterEffect() {
+        }
+
+        @Override
+        public final float score(BasicStats stats, float tfn) {
+            return 1f;
+        }
+
+        @Override
+        public final Explanation explain(BasicStats stats, float tfn) {
+            return new Explanation(1, "no aftereffect");
+        }
+
+        @Override
+        public String toString() {
+            return "";
+        }
     }
-    
+
+    /**
+     * Subclasses must override this method to return the code of the
+     * after effect formula. Refer to the original paper for the list. 
+     */
     @Override
-    public String toString() {
-      return "";
-    }
-  }
-  
-  /**
-   * Subclasses must override this method to return the code of the
-   * after effect formula. Refer to the original paper for the list. 
-   */
-  @Override
-  public abstract String toString();
+    public abstract String toString();
 }

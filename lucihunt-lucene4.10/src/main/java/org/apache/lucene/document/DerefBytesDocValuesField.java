@@ -39,35 +39,35 @@ import org.apache.lucene.util.BytesRef;
 @Deprecated
 public class DerefBytesDocValuesField extends BinaryDocValuesField {
 
-  /**
-   * Type for bytes DocValues: all with the same length
-   */
-  public static final FieldType TYPE_FIXED_LEN = BinaryDocValuesField.TYPE;
+    /**
+     * Type for bytes DocValues: all with the same length
+     */
+    public static final FieldType TYPE_FIXED_LEN = BinaryDocValuesField.TYPE;
 
-  /**
-   * Type for bytes DocValues: can have variable lengths
-   */
-  public static final FieldType TYPE_VAR_LEN = BinaryDocValuesField.TYPE;
+    /**
+     * Type for bytes DocValues: can have variable lengths
+     */
+    public static final FieldType TYPE_VAR_LEN = BinaryDocValuesField.TYPE;
 
-  /**
-   * Create a new fixed or variable-length DocValues field.
-   * @param name field name
-   * @param bytes binary content
-   * @throws IllegalArgumentException if the field name is null
-   */
-  public DerefBytesDocValuesField(String name, BytesRef bytes) {
-    super(name, bytes);
-  }
+    /**
+     * Create a new fixed or variable-length DocValues field.
+     * @param name field name
+     * @param bytes binary content
+     * @throws IllegalArgumentException if the field name is null
+     */
+    public DerefBytesDocValuesField(String name, BytesRef bytes) {
+        super(name, bytes);
+    }
 
-  /**
-   * Create a new fixed or variable length DocValues field.
-   * <p>
-   * @param name field name
-   * @param bytes binary content
-   * @param isFixedLength (ignored)
-   * @throws IllegalArgumentException if the field name is null
-   */
-  public DerefBytesDocValuesField(String name, BytesRef bytes, boolean isFixedLength) {
-    super(name, bytes);
-  }
+    /**
+     * Create a new fixed or variable length DocValues field.
+     * <p>
+     * @param name field name
+     * @param bytes binary content
+     * @param isFixedLength (ignored)
+     * @throws IllegalArgumentException if the field name is null
+     */
+    public DerefBytesDocValuesField(String name, BytesRef bytes, boolean isFixedLength) {
+        super(name, bytes);
+    }
 }

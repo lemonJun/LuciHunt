@@ -33,23 +33,23 @@ import org.apache.lucene.search.FieldCache; // javadocs
  */
 public class FloatDocValuesField extends NumericDocValuesField {
 
-  /** 
-   * Creates a new DocValues field with the specified 32-bit float value 
-   * @param name field name
-   * @param value 32-bit float value
-   * @throws IllegalArgumentException if the field name is null
-   */
-  public FloatDocValuesField(String name, float value) {
-    super(name, Float.floatToRawIntBits(value));
-  }
+    /** 
+     * Creates a new DocValues field with the specified 32-bit float value 
+     * @param name field name
+     * @param value 32-bit float value
+     * @throws IllegalArgumentException if the field name is null
+     */
+    public FloatDocValuesField(String name, float value) {
+        super(name, Float.floatToRawIntBits(value));
+    }
 
-  @Override
-  public void setFloatValue(float value) {
-    super.setLongValue(Float.floatToRawIntBits(value));
-  }
-  
-  @Override
-  public void setLongValue(long value) {
-    throw new IllegalArgumentException("cannot change value type from Float to Long");
-  }
+    @Override
+    public void setFloatValue(float value) {
+        super.setLongValue(Float.floatToRawIntBits(value));
+    }
+
+    @Override
+    public void setLongValue(long value) {
+        throw new IllegalArgumentException("cannot change value type from Float to Long");
+    }
 }

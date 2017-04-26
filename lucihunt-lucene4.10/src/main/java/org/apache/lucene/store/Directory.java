@@ -43,172 +43,168 @@ import org.apache.lucene.util.IOUtils;
  */
 public abstract class Directory implements Closeable {
 
-  /**
-   * Returns an array of strings, one for each file in the directory.
-   * 
-   * @throws NoSuchDirectoryException if the directory is not prepared for any
-   *         write operations (such as {@link #createOutput(String, IOContext)}).
-   * @throws IOException in case of other IO errors
-   */
-  public abstract String[] listAll() throws IOException;
+    /**
+     * Returns an array of strings, one for each file in the directory.
+     * 
+     * @throws NoSuchDirectoryException if the directory is not prepared for any
+     *         write operations (such as {@link #createOutput(String, IOContext)}).
+     * @throws IOException in case of other IO errors
+     */
+    public abstract String[] listAll() throws IOException;
 
-  /** Returns true iff a file with the given name exists.
-   *
-   *  @deprecated This method will be removed in 5.0 */
-  @Deprecated
-  public abstract boolean fileExists(String name)
-       throws IOException;
+    /** Returns true iff a file with the given name exists.
+     *
+     *  @deprecated This method will be removed in 5.0 */
+    @Deprecated
+    public abstract boolean fileExists(String name) throws IOException;
 
-  /** Removes an existing file in the directory. */
-  public abstract void deleteFile(String name)
-       throws IOException;
+    /** Removes an existing file in the directory. */
+    public abstract void deleteFile(String name) throws IOException;
 
-  /**
-   * Returns the length of a file in the directory. This method follows the
-   * following contract:
-   * <ul>
-   * <li>Throws {@link FileNotFoundException} or {@link NoSuchFileException}
-   * if the file does not exist.
-   * <li>Returns a value &ge;0 if the file exists, which specifies its length.
-   * </ul>
-   * 
-   * @param name the name of the file for which to return the length.
-   * @throws IOException if there was an IO error while retrieving the file's
-   *         length.
-   */
-  public abstract long fileLength(String name) throws IOException;
+    /**
+     * Returns the length of a file in the directory. This method follows the
+     * following contract:
+     * <ul>
+     * <li>Throws {@link FileNotFoundException} or {@link NoSuchFileException}
+     * if the file does not exist.
+     * <li>Returns a value &ge;0 if the file exists, which specifies its length.
+     * </ul>
+     * 
+     * @param name the name of the file for which to return the length.
+     * @throws IOException if there was an IO error while retrieving the file's
+     *         length.
+     */
+    public abstract long fileLength(String name) throws IOException;
 
-
-  /** Creates a new, empty file in the directory with the given name.
+    /** Creates a new, empty file in the directory with the given name.
       Returns a stream writing this file. */
-  public abstract IndexOutput createOutput(String name, IOContext context)
-       throws IOException;
+    public abstract IndexOutput createOutput(String name, IOContext context) throws IOException;
 
-  /**
-   * Ensure that any writes to these files are moved to
-   * stable storage.  Lucene uses this to properly commit
-   * changes to the index, to prevent a machine/OS crash
-   * from corrupting the index.<br/>
-   * <br/>
-   * NOTE: Clients may call this method for same files over
-   * and over again, so some impls might optimize for that.
-   * For other impls the operation can be a noop, for various
-   * reasons.
-   */
-  public abstract void sync(Collection<String> names) throws IOException;
+    /**
+     * Ensure that any writes to these files are moved to
+     * stable storage.  Lucene uses this to properly commit
+     * changes to the index, to prevent a machine/OS crash
+     * from corrupting the index.<br/>
+     * <br/>
+     * NOTE: Clients may call this method for same files over
+     * and over again, so some impls might optimize for that.
+     * For other impls the operation can be a noop, for various
+     * reasons.
+     */
+    public abstract void sync(Collection<String> names) throws IOException;
 
-  /** Returns a stream reading an existing file, with the
-   * specified read buffer size.  The particular Directory
-   * implementation may ignore the buffer size.  Currently
-   * the only Directory implementations that respect this
-   * parameter are {@link FSDirectory} and {@link
-   * CompoundFileDirectory}.
-   * <p>Throws {@link FileNotFoundException} or {@link NoSuchFileException}
-   * if the file does not exist.
-   */
-  public abstract IndexInput openInput(String name, IOContext context) throws IOException;
-  
-  /** Returns a stream reading an existing file, computing checksum as it reads */
-  public ChecksumIndexInput openChecksumInput(String name, IOContext context) throws IOException {
-    return new BufferedChecksumIndexInput(openInput(name, context));
-  }
-  
-  /** Construct a {@link Lock}.
-   * @param name the name of the lock file
-   */
-  public abstract Lock makeLock(String name);
+    /** Returns a stream reading an existing file, with the
+     * specified read buffer size.  The particular Directory
+     * implementation may ignore the buffer size.  Currently
+     * the only Directory implementations that respect this
+     * parameter are {@link FSDirectory} and {@link
+     * CompoundFileDirectory}.
+     * <p>Throws {@link FileNotFoundException} or {@link NoSuchFileException}
+     * if the file does not exist.
+     */
+    public abstract IndexInput openInput(String name, IOContext context) throws IOException;
 
-  /**
-   * Attempt to clear (forcefully unlock and remove) the
-   * specified lock.  Only call this at a time when you are
-   * certain this lock is no longer in use.
-   * @param name name of the lock to be cleared.
-   */
-  public abstract void clearLock(String name) throws IOException;
-
-  /** Closes the store. */
-  @Override
-  public abstract void close()
-       throws IOException;
-
-  /**
-   * Set the LockFactory that this Directory instance should
-   * use for its locking implementation.  Each * instance of
-   * LockFactory should only be used for one directory (ie,
-   * do not share a single instance across multiple
-   * Directories).
-   *
-   * @param lockFactory instance of {@link LockFactory}.
-   */
-  public abstract void setLockFactory(LockFactory lockFactory) throws IOException;
-
-  /**
-   * Get the LockFactory that this Directory instance is
-   * using for its locking implementation.  Note that this
-   * may be null for Directory implementations that provide
-   * their own locking implementation.
-   */
-  public abstract LockFactory getLockFactory();
-
-  /**
-   * Return a string identifier that uniquely differentiates
-   * this Directory instance from other Directory instances.
-   * This ID should be the same if two Directory instances
-   * (even in different JVMs and/or on different machines)
-   * are considered "the same index".  This is how locking
-   * "scopes" to the right index.
-   */
-  public String getLockID() {
-    return this.toString();
-  }
-
-  @Override
-  public String toString() {
-    return getClass().getSimpleName() + '@' + Integer.toHexString(hashCode()) + " lockFactory=" + getLockFactory();
-  }
-
-  /**
-   * Copies the file <i>src</i> to {@link Directory} <i>to</i> under the new
-   * file name <i>dest</i>.
-   * <p>
-   * If you want to copy the entire source directory to the destination one, you
-   * can do so like this:
-   * 
-   * <pre class="prettyprint">
-   * Directory to; // the directory to copy to
-   * for (String file : dir.listAll()) {
-   *   dir.copy(to, file, newFile, IOContext.DEFAULT); // newFile can be either file, or a new name
-   * }
-   * </pre>
-   * <p>
-   * <b>NOTE:</b> this method does not check whether <i>dest</i> exist and will
-   * overwrite it if it does.
-   */
-  public void copy(Directory to, String src, String dest, IOContext context) throws IOException {
-    IndexOutput os = null;
-    IndexInput is = null;
-    boolean success = false;
-    try {
-      os = to.createOutput(dest, context);
-      is = openInput(src, context);
-      os.copyBytes(is, is.length());
-      success = true;
-    } finally {
-      if (success) {
-        IOUtils.close(os, is);
-      } else {
-        IOUtils.closeWhileHandlingException(os, is);
-        try {
-          to.deleteFile(dest);
-        } catch (Throwable t) {
-        }
-      }
+    /** Returns a stream reading an existing file, computing checksum as it reads */
+    public ChecksumIndexInput openChecksumInput(String name, IOContext context) throws IOException {
+        return new BufferedChecksumIndexInput(openInput(name, context));
     }
-  }
 
-  /**
-   * @throws AlreadyClosedException if this Directory is closed
-   */
-  protected void ensureOpen() throws AlreadyClosedException {}
+    /** Construct a {@link Lock}.
+     * @param name the name of the lock file
+     */
+    public abstract Lock makeLock(String name);
+
+    /**
+     * Attempt to clear (forcefully unlock and remove) the
+     * specified lock.  Only call this at a time when you are
+     * certain this lock is no longer in use.
+     * @param name name of the lock to be cleared.
+     */
+    public abstract void clearLock(String name) throws IOException;
+
+    /** Closes the store. */
+    @Override
+    public abstract void close() throws IOException;
+
+    /**
+     * Set the LockFactory that this Directory instance should
+     * use for its locking implementation.  Each * instance of
+     * LockFactory should only be used for one directory (ie,
+     * do not share a single instance across multiple
+     * Directories).
+     *
+     * @param lockFactory instance of {@link LockFactory}.
+     */
+    public abstract void setLockFactory(LockFactory lockFactory) throws IOException;
+
+    /**
+     * Get the LockFactory that this Directory instance is
+     * using for its locking implementation.  Note that this
+     * may be null for Directory implementations that provide
+     * their own locking implementation.
+     */
+    public abstract LockFactory getLockFactory();
+
+    /**
+     * Return a string identifier that uniquely differentiates
+     * this Directory instance from other Directory instances.
+     * This ID should be the same if two Directory instances
+     * (even in different JVMs and/or on different machines)
+     * are considered "the same index".  This is how locking
+     * "scopes" to the right index.
+     */
+    public String getLockID() {
+        return this.toString();
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + '@' + Integer.toHexString(hashCode()) + " lockFactory=" + getLockFactory();
+    }
+
+    /**
+     * Copies the file <i>src</i> to {@link Directory} <i>to</i> under the new
+     * file name <i>dest</i>.
+     * <p>
+     * If you want to copy the entire source directory to the destination one, you
+     * can do so like this:
+     * 
+     * <pre class="prettyprint">
+     * Directory to; // the directory to copy to
+     * for (String file : dir.listAll()) {
+     *   dir.copy(to, file, newFile, IOContext.DEFAULT); // newFile can be either file, or a new name
+     * }
+     * </pre>
+     * <p>
+     * <b>NOTE:</b> this method does not check whether <i>dest</i> exist and will
+     * overwrite it if it does.
+     */
+    public void copy(Directory to, String src, String dest, IOContext context) throws IOException {
+        IndexOutput os = null;
+        IndexInput is = null;
+        boolean success = false;
+        try {
+            os = to.createOutput(dest, context);
+            is = openInput(src, context);
+            os.copyBytes(is, is.length());
+            success = true;
+        } finally {
+            if (success) {
+                IOUtils.close(os, is);
+            } else {
+                IOUtils.closeWhileHandlingException(os, is);
+                try {
+                    to.deleteFile(dest);
+                } catch (Throwable t) {
+                }
+            }
+        }
+    }
+
+    /**
+     * @throws AlreadyClosedException if this Directory is closed
+     */
+    protected void ensureOpen() throws AlreadyClosedException {
+    }
 
 }

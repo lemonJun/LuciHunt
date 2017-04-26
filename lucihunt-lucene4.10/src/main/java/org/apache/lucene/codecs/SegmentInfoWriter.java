@@ -30,14 +30,14 @@ import org.apache.lucene.store.IOContext;
  */
 
 public abstract class SegmentInfoWriter {
-  /** Sole constructor. (For invocation by subclass 
-   *  constructors, typically implicit.) */
-  protected SegmentInfoWriter() {
-  }
+    /** Sole constructor. (For invocation by subclass 
+     *  constructors, typically implicit.) */
+    protected SegmentInfoWriter() {
+    }
 
-  /**
-   * Write {@link SegmentInfo} data. 
-   * @throws IOException If an I/O error occurs
-   */
-  public abstract void write(Directory dir, SegmentInfo info, FieldInfos fis, IOContext ioContext) throws IOException;
+    /**
+     * Write {@link SegmentInfo} data. 
+     * @throws IOException If an I/O error occurs
+     */
+    public abstract void write(Directory dir, SegmentInfo info, FieldInfos fis, IOContext ioContext) throws IOException;
 }

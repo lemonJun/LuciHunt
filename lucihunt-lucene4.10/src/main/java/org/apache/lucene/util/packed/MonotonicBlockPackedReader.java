@@ -37,89 +37,89 @@ import org.apache.lucene.util.RamUsageEstimator;
  */
 public class MonotonicBlockPackedReader extends LongValues implements Accountable {
 
-  static long expected(long origin, float average, int index) {
-    return origin + (long) (average * (long) index);
-  }
+    static long expected(long origin, float average, int index) {
+        return origin + (long) (average * (long) index);
+    }
 
-  final int blockShift, blockMask;
-  final long valueCount;
-  final long[] minValues;
-  final float[] averages;
-  final PackedInts.Reader[] subReaders;
+    final int blockShift, blockMask;
+    final long valueCount;
+    final long[] minValues;
+    final float[] averages;
+    final PackedInts.Reader[] subReaders;
 
-  /** Sole constructor. */
-  public static MonotonicBlockPackedReader of(IndexInput in, int packedIntsVersion, int blockSize, long valueCount, boolean direct) throws IOException {
-    if (packedIntsVersion < PackedInts.VERSION_MONOTONIC_WITHOUT_ZIGZAG) {
-      return new MonotonicBlockPackedReader(in, packedIntsVersion, blockSize, valueCount, direct) {
-        @Override
-        protected long decodeDelta(long delta) {
-          return zigZagDecode(delta);
+    /** Sole constructor. */
+    public static MonotonicBlockPackedReader of(IndexInput in, int packedIntsVersion, int blockSize, long valueCount, boolean direct) throws IOException {
+        if (packedIntsVersion < PackedInts.VERSION_MONOTONIC_WITHOUT_ZIGZAG) {
+            return new MonotonicBlockPackedReader(in, packedIntsVersion, blockSize, valueCount, direct) {
+                @Override
+                protected long decodeDelta(long delta) {
+                    return zigZagDecode(delta);
+                }
+            };
         }
-      };
+        return new MonotonicBlockPackedReader(in, packedIntsVersion, blockSize, valueCount, direct);
     }
-    return new MonotonicBlockPackedReader(in, packedIntsVersion, blockSize, valueCount, direct);
-  }
 
-  private MonotonicBlockPackedReader(IndexInput in, int packedIntsVersion, int blockSize, long valueCount, boolean direct) throws IOException {
-    this.valueCount = valueCount;
-    blockShift = checkBlockSize(blockSize, MIN_BLOCK_SIZE, MAX_BLOCK_SIZE);
-    blockMask = blockSize - 1;
-    final int numBlocks = numBlocks(valueCount, blockSize);
-    minValues = new long[numBlocks];
-    averages = new float[numBlocks];
-    subReaders = new PackedInts.Reader[numBlocks];
-    for (int i = 0; i < numBlocks; ++i) {
-      if (packedIntsVersion < PackedInts.VERSION_MONOTONIC_WITHOUT_ZIGZAG) {
-        minValues[i] = in.readVLong();
-      } else {
-        minValues[i] = in.readZLong();
-      }
-      averages[i] = Float.intBitsToFloat(in.readInt());
-      final int bitsPerValue = in.readVInt();
-      if (bitsPerValue > 64) {
-        throw new IOException("Corrupted");
-      }
-      if (bitsPerValue == 0) {
-        subReaders[i] = new PackedInts.NullReader(blockSize);
-      } else {
-        final int size = (int) Math.min(blockSize, valueCount - (long) i * blockSize);
-        if (direct) {
-          final long pointer = in.getFilePointer();
-          subReaders[i] = PackedInts.getDirectReaderNoHeader(in, PackedInts.Format.PACKED, packedIntsVersion, size, bitsPerValue);
-          in.seek(pointer + PackedInts.Format.PACKED.byteCount(packedIntsVersion, size, bitsPerValue));
-        } else {
-          subReaders[i] = PackedInts.getReaderNoHeader(in, PackedInts.Format.PACKED, packedIntsVersion, size, bitsPerValue);
+    private MonotonicBlockPackedReader(IndexInput in, int packedIntsVersion, int blockSize, long valueCount, boolean direct) throws IOException {
+        this.valueCount = valueCount;
+        blockShift = checkBlockSize(blockSize, MIN_BLOCK_SIZE, MAX_BLOCK_SIZE);
+        blockMask = blockSize - 1;
+        final int numBlocks = numBlocks(valueCount, blockSize);
+        minValues = new long[numBlocks];
+        averages = new float[numBlocks];
+        subReaders = new PackedInts.Reader[numBlocks];
+        for (int i = 0; i < numBlocks; ++i) {
+            if (packedIntsVersion < PackedInts.VERSION_MONOTONIC_WITHOUT_ZIGZAG) {
+                minValues[i] = in.readVLong();
+            } else {
+                minValues[i] = in.readZLong();
+            }
+            averages[i] = Float.intBitsToFloat(in.readInt());
+            final int bitsPerValue = in.readVInt();
+            if (bitsPerValue > 64) {
+                throw new IOException("Corrupted");
+            }
+            if (bitsPerValue == 0) {
+                subReaders[i] = new PackedInts.NullReader(blockSize);
+            } else {
+                final int size = (int) Math.min(blockSize, valueCount - (long) i * blockSize);
+                if (direct) {
+                    final long pointer = in.getFilePointer();
+                    subReaders[i] = PackedInts.getDirectReaderNoHeader(in, PackedInts.Format.PACKED, packedIntsVersion, size, bitsPerValue);
+                    in.seek(pointer + PackedInts.Format.PACKED.byteCount(packedIntsVersion, size, bitsPerValue));
+                } else {
+                    subReaders[i] = PackedInts.getReaderNoHeader(in, PackedInts.Format.PACKED, packedIntsVersion, size, bitsPerValue);
+                }
+            }
         }
-      }
     }
-  }
 
-  @Override
-  public long get(long index) {
-    assert index >= 0 && index < valueCount;
-    final int block = (int) (index >>> blockShift);
-    final int idx = (int) (index & blockMask);
-    return expected(minValues[block], averages[block], idx) + decodeDelta(subReaders[block].get(idx));
-  }
-
-  protected long decodeDelta(long delta) {
-    return delta;
-  }
-
-  /** Returns the number of values */
-  public long size() {
-    return valueCount;
-  }
-  
-  @Override
-  public long ramBytesUsed() {
-    long sizeInBytes = 0;
-    sizeInBytes += RamUsageEstimator.sizeOf(minValues);
-    sizeInBytes += RamUsageEstimator.sizeOf(averages);
-    for(PackedInts.Reader reader: subReaders) {
-      sizeInBytes += reader.ramBytesUsed();
+    @Override
+    public long get(long index) {
+        assert index >= 0 && index < valueCount;
+        final int block = (int) (index >>> blockShift);
+        final int idx = (int) (index & blockMask);
+        return expected(minValues[block], averages[block], idx) + decodeDelta(subReaders[block].get(idx));
     }
-    return sizeInBytes;
-  }
+
+    protected long decodeDelta(long delta) {
+        return delta;
+    }
+
+    /** Returns the number of values */
+    public long size() {
+        return valueCount;
+    }
+
+    @Override
+    public long ramBytesUsed() {
+        long sizeInBytes = 0;
+        sizeInBytes += RamUsageEstimator.sizeOf(minValues);
+        sizeInBytes += RamUsageEstimator.sizeOf(averages);
+        for (PackedInts.Reader reader : subReaders) {
+            sizeInBytes += reader.ramBytesUsed();
+        }
+        return sizeInBytes;
+    }
 
 }

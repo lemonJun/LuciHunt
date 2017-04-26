@@ -45,23 +45,23 @@ import org.apache.lucene.util.NumericUtils;
 
 public class SortedNumericDocValuesField extends Field {
 
-  /**
-   * Type for sorted numeric DocValues.
-   */
-  public static final FieldType TYPE = new FieldType();
-  static {
-    TYPE.setDocValueType(FieldInfo.DocValuesType.SORTED_NUMERIC);
-    TYPE.freeze();
-  }
+    /**
+     * Type for sorted numeric DocValues.
+     */
+    public static final FieldType TYPE = new FieldType();
+    static {
+        TYPE.setDocValueType(FieldInfo.DocValuesType.SORTED_NUMERIC);
+        TYPE.freeze();
+    }
 
-  /** 
-   * Creates a new DocValues field with the specified 64-bit long value 
-   * @param name field name
-   * @param value 64-bit long value
-   * @throws IllegalArgumentException if the field name is null
-   */
-  public SortedNumericDocValuesField(String name, long value) {
-    super(name, TYPE);
-    fieldsData = Long.valueOf(value);
-  }
+    /** 
+     * Creates a new DocValues field with the specified 64-bit long value 
+     * @param name field name
+     * @param value 64-bit long value
+     * @throws IllegalArgumentException if the field name is null
+     */
+    public SortedNumericDocValuesField(String name, long value) {
+        super(name, TYPE);
+        fieldsData = Long.valueOf(value);
+    }
 }

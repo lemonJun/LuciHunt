@@ -40,34 +40,34 @@ import org.apache.lucene.util.BytesRef;
 @Deprecated
 public class SortedBytesDocValuesField extends SortedDocValuesField {
 
-  /**
-   * Type for sorted bytes DocValues: all with the same length
-   */
-  public static final FieldType TYPE_FIXED_LEN = SortedDocValuesField.TYPE;
+    /**
+     * Type for sorted bytes DocValues: all with the same length
+     */
+    public static final FieldType TYPE_FIXED_LEN = SortedDocValuesField.TYPE;
 
-  /**
-   * Type for sorted bytes DocValues: can have variable lengths
-   */
-  public static final FieldType TYPE_VAR_LEN = SortedDocValuesField.TYPE;
+    /**
+     * Type for sorted bytes DocValues: can have variable lengths
+     */
+    public static final FieldType TYPE_VAR_LEN = SortedDocValuesField.TYPE;
 
-  /**
-   * Create a new fixed or variable-length sorted DocValues field.
-   * @param name field name
-   * @param bytes binary content
-   * @throws IllegalArgumentException if the field name is null
-   */
-  public SortedBytesDocValuesField(String name, BytesRef bytes) {
-    super(name, bytes);
-  }
+    /**
+     * Create a new fixed or variable-length sorted DocValues field.
+     * @param name field name
+     * @param bytes binary content
+     * @throws IllegalArgumentException if the field name is null
+     */
+    public SortedBytesDocValuesField(String name, BytesRef bytes) {
+        super(name, bytes);
+    }
 
-  /**
-   * Create a new fixed or variable length sorted DocValues field.
-   * @param name field name
-   * @param bytes binary content
-   * @param isFixedLength (ignored)
-   * @throws IllegalArgumentException if the field name is null
-   */
-  public SortedBytesDocValuesField(String name, BytesRef bytes, boolean isFixedLength) {
-    super(name, bytes);
-  }
+    /**
+     * Create a new fixed or variable length sorted DocValues field.
+     * @param name field name
+     * @param bytes binary content
+     * @param isFixedLength (ignored)
+     * @throws IllegalArgumentException if the field name is null
+     */
+    public SortedBytesDocValuesField(String name, BytesRef bytes, boolean isFixedLength) {
+        super(name, bytes);
+    }
 }

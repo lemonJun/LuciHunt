@@ -25,31 +25,31 @@ import org.apache.lucene.store.DataOutput;
  */
 public final class GrowableByteArrayDataOutput extends DataOutput {
 
-  /** The bytes */
-  public byte[] bytes;
-  /** The length */
-  public int length;
+    /** The bytes */
+    public byte[] bytes;
+    /** The length */
+    public int length;
 
-  /** Create a {@link GrowableByteArrayDataOutput} with the given initial capacity. */
-  public GrowableByteArrayDataOutput(int cp) {
-    this.bytes = new byte[ArrayUtil.oversize(cp, 1)];
-    this.length = 0;
-  }
-
-  @Override
-  public void writeByte(byte b) {
-    if (length >= bytes.length) {
-      bytes = ArrayUtil.grow(bytes);
+    /** Create a {@link GrowableByteArrayDataOutput} with the given initial capacity. */
+    public GrowableByteArrayDataOutput(int cp) {
+        this.bytes = new byte[ArrayUtil.oversize(cp, 1)];
+        this.length = 0;
     }
-    bytes[length++] = b;
-  }
 
-  @Override
-  public void writeBytes(byte[] b, int off, int len) {
-    final int newLength = length + len;
-    bytes = ArrayUtil.grow(bytes, newLength);
-    System.arraycopy(b, off, bytes, length, len);
-    length = newLength;
-  }
+    @Override
+    public void writeByte(byte b) {
+        if (length >= bytes.length) {
+            bytes = ArrayUtil.grow(bytes);
+        }
+        bytes[length++] = b;
+    }
+
+    @Override
+    public void writeBytes(byte[] b, int off, int len) {
+        final int newLength = length + len;
+        bytes = ArrayUtil.grow(bytes, newLength);
+        System.arraycopy(b, off, bytes, length, len);
+        length = newLength;
+    }
 
 }

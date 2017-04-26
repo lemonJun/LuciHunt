@@ -35,98 +35,98 @@ import java.io.IOException;
  
  * @see Directory
  */
-public abstract class IndexInput extends DataInput implements Cloneable,Closeable {
+public abstract class IndexInput extends DataInput implements Cloneable, Closeable {
 
-  private final String resourceDescription;
+    private final String resourceDescription;
 
-  /** resourceDescription should be a non-null, opaque string
-   *  describing this resource; it's returned from
-   *  {@link #toString}. */
-  protected IndexInput(String resourceDescription) {
-    if (resourceDescription == null) {
-      throw new IllegalArgumentException("resourceDescription must not be null");
+    /** resourceDescription should be a non-null, opaque string
+     *  describing this resource; it's returned from
+     *  {@link #toString}. */
+    protected IndexInput(String resourceDescription) {
+        if (resourceDescription == null) {
+            throw new IllegalArgumentException("resourceDescription must not be null");
+        }
+        this.resourceDescription = resourceDescription;
     }
-    this.resourceDescription = resourceDescription;
-  }
 
-  /** Closes the stream to further operations. */
-  @Override
-  public abstract void close() throws IOException;
+    /** Closes the stream to further operations. */
+    @Override
+    public abstract void close() throws IOException;
 
-  /** Returns the current position in this file, where the next read will
-   * occur.
-   * @see #seek(long)
-   */
-  public abstract long getFilePointer();
+    /** Returns the current position in this file, where the next read will
+     * occur.
+     * @see #seek(long)
+     */
+    public abstract long getFilePointer();
 
-  /** Sets current position in this file, where the next read will occur.
-   * @see #getFilePointer()
-   */
-  public abstract void seek(long pos) throws IOException;
+    /** Sets current position in this file, where the next read will occur.
+     * @see #getFilePointer()
+     */
+    public abstract void seek(long pos) throws IOException;
 
-  /** The number of bytes in the file. */
-  public abstract long length();
+    /** The number of bytes in the file. */
+    public abstract long length();
 
-  @Override
-  public String toString() {
-    return resourceDescription;
-  }
-  
-  /** {@inheritDoc}
-   * <p><b>Warning:</b> Lucene never closes cloned
-   * {@code IndexInput}s, it will only do this on the original one.
-   * The original instance must take care that cloned instances throw
-   * {@link AlreadyClosedException} when the original one is closed.
-   */
-  @Override
-  public IndexInput clone() {
-    return (IndexInput) super.clone();
-  }
-  
-  /**
-   * Creates a slice of this index input, with the given description, offset, and length. 
-   * The slice is seeked to the beginning.
-   */
-  public abstract IndexInput slice(String sliceDescription, long offset, long length) throws IOException;
-  
-  /**
-   * Creates a random-access slice of this index input, with the given offset and length. 
-   * <p>
-   * The default implementation calls {@link #slice}, and it doesn't support random access,
-   * it implements absolute reads as seek+read.
-   */
-  public RandomAccessInput randomAccessSlice(long offset, long length) throws IOException {
-    final IndexInput slice = slice("randomaccess", offset, length);
-    if (slice instanceof RandomAccessInput) {
-      // slice() already supports random access
-      return (RandomAccessInput) slice;
-    } else {
-      // return default impl
-      return new RandomAccessInput() {
-        @Override
-        public byte readByte(long pos) throws IOException {
-          slice.seek(pos);
-          return slice.readByte();
-        }
-        
-        @Override
-        public short readShort(long pos) throws IOException {
-          slice.seek(pos);
-          return slice.readShort();
-        }
-        
-        @Override
-        public int readInt(long pos) throws IOException {
-          slice.seek(pos);
-          return slice.readInt();
-        }
-        
-        @Override
-        public long readLong(long pos) throws IOException {
-          slice.seek(pos);
-          return slice.readLong();
-        }
-      };
+    @Override
+    public String toString() {
+        return resourceDescription;
     }
-  }
+
+    /** {@inheritDoc}
+     * <p><b>Warning:</b> Lucene never closes cloned
+     * {@code IndexInput}s, it will only do this on the original one.
+     * The original instance must take care that cloned instances throw
+     * {@link AlreadyClosedException} when the original one is closed.
+     */
+    @Override
+    public IndexInput clone() {
+        return (IndexInput) super.clone();
+    }
+
+    /**
+     * Creates a slice of this index input, with the given description, offset, and length. 
+     * The slice is seeked to the beginning.
+     */
+    public abstract IndexInput slice(String sliceDescription, long offset, long length) throws IOException;
+
+    /**
+     * Creates a random-access slice of this index input, with the given offset and length. 
+     * <p>
+     * The default implementation calls {@link #slice}, and it doesn't support random access,
+     * it implements absolute reads as seek+read.
+     */
+    public RandomAccessInput randomAccessSlice(long offset, long length) throws IOException {
+        final IndexInput slice = slice("randomaccess", offset, length);
+        if (slice instanceof RandomAccessInput) {
+            // slice() already supports random access
+            return (RandomAccessInput) slice;
+        } else {
+            // return default impl
+            return new RandomAccessInput() {
+                @Override
+                public byte readByte(long pos) throws IOException {
+                    slice.seek(pos);
+                    return slice.readByte();
+                }
+
+                @Override
+                public short readShort(long pos) throws IOException {
+                    slice.seek(pos);
+                    return slice.readShort();
+                }
+
+                @Override
+                public int readInt(long pos) throws IOException {
+                    slice.seek(pos);
+                    return slice.readInt();
+                }
+
+                @Override
+                public long readLong(long pos) throws IOException {
+                    slice.seek(pos);
+                    return slice.readLong();
+                }
+            };
+        }
+    }
 }

@@ -47,94 +47,94 @@ import org.apache.lucene.util.automaton.Operations;
  * @lucene.experimental
  */
 public class AutomatonQuery extends MultiTermQuery {
-  /** the automaton to match index terms against */
-  protected final Automaton automaton;
-  protected final CompiledAutomaton compiled;
-  /** term containing the field, and possibly some pattern structure */
-  protected final Term term;
+    /** the automaton to match index terms against */
+    protected final Automaton automaton;
+    protected final CompiledAutomaton compiled;
+    /** term containing the field, and possibly some pattern structure */
+    protected final Term term;
 
-  /**
-   * Create a new AutomatonQuery from an {@link Automaton}.
-   * 
-   * @param term Term containing field and possibly some pattern structure. The
-   *        term text is ignored.
-   * @param automaton Automaton to run, terms that are accepted are considered a
-   *        match.
-   */
-  public AutomatonQuery(final Term term, Automaton automaton) {
-    this(term, automaton, Operations.DEFAULT_MAX_DETERMINIZED_STATES);
-  }
-
-  /**
-   * Create a new AutomatonQuery from an {@link Automaton}.
-   * 
-   * @param term Term containing field and possibly some pattern structure. The
-   *        term text is ignored.
-   * @param automaton Automaton to run, terms that are accepted are considered a
-   *        match.
-   * @param maxDeterminizedStates maximum number of states in the resulting
-   *   automata.  If the automata would need more than this many states
-   *   TooComplextToDeterminizeException is thrown.  Higher number require more
-   *   space but can process more complex automata.
-   */
-  public AutomatonQuery(final Term term, Automaton automaton, int maxDeterminizedStates) {
-    super(term.field());
-    this.term = term;
-    this.automaton = automaton;
-    this.compiled = new CompiledAutomaton(automaton, null, true, maxDeterminizedStates);
-  }
-
-  @Override
-  protected TermsEnum getTermsEnum(Terms terms, AttributeSource atts) throws IOException {
-    return compiled.getTermsEnum(terms);
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = super.hashCode();
-    result = prime * result + compiled.hashCode();
-    result = prime * result + ((term == null) ? 0 : term.hashCode());
-    return result;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (!super.equals(obj))
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    AutomatonQuery other = (AutomatonQuery) obj;
-    if (!compiled.equals(other.compiled))
-      return false;
-    if (term == null) {
-      if (other.term != null)
-        return false;
-    } else if (!term.equals(other.term))
-      return false;
-    return true;
-  }
-
-  @Override
-  public String toString(String field) {
-    StringBuilder buffer = new StringBuilder();
-    if (!term.field().equals(field)) {
-      buffer.append(term.field());
-      buffer.append(":");
+    /**
+     * Create a new AutomatonQuery from an {@link Automaton}.
+     * 
+     * @param term Term containing field and possibly some pattern structure. The
+     *        term text is ignored.
+     * @param automaton Automaton to run, terms that are accepted are considered a
+     *        match.
+     */
+    public AutomatonQuery(final Term term, Automaton automaton) {
+        this(term, automaton, Operations.DEFAULT_MAX_DETERMINIZED_STATES);
     }
-    buffer.append(getClass().getSimpleName());
-    buffer.append(" {");
-    buffer.append('\n');
-    buffer.append(automaton.toString());
-    buffer.append("}");
-    buffer.append(ToStringUtils.boost(getBoost()));
-    return buffer.toString();
-  }
-  
-  /** Returns the automaton used to create this query */
-  public Automaton getAutomaton() {
-    return automaton;
-  }
+
+    /**
+     * Create a new AutomatonQuery from an {@link Automaton}.
+     * 
+     * @param term Term containing field and possibly some pattern structure. The
+     *        term text is ignored.
+     * @param automaton Automaton to run, terms that are accepted are considered a
+     *        match.
+     * @param maxDeterminizedStates maximum number of states in the resulting
+     *   automata.  If the automata would need more than this many states
+     *   TooComplextToDeterminizeException is thrown.  Higher number require more
+     *   space but can process more complex automata.
+     */
+    public AutomatonQuery(final Term term, Automaton automaton, int maxDeterminizedStates) {
+        super(term.field());
+        this.term = term;
+        this.automaton = automaton;
+        this.compiled = new CompiledAutomaton(automaton, null, true, maxDeterminizedStates);
+    }
+
+    @Override
+    protected TermsEnum getTermsEnum(Terms terms, AttributeSource atts) throws IOException {
+        return compiled.getTermsEnum(terms);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + compiled.hashCode();
+        result = prime * result + ((term == null) ? 0 : term.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        AutomatonQuery other = (AutomatonQuery) obj;
+        if (!compiled.equals(other.compiled))
+            return false;
+        if (term == null) {
+            if (other.term != null)
+                return false;
+        } else if (!term.equals(other.term))
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString(String field) {
+        StringBuilder buffer = new StringBuilder();
+        if (!term.field().equals(field)) {
+            buffer.append(term.field());
+            buffer.append(":");
+        }
+        buffer.append(getClass().getSimpleName());
+        buffer.append(" {");
+        buffer.append('\n');
+        buffer.append(automaton.toString());
+        buffer.append("}");
+        buffer.append(ToStringUtils.boost(getBoost()));
+        return buffer.toString();
+    }
+
+    /** Returns the automaton used to create this query */
+    public Automaton getAutomaton() {
+        return automaton;
+    }
 }

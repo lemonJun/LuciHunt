@@ -48,10 +48,10 @@ import org.apache.lucene.search.similarities.Similarity; // javadocs
  * @lucene.experimental
  */
 public class SearcherFactory {
-  /** 
-   * Returns a new IndexSearcher over the given reader. 
-   */
-  public IndexSearcher newSearcher(IndexReader reader) throws IOException {
-    return new IndexSearcher(reader);
-  }
+    /** 
+     * Returns a new IndexSearcher over the given reader. 
+     */
+    public IndexSearcher newSearcher(IndexReader reader) throws IOException {
+        return new IndexSearcher(reader);
+    }
 }

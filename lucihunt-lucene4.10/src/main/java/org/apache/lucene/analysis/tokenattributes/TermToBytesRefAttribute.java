@@ -53,16 +53,16 @@ import org.apache.lucene.util.BytesRef;
  */
 public interface TermToBytesRefAttribute extends Attribute {
 
-  /** 
-   * Updates the bytes {@link #getBytesRef()} to contain this term's
-   * final encoding.
-   */
-  public void fillBytesRef();
-  
-  /**
-   * Retrieve this attribute's BytesRef. The bytes are updated 
-   * from the current term when the consumer calls {@link #fillBytesRef()}.
-   * @return this Attributes internal BytesRef.
-   */
-  public BytesRef getBytesRef();
+    /** 
+     * Updates the bytes {@link #getBytesRef()} to contain this term's
+     * final encoding.
+     */
+    public void fillBytesRef();
+
+    /**
+     * Retrieve this attribute's BytesRef. The bytes are updated 
+     * from the current term when the consumer calls {@link #fillBytesRef()}.
+     * @return this Attributes internal BytesRef.
+     */
+    public BytesRef getBytesRef();
 }

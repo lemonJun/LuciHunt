@@ -23,54 +23,56 @@ package org.apache.lucene.util.mutable;
  * <code>value</code> set to <code>0</code> for proper operation.
  */
 public class MutableValueInt extends MutableValue {
-  public int value;
-  
-  @Override
-  public Object toObject() {
-    assert exists || 0 == value;
-    return exists ? value : null;
-  }
+    public int value;
 
-  @Override
-  public void copy(MutableValue source) {
-    MutableValueInt s = (MutableValueInt) source;
-    value = s.value;
-    exists = s.exists;
-  }
+    @Override
+    public Object toObject() {
+        assert exists || 0 == value;
+        return exists ? value : null;
+    }
 
-  @Override
-  public MutableValue duplicate() {
-    MutableValueInt v = new MutableValueInt();
-    v.value = this.value;
-    v.exists = this.exists;
-    return v;
-  }
+    @Override
+    public void copy(MutableValue source) {
+        MutableValueInt s = (MutableValueInt) source;
+        value = s.value;
+        exists = s.exists;
+    }
 
-  @Override
-  public boolean equalsSameType(Object other) {
-    assert exists || 0 == value;
-    MutableValueInt b = (MutableValueInt)other;
-    return value == b.value && exists == b.exists;
-  }
+    @Override
+    public MutableValue duplicate() {
+        MutableValueInt v = new MutableValueInt();
+        v.value = this.value;
+        v.exists = this.exists;
+        return v;
+    }
 
-  @Override
-  public int compareSameType(Object other) {
-    assert exists || 0 == value;
-    MutableValueInt b = (MutableValueInt)other;
-    int ai = value;
-    int bi = b.value;
-    if (ai<bi) return -1;
-    else if (ai>bi) return 1;
+    @Override
+    public boolean equalsSameType(Object other) {
+        assert exists || 0 == value;
+        MutableValueInt b = (MutableValueInt) other;
+        return value == b.value && exists == b.exists;
+    }
 
-    if (exists == b.exists) return 0;
-    return exists ? 1 : -1;
-  }
+    @Override
+    public int compareSameType(Object other) {
+        assert exists || 0 == value;
+        MutableValueInt b = (MutableValueInt) other;
+        int ai = value;
+        int bi = b.value;
+        if (ai < bi)
+            return -1;
+        else if (ai > bi)
+            return 1;
 
+        if (exists == b.exists)
+            return 0;
+        return exists ? 1 : -1;
+    }
 
-  @Override
-  public int hashCode() {
-    assert exists || 0 == value;
-    // TODO: if used in HashMap, it already mixes the value... maybe use a straight value?
-    return (value>>8) + (value>>16);
-  }
+    @Override
+    public int hashCode() {
+        assert exists || 0 == value;
+        // TODO: if used in HashMap, it already mixes the value... maybe use a straight value?
+        return (value >> 8) + (value >> 16);
+    }
 }

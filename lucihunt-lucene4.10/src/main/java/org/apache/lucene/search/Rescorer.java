@@ -37,22 +37,22 @@ import java.io.IOException;
 
 public abstract class Rescorer {
 
-  /** 
-   * Rescore an initial first-pass {@link TopDocs}.
-   *
-   * @param searcher {@link IndexSearcher} used to produce the
-   *   first pass topDocs
-   * @param firstPassTopDocs Hits from the first pass
-   *   search.  It's very important that these hits were
-   *   produced by the provided searcher; otherwise the doc
-   *   IDs will not match!
-   * @param topN How many re-scored hits to return
-   */ 
-  public abstract TopDocs rescore(IndexSearcher searcher, TopDocs firstPassTopDocs, int topN) throws IOException;
+    /** 
+     * Rescore an initial first-pass {@link TopDocs}.
+     *
+     * @param searcher {@link IndexSearcher} used to produce the
+     *   first pass topDocs
+     * @param firstPassTopDocs Hits from the first pass
+     *   search.  It's very important that these hits were
+     *   produced by the provided searcher; otherwise the doc
+     *   IDs will not match!
+     * @param topN How many re-scored hits to return
+     */
+    public abstract TopDocs rescore(IndexSearcher searcher, TopDocs firstPassTopDocs, int topN) throws IOException;
 
-  /**
-   * Explains how the score for the specified document was
-   * computed.
-   */
-  public abstract Explanation explain(IndexSearcher searcher, Explanation firstPassExplanation, int docID) throws IOException;
+    /**
+     * Explains how the score for the specified document was
+     * computed.
+     */
+    public abstract Explanation explain(IndexSearcher searcher, Explanation firstPassExplanation, int docID) throws IOException;
 }

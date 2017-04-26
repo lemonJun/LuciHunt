@@ -36,29 +36,29 @@ import org.apache.lucene.index.SegmentReadState;
 @Deprecated
 class Lucene3xPostingsFormat extends PostingsFormat {
 
-  /** Extension of terms file */
-  public static final String TERMS_EXTENSION = "tis";
+    /** Extension of terms file */
+    public static final String TERMS_EXTENSION = "tis";
 
-  /** Extension of terms index file */
-  public static final String TERMS_INDEX_EXTENSION = "tii";
+    /** Extension of terms index file */
+    public static final String TERMS_INDEX_EXTENSION = "tii";
 
-  /** Extension of freq postings file */
-  public static final String FREQ_EXTENSION = "frq";
+    /** Extension of freq postings file */
+    public static final String FREQ_EXTENSION = "frq";
 
-  /** Extension of prox postings file */
-  public static final String PROX_EXTENSION = "prx";
+    /** Extension of prox postings file */
+    public static final String PROX_EXTENSION = "prx";
 
-  public Lucene3xPostingsFormat() {
-    super("Lucene3x");
-  }
-  
-  @Override
-  public FieldsConsumer fieldsConsumer(SegmentWriteState state) throws IOException {
-    throw new UnsupportedOperationException("this codec can only be used for reading");
-  }
+    public Lucene3xPostingsFormat() {
+        super("Lucene3x");
+    }
 
-  @Override
-  public FieldsProducer fieldsProducer(SegmentReadState state) throws IOException {
-    return new Lucene3xFields(state.directory, state.fieldInfos, state.segmentInfo, state.context, state.termsIndexDivisor);
-  }
+    @Override
+    public FieldsConsumer fieldsConsumer(SegmentWriteState state) throws IOException {
+        throw new UnsupportedOperationException("this codec can only be used for reading");
+    }
+
+    @Override
+    public FieldsProducer fieldsProducer(SegmentReadState state) throws IOException {
+        return new Lucene3xFields(state.directory, state.fieldInfos, state.segmentInfo, state.context, state.termsIndexDivisor);
+    }
 }

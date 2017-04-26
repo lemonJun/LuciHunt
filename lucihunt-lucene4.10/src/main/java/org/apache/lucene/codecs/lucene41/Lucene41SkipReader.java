@@ -51,173 +51,173 @@ import org.apache.lucene.store.IndexInput;
  *
  */
 final class Lucene41SkipReader extends MultiLevelSkipListReader {
-  // private boolean DEBUG = Lucene41PostingsReader.DEBUG;
-  private final int blockSize;
+    // private boolean DEBUG = Lucene41PostingsReader.DEBUG;
+    private final int blockSize;
 
-  private long docPointer[];
-  private long posPointer[];
-  private long payPointer[];
-  private int posBufferUpto[];
-  private int payloadByteUpto[];
+    private long docPointer[];
+    private long posPointer[];
+    private long payPointer[];
+    private int posBufferUpto[];
+    private int payloadByteUpto[];
 
-  private long lastPosPointer;
-  private long lastPayPointer;
-  private int lastPayloadByteUpto;
-  private long lastDocPointer;
-  private int lastPosBufferUpto;
+    private long lastPosPointer;
+    private long lastPayPointer;
+    private int lastPayloadByteUpto;
+    private long lastDocPointer;
+    private int lastPosBufferUpto;
 
-  public Lucene41SkipReader(IndexInput skipStream, int maxSkipLevels, int blockSize, boolean hasPos, boolean hasOffsets, boolean hasPayloads) {
-    super(skipStream, maxSkipLevels, blockSize, 8);
-    this.blockSize = blockSize;
-    docPointer = new long[maxSkipLevels];
-    if (hasPos) {
-      posPointer = new long[maxSkipLevels];
-      posBufferUpto = new int[maxSkipLevels];
-      if (hasPayloads) {
-        payloadByteUpto = new int[maxSkipLevels];
-      } else {
-        payloadByteUpto = null;
-      }
-      if (hasOffsets || hasPayloads) {
-        payPointer = new long[maxSkipLevels];
-      } else {
-        payPointer = null;
-      }
-    } else {
-      posPointer = null;
+    public Lucene41SkipReader(IndexInput skipStream, int maxSkipLevels, int blockSize, boolean hasPos, boolean hasOffsets, boolean hasPayloads) {
+        super(skipStream, maxSkipLevels, blockSize, 8);
+        this.blockSize = blockSize;
+        docPointer = new long[maxSkipLevels];
+        if (hasPos) {
+            posPointer = new long[maxSkipLevels];
+            posBufferUpto = new int[maxSkipLevels];
+            if (hasPayloads) {
+                payloadByteUpto = new int[maxSkipLevels];
+            } else {
+                payloadByteUpto = null;
+            }
+            if (hasOffsets || hasPayloads) {
+                payPointer = new long[maxSkipLevels];
+            } else {
+                payPointer = null;
+            }
+        } else {
+            posPointer = null;
+        }
     }
-  }
 
-  /**
-   * Trim original docFreq to tell skipReader read proper number of skip points.
-   *
-   * Since our definition in Lucene41Skip* is a little different from MultiLevelSkip*
-   * This trimmed docFreq will prevent skipReader from:
-   * 1. silly reading a non-existed skip point after the last block boundary
-   * 2. moving into the vInt block
-   *
-   */
-  protected int trim(int df) {
-    return df % blockSize == 0? df - 1: df;
-  }
-
-  public void init(long skipPointer, long docBasePointer, long posBasePointer, long payBasePointer, int df) {
-    super.init(skipPointer, trim(df));
-    lastDocPointer = docBasePointer;
-    lastPosPointer = posBasePointer;
-    lastPayPointer = payBasePointer;
-
-    Arrays.fill(docPointer, docBasePointer);
-    if (posPointer != null) {
-      Arrays.fill(posPointer, posBasePointer);
-      if (payPointer != null) {
-        Arrays.fill(payPointer, payBasePointer);
-      }
-    } else {
-      assert posBasePointer == 0;
+    /**
+     * Trim original docFreq to tell skipReader read proper number of skip points.
+     *
+     * Since our definition in Lucene41Skip* is a little different from MultiLevelSkip*
+     * This trimmed docFreq will prevent skipReader from:
+     * 1. silly reading a non-existed skip point after the last block boundary
+     * 2. moving into the vInt block
+     *
+     */
+    protected int trim(int df) {
+        return df % blockSize == 0 ? df - 1 : df;
     }
-  }
 
-  /** Returns the doc pointer of the doc to which the last call of 
-   * {@link MultiLevelSkipListReader#skipTo(int)} has skipped.  */
-  public long getDocPointer() {
-    return lastDocPointer;
-  }
+    public void init(long skipPointer, long docBasePointer, long posBasePointer, long payBasePointer, int df) {
+        super.init(skipPointer, trim(df));
+        lastDocPointer = docBasePointer;
+        lastPosPointer = posBasePointer;
+        lastPayPointer = payBasePointer;
 
-  public long getPosPointer() {
-    return lastPosPointer;
-  }
-
-  public int getPosBufferUpto() {
-    return lastPosBufferUpto;
-  }
-
-  public long getPayPointer() {
-    return lastPayPointer;
-  }
-
-  public int getPayloadByteUpto() {
-    return lastPayloadByteUpto;
-  }
-
-  public int getNextSkipDoc() {
-    return skipDoc[0];
-  }
-
-  @Override
-  protected void seekChild(int level) throws IOException {
-    super.seekChild(level);
-    // if (DEBUG) {
-    //   System.out.println("seekChild level=" + level);
-    // }
-    docPointer[level] = lastDocPointer;
-    if (posPointer != null) {
-      posPointer[level] = lastPosPointer;
-      posBufferUpto[level] = lastPosBufferUpto;
-      if (payloadByteUpto != null) {
-        payloadByteUpto[level] = lastPayloadByteUpto;
-      }
-      if (payPointer != null) {
-        payPointer[level] = lastPayPointer;
-      }
+        Arrays.fill(docPointer, docBasePointer);
+        if (posPointer != null) {
+            Arrays.fill(posPointer, posBasePointer);
+            if (payPointer != null) {
+                Arrays.fill(payPointer, payBasePointer);
+            }
+        } else {
+            assert posBasePointer == 0;
+        }
     }
-  }
-  
-  @Override
-  protected void setLastSkipData(int level) {
-    super.setLastSkipData(level);
-    lastDocPointer = docPointer[level];
-    // if (DEBUG) {
-    //   System.out.println("setLastSkipData level=" + level);
-    //   System.out.println("  lastDocPointer=" + lastDocPointer);
-    // }
-    if (posPointer != null) {
-      lastPosPointer = posPointer[level];
-      lastPosBufferUpto = posBufferUpto[level];
-      // if (DEBUG) {
-      //   System.out.println("  lastPosPointer=" + lastPosPointer + " lastPosBUfferUpto=" + lastPosBufferUpto);
-      // }
-      if (payPointer != null) {
-        lastPayPointer = payPointer[level];
-      }
-      if (payloadByteUpto != null) {
-        lastPayloadByteUpto = payloadByteUpto[level];
-      }
+
+    /** Returns the doc pointer of the doc to which the last call of 
+     * {@link MultiLevelSkipListReader#skipTo(int)} has skipped.  */
+    public long getDocPointer() {
+        return lastDocPointer;
     }
-  }
 
-  @Override
-  protected int readSkipData(int level, IndexInput skipStream) throws IOException {
-    // if (DEBUG) {
-    //   System.out.println("readSkipData level=" + level);
-    // }
-    int delta = skipStream.readVInt();
-    // if (DEBUG) {
-    //   System.out.println("  delta=" + delta);
-    // }
-    docPointer[level] += skipStream.readVLong();
-    // if (DEBUG) {
-    //   System.out.println("  docFP=" + docPointer[level]);
-    // }
-
-    if (posPointer != null) {
-      posPointer[level] += skipStream.readVLong();
-      // if (DEBUG) {
-      //   System.out.println("  posFP=" + posPointer[level]);
-      // }
-      posBufferUpto[level] = skipStream.readVInt();
-      // if (DEBUG) {
-      //   System.out.println("  posBufferUpto=" + posBufferUpto[level]);
-      // }
-
-      if (payloadByteUpto != null) {
-        payloadByteUpto[level] = skipStream.readVInt();
-      }
-
-      if (payPointer != null) {
-        payPointer[level] += skipStream.readVLong();
-      }
+    public long getPosPointer() {
+        return lastPosPointer;
     }
-    return delta;
-  }
+
+    public int getPosBufferUpto() {
+        return lastPosBufferUpto;
+    }
+
+    public long getPayPointer() {
+        return lastPayPointer;
+    }
+
+    public int getPayloadByteUpto() {
+        return lastPayloadByteUpto;
+    }
+
+    public int getNextSkipDoc() {
+        return skipDoc[0];
+    }
+
+    @Override
+    protected void seekChild(int level) throws IOException {
+        super.seekChild(level);
+        // if (DEBUG) {
+        //   System.out.println("seekChild level=" + level);
+        // }
+        docPointer[level] = lastDocPointer;
+        if (posPointer != null) {
+            posPointer[level] = lastPosPointer;
+            posBufferUpto[level] = lastPosBufferUpto;
+            if (payloadByteUpto != null) {
+                payloadByteUpto[level] = lastPayloadByteUpto;
+            }
+            if (payPointer != null) {
+                payPointer[level] = lastPayPointer;
+            }
+        }
+    }
+
+    @Override
+    protected void setLastSkipData(int level) {
+        super.setLastSkipData(level);
+        lastDocPointer = docPointer[level];
+        // if (DEBUG) {
+        //   System.out.println("setLastSkipData level=" + level);
+        //   System.out.println("  lastDocPointer=" + lastDocPointer);
+        // }
+        if (posPointer != null) {
+            lastPosPointer = posPointer[level];
+            lastPosBufferUpto = posBufferUpto[level];
+            // if (DEBUG) {
+            //   System.out.println("  lastPosPointer=" + lastPosPointer + " lastPosBUfferUpto=" + lastPosBufferUpto);
+            // }
+            if (payPointer != null) {
+                lastPayPointer = payPointer[level];
+            }
+            if (payloadByteUpto != null) {
+                lastPayloadByteUpto = payloadByteUpto[level];
+            }
+        }
+    }
+
+    @Override
+    protected int readSkipData(int level, IndexInput skipStream) throws IOException {
+        // if (DEBUG) {
+        //   System.out.println("readSkipData level=" + level);
+        // }
+        int delta = skipStream.readVInt();
+        // if (DEBUG) {
+        //   System.out.println("  delta=" + delta);
+        // }
+        docPointer[level] += skipStream.readVLong();
+        // if (DEBUG) {
+        //   System.out.println("  docFP=" + docPointer[level]);
+        // }
+
+        if (posPointer != null) {
+            posPointer[level] += skipStream.readVLong();
+            // if (DEBUG) {
+            //   System.out.println("  posFP=" + posPointer[level]);
+            // }
+            posBufferUpto[level] = skipStream.readVInt();
+            // if (DEBUG) {
+            //   System.out.println("  posBufferUpto=" + posBufferUpto[level]);
+            // }
+
+            if (payloadByteUpto != null) {
+                payloadByteUpto[level] = skipStream.readVInt();
+            }
+
+            if (payPointer != null) {
+                payPointer[level] += skipStream.readVLong();
+            }
+        }
+        return delta;
+    }
 }

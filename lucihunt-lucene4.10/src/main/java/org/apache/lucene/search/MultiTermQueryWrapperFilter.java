@@ -43,80 +43,84 @@ import org.apache.lucene.util.Bits;
  * this is why it is not abstract.
  */
 public class MultiTermQueryWrapperFilter<Q extends MultiTermQuery> extends Filter {
-    
-  protected final Q query;
 
-  /**
-   * Wrap a {@link MultiTermQuery} as a Filter.
-   */
-  protected MultiTermQueryWrapperFilter(Q query) {
-      this.query = query;
-  }
-  
-  @Override
-  public String toString() {
-    // query.toString should be ok for the filter, too, if the query boost is 1.0f
-    return query.toString();
-  }
+    protected final Q query;
 
-  @Override
-  @SuppressWarnings({"unchecked","rawtypes"})
-  public final boolean equals(final Object o) {
-    if (o==this) return true;
-    if (o==null) return false;
-    if (this.getClass().equals(o.getClass())) {
-      return this.query.equals( ((MultiTermQueryWrapperFilter)o).query );
-    }
-    return false;
-  }
-
-  @Override
-  public final int hashCode() {
-    return query.hashCode();
-  }
-
-  /** Returns the field name for this query */
-  public final String getField() { return query.getField(); }
-  
-  /**
-   * Returns a DocIdSet with documents that should be permitted in search
-   * results.
-   */
-  @Override
-  public DocIdSet getDocIdSet(AtomicReaderContext context, Bits acceptDocs) throws IOException {
-    final AtomicReader reader = context.reader();
-    final Fields fields = reader.fields();
-    if (fields == null) {
-      // reader has no fields
-      return null;
+    /**
+     * Wrap a {@link MultiTermQuery} as a Filter.
+     */
+    protected MultiTermQueryWrapperFilter(Q query) {
+        this.query = query;
     }
 
-    final Terms terms = fields.terms(query.field);
-    if (terms == null) {
-      // field does not exist
-      return null;
+    @Override
+    public String toString() {
+        // query.toString should be ok for the filter, too, if the query boost is 1.0f
+        return query.toString();
     }
 
-    final TermsEnum termsEnum = query.getTermsEnum(terms);
-    assert termsEnum != null;
-    if (termsEnum.next() != null) {
-      // fill into a FixedBitSet
-      final FixedBitSet bitSet = new FixedBitSet(context.reader().maxDoc());
-      DocsEnum docsEnum = null;
-      do {
-        // System.out.println("  iter termCount=" + termCount + " term=" +
-        // enumerator.term().toBytesString());
-        docsEnum = termsEnum.docs(acceptDocs, docsEnum, DocsEnum.FLAG_NONE);
-        int docid;
-        while ((docid = docsEnum.nextDoc()) != DocIdSetIterator.NO_MORE_DOCS) {
-          bitSet.set(docid);
+    @Override
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public final boolean equals(final Object o) {
+        if (o == this)
+            return true;
+        if (o == null)
+            return false;
+        if (this.getClass().equals(o.getClass())) {
+            return this.query.equals(((MultiTermQueryWrapperFilter) o).query);
         }
-      } while (termsEnum.next() != null);
-      // System.out.println("  done termCount=" + termCount);
-
-      return bitSet;
-    } else {
-      return null;
+        return false;
     }
-  }
+
+    @Override
+    public final int hashCode() {
+        return query.hashCode();
+    }
+
+    /** Returns the field name for this query */
+    public final String getField() {
+        return query.getField();
+    }
+
+    /**
+     * Returns a DocIdSet with documents that should be permitted in search
+     * results.
+     */
+    @Override
+    public DocIdSet getDocIdSet(AtomicReaderContext context, Bits acceptDocs) throws IOException {
+        final AtomicReader reader = context.reader();
+        final Fields fields = reader.fields();
+        if (fields == null) {
+            // reader has no fields
+            return null;
+        }
+
+        final Terms terms = fields.terms(query.field);
+        if (terms == null) {
+            // field does not exist
+            return null;
+        }
+
+        final TermsEnum termsEnum = query.getTermsEnum(terms);
+        assert termsEnum != null;
+        if (termsEnum.next() != null) {
+            // fill into a FixedBitSet
+            final FixedBitSet bitSet = new FixedBitSet(context.reader().maxDoc());
+            DocsEnum docsEnum = null;
+            do {
+                // System.out.println("  iter termCount=" + termCount + " term=" +
+                // enumerator.term().toBytesString());
+                docsEnum = termsEnum.docs(acceptDocs, docsEnum, DocsEnum.FLAG_NONE);
+                int docid;
+                while ((docid = docsEnum.nextDoc()) != DocIdSetIterator.NO_MORE_DOCS) {
+                    bitSet.set(docid);
+                }
+            } while (termsEnum.next() != null);
+            // System.out.println("  done termCount=" + termCount);
+
+            return bitSet;
+        } else {
+            return null;
+        }
+    }
 }

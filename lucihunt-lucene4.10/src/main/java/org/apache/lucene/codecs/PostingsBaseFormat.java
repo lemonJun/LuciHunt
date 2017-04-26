@@ -36,20 +36,20 @@ import org.apache.lucene.index.SegmentReadState;
 // refactor some of these classes and use covariant return?
 public abstract class PostingsBaseFormat {
 
-  /** Unique name that's used to retrieve this codec when
-   *  reading the index */
-  public final String name;
-  
-  /** Sole constructor. */
-  protected PostingsBaseFormat(String name) {
-    this.name = name;
-  }
+    /** Unique name that's used to retrieve this codec when
+     *  reading the index */
+    public final String name;
 
-  /** Creates the {@link PostingsReaderBase} for this
-   *  format. */
-  public abstract PostingsReaderBase postingsReaderBase(SegmentReadState state) throws IOException;
+    /** Sole constructor. */
+    protected PostingsBaseFormat(String name) {
+        this.name = name;
+    }
 
-  /** Creates the {@link PostingsWriterBase} for this
-   *  format. */
-  public abstract PostingsWriterBase postingsWriterBase(SegmentWriteState state) throws IOException;
+    /** Creates the {@link PostingsReaderBase} for this
+     *  format. */
+    public abstract PostingsReaderBase postingsReaderBase(SegmentReadState state) throws IOException;
+
+    /** Creates the {@link PostingsWriterBase} for this
+     *  format. */
+    public abstract PostingsWriterBase postingsWriterBase(SegmentWriteState state) throws IOException;
 }

@@ -27,43 +27,43 @@ import org.apache.lucene.util.Bits.MatchAllBits;
  * that works for single or multi-valued types.
  */
 final class SingletonSortedNumericDocValues extends SortedNumericDocValues {
-  private final NumericDocValues in;
-  private final Bits docsWithField;
-  private long value;
-  private int count;
-  
-  public SingletonSortedNumericDocValues(NumericDocValues in, Bits docsWithField) {
-    this.in = in;
-    this.docsWithField = docsWithField instanceof MatchAllBits ? null : docsWithField;
-  }
+    private final NumericDocValues in;
+    private final Bits docsWithField;
+    private long value;
+    private int count;
 
-  /** Return the wrapped {@link NumericDocValues} */
-  public NumericDocValues getNumericDocValues() {
-    return in;
-  }
-  
-  /** Return the wrapped {@link Bits} */
-  public Bits getDocsWithField() {
-    return docsWithField;
-  }
-
-  @Override
-  public void setDocument(int doc) {
-    value = in.get(doc);
-    if (docsWithField != null && value == 0 && docsWithField.get(doc) == false) {
-      count = 0;
-    } else {
-      count = 1;
+    public SingletonSortedNumericDocValues(NumericDocValues in, Bits docsWithField) {
+        this.in = in;
+        this.docsWithField = docsWithField instanceof MatchAllBits ? null : docsWithField;
     }
-  }
 
-  @Override
-  public long valueAt(int index) {
-    return value;
-  }
+    /** Return the wrapped {@link NumericDocValues} */
+    public NumericDocValues getNumericDocValues() {
+        return in;
+    }
 
-  @Override
-  public int count() {
-    return count;
-  }
+    /** Return the wrapped {@link Bits} */
+    public Bits getDocsWithField() {
+        return docsWithField;
+    }
+
+    @Override
+    public void setDocument(int doc) {
+        value = in.get(doc);
+        if (docsWithField != null && value == 0 && docsWithField.get(doc) == false) {
+            count = 0;
+        } else {
+            count = 1;
+        }
+    }
+
+    @Override
+    public long valueAt(int index) {
+        return value;
+    }
+
+    @Override
+    public int count() {
+        return count;
+    }
 }

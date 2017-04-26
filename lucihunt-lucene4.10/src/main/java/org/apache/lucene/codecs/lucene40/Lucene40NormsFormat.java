@@ -45,19 +45,18 @@ import org.apache.lucene.store.CompoundFileDirectory;
 @Deprecated
 public class Lucene40NormsFormat extends NormsFormat {
 
-  /** Sole constructor. */
-  public Lucene40NormsFormat() {}
-  
-  @Override
-  public DocValuesConsumer normsConsumer(SegmentWriteState state) throws IOException {
-    throw new UnsupportedOperationException("this codec can only be used for reading");
-  }
+    /** Sole constructor. */
+    public Lucene40NormsFormat() {
+    }
 
-  @Override
-  public DocValuesProducer normsProducer(SegmentReadState state) throws IOException {
-    String filename = IndexFileNames.segmentFileName(state.segmentInfo.name, 
-                                                     "nrm", 
-                                                     IndexFileNames.COMPOUND_FILE_EXTENSION);
-    return new Lucene40DocValuesReader(state, filename, Lucene40FieldInfosReader.LEGACY_NORM_TYPE_KEY);
-  }
+    @Override
+    public DocValuesConsumer normsConsumer(SegmentWriteState state) throws IOException {
+        throw new UnsupportedOperationException("this codec can only be used for reading");
+    }
+
+    @Override
+    public DocValuesProducer normsProducer(SegmentReadState state) throws IOException {
+        String filename = IndexFileNames.segmentFileName(state.segmentInfo.name, "nrm", IndexFileNames.COMPOUND_FILE_EXTENSION);
+        return new Lucene40DocValuesReader(state, filename, Lucene40FieldInfosReader.LEGACY_NORM_TYPE_KEY);
+    }
 }

@@ -35,97 +35,97 @@ import org.apache.lucene.index.FieldInfos;
 @Deprecated
 final class TermBuffer implements Cloneable {
 
-  private String field;
-  private Term term;                            // cached
+    private String field;
+    private Term term; // cached
 
-  private BytesRefBuilder bytes = new BytesRefBuilder();
+    private BytesRefBuilder bytes = new BytesRefBuilder();
 
-  // Cannot be -1 since (strangely) we write that
-  // fieldNumber into index for first indexed term:
-  private int currentFieldNumber = -2;
+    // Cannot be -1 since (strangely) we write that
+    // fieldNumber into index for first indexed term:
+    private int currentFieldNumber = -2;
 
-  private static final Comparator<BytesRef> utf8AsUTF16Comparator = BytesRef.getUTF8SortedAsUTF16Comparator();
+    private static final Comparator<BytesRef> utf8AsUTF16Comparator = BytesRef.getUTF8SortedAsUTF16Comparator();
 
-  int newSuffixStart;                             // only valid right after .read is called
+    int newSuffixStart; // only valid right after .read is called
 
-  public int compareTo(TermBuffer other) {
-    if (field == other.field)     // fields are interned
-                                  // (only by PreFlex codec)
-      return utf8AsUTF16Comparator.compare(bytes.get(), other.bytes.get());
-    else
-      return field.compareTo(other.field);
-  }
-
-  public void read(IndexInput input, FieldInfos fieldInfos)
-    throws IOException {
-    this.term = null;                           // invalidate cache
-    newSuffixStart = input.readVInt();
-    int length = input.readVInt();
-    int totalLength = newSuffixStart + length;
-    assert totalLength <= BYTE_BLOCK_SIZE-2 : "termLength=" + totalLength + ",resource=" + input;
-    bytes.grow(totalLength);
-    bytes.setLength(totalLength);
-    input.readBytes(bytes.bytes(), newSuffixStart, length);
-    final int fieldNumber = input.readVInt();
-    if (fieldNumber != currentFieldNumber) {
-      currentFieldNumber = fieldNumber;
-      // NOTE: too much sneakiness here, seriously this is a negative vint?!
-      if (currentFieldNumber == -1) {
-        field = "";
-      } else {
-        assert fieldInfos.fieldInfo(currentFieldNumber) != null : currentFieldNumber;
-        field = fieldInfos.fieldInfo(currentFieldNumber).name.intern();
-      }
-    } else {
-      assert field.equals(fieldInfos.fieldInfo(fieldNumber).name) : "currentFieldNumber=" + currentFieldNumber + " field=" + field + " vs " + fieldInfos.fieldInfo(fieldNumber) == null ? "null" : fieldInfos.fieldInfo(fieldNumber).name;
-    }
-  }
-
-  public void set(Term term) {
-    if (term == null) {
-      reset();
-      return;
-    }
-    bytes.copyBytes(term.bytes());
-    field = term.field().intern();
-    currentFieldNumber = -1;
-    this.term = term;
-  }
-
-  public void set(TermBuffer other) {
-    field = other.field;
-    currentFieldNumber = other.currentFieldNumber;
-    // dangerous to copy Term over, since the underlying
-    // BytesRef could subsequently be modified:
-    term = null;
-    bytes.copyBytes(other.bytes);
-  }
-
-  public void reset() {
-    field = null;
-    term = null;
-    currentFieldNumber=  -1;
-  }
-
-  public Term toTerm() {
-    if (field == null)                            // unset
-      return null;
-
-    if (term == null) {
-      term = new Term(field, bytes.toBytesRef());
+    public int compareTo(TermBuffer other) {
+        if (field == other.field) // fields are interned
+                                      // (only by PreFlex codec)
+            return utf8AsUTF16Comparator.compare(bytes.get(), other.bytes.get());
+        else
+            return field.compareTo(other.field);
     }
 
-    return term;
-  }
+    public void read(IndexInput input, FieldInfos fieldInfos) throws IOException {
+        this.term = null; // invalidate cache
+        newSuffixStart = input.readVInt();
+        int length = input.readVInt();
+        int totalLength = newSuffixStart + length;
+        assert totalLength <= BYTE_BLOCK_SIZE - 2 : "termLength=" + totalLength + ",resource=" + input;
+        bytes.grow(totalLength);
+        bytes.setLength(totalLength);
+        input.readBytes(bytes.bytes(), newSuffixStart, length);
+        final int fieldNumber = input.readVInt();
+        if (fieldNumber != currentFieldNumber) {
+            currentFieldNumber = fieldNumber;
+            // NOTE: too much sneakiness here, seriously this is a negative vint?!
+            if (currentFieldNumber == -1) {
+                field = "";
+            } else {
+                assert fieldInfos.fieldInfo(currentFieldNumber) != null : currentFieldNumber;
+                field = fieldInfos.fieldInfo(currentFieldNumber).name.intern();
+            }
+        } else {
+            assert field.equals(fieldInfos.fieldInfo(fieldNumber).name) : "currentFieldNumber=" + currentFieldNumber + " field=" + field + " vs " + fieldInfos.fieldInfo(fieldNumber) == null ? "null" : fieldInfos.fieldInfo(fieldNumber).name;
+        }
+    }
 
-  @Override
-  protected TermBuffer clone() {
-    TermBuffer clone = null;
-    try {
-      clone = (TermBuffer)super.clone();
-    } catch (CloneNotSupportedException e) {}
-    clone.bytes = new BytesRefBuilder();
-    clone.bytes.copyBytes(this.bytes.get());
-    return clone;
-  }
+    public void set(Term term) {
+        if (term == null) {
+            reset();
+            return;
+        }
+        bytes.copyBytes(term.bytes());
+        field = term.field().intern();
+        currentFieldNumber = -1;
+        this.term = term;
+    }
+
+    public void set(TermBuffer other) {
+        field = other.field;
+        currentFieldNumber = other.currentFieldNumber;
+        // dangerous to copy Term over, since the underlying
+        // BytesRef could subsequently be modified:
+        term = null;
+        bytes.copyBytes(other.bytes);
+    }
+
+    public void reset() {
+        field = null;
+        term = null;
+        currentFieldNumber = -1;
+    }
+
+    public Term toTerm() {
+        if (field == null) // unset
+            return null;
+
+        if (term == null) {
+            term = new Term(field, bytes.toBytesRef());
+        }
+
+        return term;
+    }
+
+    @Override
+    protected TermBuffer clone() {
+        TermBuffer clone = null;
+        try {
+            clone = (TermBuffer) super.clone();
+        } catch (CloneNotSupportedException e) {
+        }
+        clone.bytes = new BytesRefBuilder();
+        clone.bytes.copyBytes(this.bytes.get());
+        return clone;
+    }
 }

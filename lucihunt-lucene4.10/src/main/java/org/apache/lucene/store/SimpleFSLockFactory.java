@@ -60,105 +60,103 @@ import java.io.IOException;
 
 public class SimpleFSLockFactory extends FSLockFactory {
 
-  /**
-   * Create a SimpleFSLockFactory instance, with null (unset)
-   * lock directory. When you pass this factory to a {@link FSDirectory}
-   * subclass, the lock directory is automatically set to the
-   * directory itself. Be sure to create one instance for each directory
-   * your create!
-   */
-  public SimpleFSLockFactory() {
-    this((File) null);
-  }
-
-  /**
-   * Instantiate using the provided directory (as a File instance).
-   * @param lockDir where lock files should be created.
-   */
-  public SimpleFSLockFactory(File lockDir) {
-    setLockDir(lockDir);
-  }
-
-  /**
-   * Instantiate using the provided directory name (String).
-   * @param lockDirName where lock files should be created.
-   */
-  public SimpleFSLockFactory(String lockDirName) {
-    setLockDir(new File(lockDirName));
-  }
-
-  @Override
-  public Lock makeLock(String lockName) {
-    if (lockPrefix != null) {
-      lockName = lockPrefix + "-" + lockName;
+    /**
+     * Create a SimpleFSLockFactory instance, with null (unset)
+     * lock directory. When you pass this factory to a {@link FSDirectory}
+     * subclass, the lock directory is automatically set to the
+     * directory itself. Be sure to create one instance for each directory
+     * your create!
+     */
+    public SimpleFSLockFactory() {
+        this((File) null);
     }
-    return new SimpleFSLock(lockDir, lockName);
-  }
 
-  @Override
-  public void clearLock(String lockName) throws IOException {
-    if (lockDir.exists()) {
-      if (lockPrefix != null) {
-        lockName = lockPrefix + "-" + lockName;
-      }
-      File lockFile = new File(lockDir, lockName);
-      if (lockFile.exists() && !lockFile.delete()) {
-        throw new IOException("Cannot delete " + lockFile);
-      }
+    /**
+     * Instantiate using the provided directory (as a File instance).
+     * @param lockDir where lock files should be created.
+     */
+    public SimpleFSLockFactory(File lockDir) {
+        setLockDir(lockDir);
     }
-  }
+
+    /**
+     * Instantiate using the provided directory name (String).
+     * @param lockDirName where lock files should be created.
+     */
+    public SimpleFSLockFactory(String lockDirName) {
+        setLockDir(new File(lockDirName));
+    }
+
+    @Override
+    public Lock makeLock(String lockName) {
+        if (lockPrefix != null) {
+            lockName = lockPrefix + "-" + lockName;
+        }
+        return new SimpleFSLock(lockDir, lockName);
+    }
+
+    @Override
+    public void clearLock(String lockName) throws IOException {
+        if (lockDir.exists()) {
+            if (lockPrefix != null) {
+                lockName = lockPrefix + "-" + lockName;
+            }
+            File lockFile = new File(lockDir, lockName);
+            if (lockFile.exists() && !lockFile.delete()) {
+                throw new IOException("Cannot delete " + lockFile);
+            }
+        }
+    }
 }
 
 class SimpleFSLock extends Lock {
 
-  File lockFile;
-  File lockDir;
+    File lockFile;
+    File lockDir;
 
-  public SimpleFSLock(File lockDir, String lockFileName) {
-    this.lockDir = lockDir;
-    lockFile = new File(lockDir, lockFileName);
-  }
-
-  @Override
-  public boolean obtain() throws IOException {
-
-    // Ensure that lockDir exists and is a directory:
-    if (!lockDir.exists()) {
-      if (!lockDir.mkdirs())
-        throw new IOException("Cannot create directory: " +
-                              lockDir.getAbsolutePath());
-    } else if (!lockDir.isDirectory()) {
-      // TODO: NoSuchDirectoryException instead?
-      throw new IOException("Found regular file where directory expected: " + 
-                            lockDir.getAbsolutePath());
+    public SimpleFSLock(File lockDir, String lockFileName) {
+        this.lockDir = lockDir;
+        lockFile = new File(lockDir, lockFileName);
     }
-    
-    try {
-      return lockFile.createNewFile();
-    } catch (IOException ioe) {
-      // On Windows, on concurrent createNewFile, the 2nd process gets "access denied".
-      // In that case, the lock was not aquired successfully, so return false.
-      // We record the failure reason here; the obtain with timeout (usually the
-      // one calling us) will use this as "root cause" if it fails to get the lock.
-      failureReason = ioe;
-      return false;
+
+    @Override
+    public boolean obtain() throws IOException {
+
+        // Ensure that lockDir exists and is a directory:
+        if (!lockDir.exists()) {
+            if (!lockDir.mkdirs())
+                throw new IOException("Cannot create directory: " + lockDir.getAbsolutePath());
+        } else if (!lockDir.isDirectory()) {
+            // TODO: NoSuchDirectoryException instead?
+            throw new IOException("Found regular file where directory expected: " + lockDir.getAbsolutePath());
+        }
+
+        try {
+            return lockFile.createNewFile();
+        } catch (IOException ioe) {
+            // On Windows, on concurrent createNewFile, the 2nd process gets "access denied".
+            // In that case, the lock was not aquired successfully, so return false.
+            // We record the failure reason here; the obtain with timeout (usually the
+            // one calling us) will use this as "root cause" if it fails to get the lock.
+            failureReason = ioe;
+            return false;
+        }
     }
-  }
 
-  @Override
-  public void close() throws LockReleaseFailedException {
-    if (lockFile.exists() && !lockFile.delete()) {
-      throw new LockReleaseFailedException("failed to delete " + lockFile);
+    @Override
+    public void close() throws LockReleaseFailedException {
+        if (lockFile.exists() && !lockFile.delete()) {
+            throw new LockReleaseFailedException("failed to delete " + lockFile);
+        }
     }
-  }
 
-  @Override
-  public boolean isLocked() {
-    return lockFile.exists();
-  }
+    @Override
+    public boolean isLocked() {
+        return lockFile.exists();
+    }
 
-  @Override
-  public String toString() {
-    return "SimpleFSLock@" + lockFile;
-  }
+    @Override
+    public String toString() {
+        return "SimpleFSLock@" + lockFile;
+    }
 }

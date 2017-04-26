@@ -33,59 +33,59 @@ import java.util.HashSet;
 
 public class SingleInstanceLockFactory extends LockFactory {
 
-  private HashSet<String> locks = new HashSet<>();
+    private HashSet<String> locks = new HashSet<>();
 
-  @Override
-  public Lock makeLock(String lockName) {
-    // We do not use the LockPrefix at all, because the private
-    // HashSet instance effectively scopes the locking to this
-    // single Directory instance.
-    return new SingleInstanceLock(locks, lockName);
-  }
-
-  @Override
-  public void clearLock(String lockName) throws IOException {
-    synchronized(locks) {
-      if (locks.contains(lockName)) {
-        locks.remove(lockName);
-      }
+    @Override
+    public Lock makeLock(String lockName) {
+        // We do not use the LockPrefix at all, because the private
+        // HashSet instance effectively scopes the locking to this
+        // single Directory instance.
+        return new SingleInstanceLock(locks, lockName);
     }
-  }
+
+    @Override
+    public void clearLock(String lockName) throws IOException {
+        synchronized (locks) {
+            if (locks.contains(lockName)) {
+                locks.remove(lockName);
+            }
+        }
+    }
 }
 
 class SingleInstanceLock extends Lock {
 
-  String lockName;
-  private HashSet<String> locks;
+    String lockName;
+    private HashSet<String> locks;
 
-  public SingleInstanceLock(HashSet<String> locks, String lockName) {
-    this.locks = locks;
-    this.lockName = lockName;
-  }
-
-  @Override
-  public boolean obtain() throws IOException {
-    synchronized(locks) {
-      return locks.add(lockName);
+    public SingleInstanceLock(HashSet<String> locks, String lockName) {
+        this.locks = locks;
+        this.lockName = lockName;
     }
-  }
 
-  @Override
-  public void close() {
-    synchronized(locks) {
-      locks.remove(lockName);
+    @Override
+    public boolean obtain() throws IOException {
+        synchronized (locks) {
+            return locks.add(lockName);
+        }
     }
-  }
 
-  @Override
-  public boolean isLocked() {
-    synchronized(locks) {
-      return locks.contains(lockName);
+    @Override
+    public void close() {
+        synchronized (locks) {
+            locks.remove(lockName);
+        }
     }
-  }
 
-  @Override
-  public String toString() {
-    return super.toString() + ": " + lockName;
-  }
+    @Override
+    public boolean isLocked() {
+        synchronized (locks) {
+            return locks.contains(lockName);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + ": " + lockName;
+    }
 }

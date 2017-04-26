@@ -27,61 +27,61 @@ import org.apache.lucene.util.BytesRef;
  * fields.
  */
 final class SingletonSortedSetDocValues extends RandomAccessOrds {
-  private final SortedDocValues in;
-  private long currentOrd;
-  private long ord;
-  
-  /** Creates a multi-valued view over the provided SortedDocValues */
-  public SingletonSortedSetDocValues(SortedDocValues in) {
-    this.in = in;
-    assert NO_MORE_ORDS == -1; // this allows our nextOrd() to work for missing values without a check
-  }
+    private final SortedDocValues in;
+    private long currentOrd;
+    private long ord;
 
-  /** Return the wrapped {@link SortedDocValues} */
-  public SortedDocValues getSortedDocValues() {
-    return in;
-  }
+    /** Creates a multi-valued view over the provided SortedDocValues */
+    public SingletonSortedSetDocValues(SortedDocValues in) {
+        this.in = in;
+        assert NO_MORE_ORDS == -1; // this allows our nextOrd() to work for missing values without a check
+    }
 
-  @Override
-  public long nextOrd() {
-    long v = currentOrd;
-    currentOrd = NO_MORE_ORDS;
-    return v;
-  }
+    /** Return the wrapped {@link SortedDocValues} */
+    public SortedDocValues getSortedDocValues() {
+        return in;
+    }
 
-  @Override
-  public void setDocument(int docID) {
-    currentOrd = ord = in.getOrd(docID);
-  }
+    @Override
+    public long nextOrd() {
+        long v = currentOrd;
+        currentOrd = NO_MORE_ORDS;
+        return v;
+    }
 
-  @Override
-  public BytesRef lookupOrd(long ord) {
-    // cast is ok: single-valued cannot exceed Integer.MAX_VALUE
-    return in.lookupOrd((int) ord);
-  }
+    @Override
+    public void setDocument(int docID) {
+        currentOrd = ord = in.getOrd(docID);
+    }
 
-  @Override
-  public long getValueCount() {
-    return in.getValueCount();
-  }
+    @Override
+    public BytesRef lookupOrd(long ord) {
+        // cast is ok: single-valued cannot exceed Integer.MAX_VALUE
+        return in.lookupOrd((int) ord);
+    }
 
-  @Override
-  public long lookupTerm(BytesRef key) {
-    return in.lookupTerm(key);
-  }
+    @Override
+    public long getValueCount() {
+        return in.getValueCount();
+    }
 
-  @Override
-  public long ordAt(int index) {
-    return ord;
-  }
+    @Override
+    public long lookupTerm(BytesRef key) {
+        return in.lookupTerm(key);
+    }
 
-  @Override
-  public int cardinality() {
-    return (int) (ord >>> 63) ^ 1;
-  }
+    @Override
+    public long ordAt(int index) {
+        return ord;
+    }
 
-  @Override
-  public TermsEnum termsEnum() {
-    return in.termsEnum();
-  }
+    @Override
+    public int cardinality() {
+        return (int) (ord >>> 63) ^ 1;
+    }
+
+    @Override
+    public TermsEnum termsEnum() {
+        return in.termsEnum();
+    }
 }

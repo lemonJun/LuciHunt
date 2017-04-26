@@ -27,11 +27,11 @@ import java.io.IOException;
  * @see Lock#obtain(long)
  */
 public class LockObtainFailedException extends IOException {
-  public LockObtainFailedException(String message) {
-    super(message);
-  }
-  
-  public LockObtainFailedException(String message, Throwable cause) {
-    super(message, cause);
-  }
+    public LockObtainFailedException(String message) {
+        super(message);
+    }
+
+    public LockObtainFailedException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

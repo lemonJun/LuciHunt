@@ -30,199 +30,201 @@ import org.apache.lucene.util.Bits;
  *  @lucene.experimental */
 @Deprecated
 class SegmentTermDocs {
-  //protected SegmentReader parent;
-  private final FieldInfos fieldInfos;
-  private final TermInfosReader tis;
-  protected Bits liveDocs;
-  protected IndexInput freqStream;
-  protected int count;
-  protected int df;
-  int doc = 0;
-  int freq;
+    //protected SegmentReader parent;
+    private final FieldInfos fieldInfos;
+    private final TermInfosReader tis;
+    protected Bits liveDocs;
+    protected IndexInput freqStream;
+    protected int count;
+    protected int df;
+    int doc = 0;
+    int freq;
 
-  private int skipInterval;
-  private int maxSkipLevels;
-  private Lucene3xSkipListReader skipListReader;
-  
-  private long freqBasePointer;
-  private long proxBasePointer;
+    private int skipInterval;
+    private int maxSkipLevels;
+    private Lucene3xSkipListReader skipListReader;
 
-  private long skipPointer;
-  private boolean haveSkipped;
-  
-  protected boolean currentFieldStoresPayloads;
-  protected IndexOptions indexOptions;
-  
-  public SegmentTermDocs(IndexInput freqStream, TermInfosReader tis, FieldInfos fieldInfos) {
-    this.freqStream = freqStream.clone();
-    this.tis = tis;
-    this.fieldInfos = fieldInfos;
-    skipInterval = tis.getSkipInterval();
-    maxSkipLevels = tis.getMaxSkipLevels();
-  }
+    private long freqBasePointer;
+    private long proxBasePointer;
 
-  public void seek(Term term) throws IOException {
-    TermInfo ti = tis.get(term);
-    seek(ti, term);
-  }
+    private long skipPointer;
+    private boolean haveSkipped;
 
-  public void setLiveDocs(Bits liveDocs) {
-    this.liveDocs = liveDocs;
-  }
+    protected boolean currentFieldStoresPayloads;
+    protected IndexOptions indexOptions;
 
-  public void seek(SegmentTermEnum segmentTermEnum) throws IOException {
-    TermInfo ti;
-    Term term;
-    
-    // use comparison of fieldinfos to verify that termEnum belongs to the same segment as this SegmentTermDocs
-    if (segmentTermEnum.fieldInfos == fieldInfos) {        // optimized case
-      term = segmentTermEnum.term();
-      ti = segmentTermEnum.termInfo();
-    } else  {                                         // punt case
-      term = segmentTermEnum.term();
-      ti = tis.get(term); 
+    public SegmentTermDocs(IndexInput freqStream, TermInfosReader tis, FieldInfos fieldInfos) {
+        this.freqStream = freqStream.clone();
+        this.tis = tis;
+        this.fieldInfos = fieldInfos;
+        skipInterval = tis.getSkipInterval();
+        maxSkipLevels = tis.getMaxSkipLevels();
     }
-    
-    seek(ti, term);
-  }
 
-  void seek(TermInfo ti, Term term) throws IOException {
-    count = 0;
-    FieldInfo fi = fieldInfos.fieldInfo(term.field());
-    this.indexOptions = (fi != null) ? fi.getIndexOptions() : IndexOptions.DOCS_AND_FREQS_AND_POSITIONS;
-    currentFieldStoresPayloads = (fi != null) ? fi.hasPayloads() : false;
-    if (ti == null) {
-      df = 0;
-    } else {
-      df = ti.docFreq;
-      doc = 0;
-      freqBasePointer = ti.freqPointer;
-      proxBasePointer = ti.proxPointer;
-      skipPointer = freqBasePointer + ti.skipOffset;
-      freqStream.seek(freqBasePointer);
-      haveSkipped = false;
+    public void seek(Term term) throws IOException {
+        TermInfo ti = tis.get(term);
+        seek(ti, term);
     }
-  }
 
-  public void close() throws IOException {
-    freqStream.close();
-    if (skipListReader != null)
-      skipListReader.close();
-  }
+    public void setLiveDocs(Bits liveDocs) {
+        this.liveDocs = liveDocs;
+    }
 
-  public final int doc() { return doc; }
-  public final int freq() {
-    return freq;
-  }
+    public void seek(SegmentTermEnum segmentTermEnum) throws IOException {
+        TermInfo ti;
+        Term term;
 
-  protected void skippingDoc() throws IOException {
-  }
-
-  public boolean next() throws IOException {
-    while (true) {
-      if (count == df)
-        return false;
-      final int docCode = freqStream.readVInt();
-      
-      if (indexOptions == IndexOptions.DOCS_ONLY) {
-        doc += docCode;
-      } else {
-        doc += docCode >>> 1;       // shift off low bit
-        if ((docCode & 1) != 0)       // if low bit is set
-          freq = 1;         // freq is one
-        else {
-          freq = freqStream.readVInt();     // else read freq
-          assert freq != 1;
+        // use comparison of fieldinfos to verify that termEnum belongs to the same segment as this SegmentTermDocs
+        if (segmentTermEnum.fieldInfos == fieldInfos) { // optimized case
+            term = segmentTermEnum.term();
+            ti = segmentTermEnum.termInfo();
+        } else { // punt case
+            term = segmentTermEnum.term();
+            ti = tis.get(term);
         }
-      }
-      
-      count++;
 
-      if (liveDocs == null || liveDocs.get(doc)) {
-        break;
-      }
-      skippingDoc();
+        seek(ti, term);
     }
-    return true;
-  }
 
-  /** Optimized implementation. */
-  public int read(final int[] docs, final int[] freqs)
-          throws IOException {
-    final int length = docs.length;
-    if (indexOptions == IndexOptions.DOCS_ONLY) {
-      return readNoTf(docs, freqs, length);
-    } else {
-      int i = 0;
-      while (i < length && count < df) {
-        // manually inlined call to next() for speed
-        final int docCode = freqStream.readVInt();
-        doc += docCode >>> 1;       // shift off low bit
-        if ((docCode & 1) != 0)       // if low bit is set
-          freq = 1;         // freq is one
-        else
-          freq = freqStream.readVInt();     // else read freq
-        count++;
-
-        if (liveDocs == null || liveDocs.get(doc)) {
-          docs[i] = doc;
-          freqs[i] = freq;
-          ++i;
+    void seek(TermInfo ti, Term term) throws IOException {
+        count = 0;
+        FieldInfo fi = fieldInfos.fieldInfo(term.field());
+        this.indexOptions = (fi != null) ? fi.getIndexOptions() : IndexOptions.DOCS_AND_FREQS_AND_POSITIONS;
+        currentFieldStoresPayloads = (fi != null) ? fi.hasPayloads() : false;
+        if (ti == null) {
+            df = 0;
+        } else {
+            df = ti.docFreq;
+            doc = 0;
+            freqBasePointer = ti.freqPointer;
+            proxBasePointer = ti.proxPointer;
+            skipPointer = freqBasePointer + ti.skipOffset;
+            freqStream.seek(freqBasePointer);
+            haveSkipped = false;
         }
-      }
-      return i;
-    }
-  }
-
-  private final int readNoTf(final int[] docs, final int[] freqs, final int length) throws IOException {
-    int i = 0;
-    while (i < length && count < df) {
-      // manually inlined call to next() for speed
-      doc += freqStream.readVInt();       
-      count++;
-
-      if (liveDocs == null || liveDocs.get(doc)) {
-        docs[i] = doc;
-        // Hardware freq to 1 when term freqs were not
-        // stored in the index
-        freqs[i] = 1;
-        ++i;
-      }
-    }
-    return i;
-  }
- 
-  
-  /** Overridden by SegmentTermPositions to skip in prox stream. */
-  protected void skipProx(long proxPointer, int payloadLength) throws IOException {}
-
-  /** Optimized implementation. */
-  public boolean skipTo(int target) throws IOException {
-    // don't skip if the target is close (within skipInterval docs away)
-    if ((target - skipInterval) >= doc && df >= skipInterval) {                      // optimized case
-      if (skipListReader == null)
-        skipListReader = new Lucene3xSkipListReader(freqStream.clone(), maxSkipLevels, skipInterval); // lazily clone
-
-      if (!haveSkipped) {                          // lazily initialize skip stream
-        skipListReader.init(skipPointer, freqBasePointer, proxBasePointer, df, currentFieldStoresPayloads);
-        haveSkipped = true;
-      }
-
-      int newCount = skipListReader.skipTo(target); 
-      if (newCount > count) {
-        freqStream.seek(skipListReader.getFreqPointer());
-        skipProx(skipListReader.getProxPointer(), skipListReader.getPayloadLength());
-
-        doc = skipListReader.getDoc();
-        count = newCount;
-      }      
     }
 
-    // done skipping, now just scan
-    do {
-      if (!next())
-        return false;
-    } while (target > doc);
-    return true;
-  }
+    public void close() throws IOException {
+        freqStream.close();
+        if (skipListReader != null)
+            skipListReader.close();
+    }
+
+    public final int doc() {
+        return doc;
+    }
+
+    public final int freq() {
+        return freq;
+    }
+
+    protected void skippingDoc() throws IOException {
+    }
+
+    public boolean next() throws IOException {
+        while (true) {
+            if (count == df)
+                return false;
+            final int docCode = freqStream.readVInt();
+
+            if (indexOptions == IndexOptions.DOCS_ONLY) {
+                doc += docCode;
+            } else {
+                doc += docCode >>> 1; // shift off low bit
+                if ((docCode & 1) != 0) // if low bit is set
+                    freq = 1; // freq is one
+                else {
+                    freq = freqStream.readVInt(); // else read freq
+                    assert freq != 1;
+                }
+            }
+
+            count++;
+
+            if (liveDocs == null || liveDocs.get(doc)) {
+                break;
+            }
+            skippingDoc();
+        }
+        return true;
+    }
+
+    /** Optimized implementation. */
+    public int read(final int[] docs, final int[] freqs) throws IOException {
+        final int length = docs.length;
+        if (indexOptions == IndexOptions.DOCS_ONLY) {
+            return readNoTf(docs, freqs, length);
+        } else {
+            int i = 0;
+            while (i < length && count < df) {
+                // manually inlined call to next() for speed
+                final int docCode = freqStream.readVInt();
+                doc += docCode >>> 1; // shift off low bit
+                if ((docCode & 1) != 0) // if low bit is set
+                    freq = 1; // freq is one
+                else
+                    freq = freqStream.readVInt(); // else read freq
+                count++;
+
+                if (liveDocs == null || liveDocs.get(doc)) {
+                    docs[i] = doc;
+                    freqs[i] = freq;
+                    ++i;
+                }
+            }
+            return i;
+        }
+    }
+
+    private final int readNoTf(final int[] docs, final int[] freqs, final int length) throws IOException {
+        int i = 0;
+        while (i < length && count < df) {
+            // manually inlined call to next() for speed
+            doc += freqStream.readVInt();
+            count++;
+
+            if (liveDocs == null || liveDocs.get(doc)) {
+                docs[i] = doc;
+                // Hardware freq to 1 when term freqs were not
+                // stored in the index
+                freqs[i] = 1;
+                ++i;
+            }
+        }
+        return i;
+    }
+
+    /** Overridden by SegmentTermPositions to skip in prox stream. */
+    protected void skipProx(long proxPointer, int payloadLength) throws IOException {
+    }
+
+    /** Optimized implementation. */
+    public boolean skipTo(int target) throws IOException {
+        // don't skip if the target is close (within skipInterval docs away)
+        if ((target - skipInterval) >= doc && df >= skipInterval) { // optimized case
+            if (skipListReader == null)
+                skipListReader = new Lucene3xSkipListReader(freqStream.clone(), maxSkipLevels, skipInterval); // lazily clone
+
+            if (!haveSkipped) { // lazily initialize skip stream
+                skipListReader.init(skipPointer, freqBasePointer, proxBasePointer, df, currentFieldStoresPayloads);
+                haveSkipped = true;
+            }
+
+            int newCount = skipListReader.skipTo(target);
+            if (newCount > count) {
+                freqStream.seek(skipListReader.getFreqPointer());
+                skipProx(skipListReader.getProxPointer(), skipListReader.getPayloadLength());
+
+                doc = skipListReader.getDoc();
+                count = newCount;
+            }
+        }
+
+        // done skipping, now just scan
+        do {
+            if (!next())
+                return false;
+        } while (target > doc);
+        return true;
+    }
 }

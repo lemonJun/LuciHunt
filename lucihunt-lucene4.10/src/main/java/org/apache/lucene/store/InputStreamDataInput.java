@@ -25,34 +25,35 @@ import org.apache.lucene.store.DataInput;
  * A {@link DataInput} wrapping a plain {@link InputStream}.
  */
 public class InputStreamDataInput extends DataInput implements Closeable {
-  private final InputStream is;
-  
-  public InputStreamDataInput(InputStream is) {
-    this.is = is;
-  }
+    private final InputStream is;
 
-  @Override
-  public byte readByte() throws IOException {
-    int v = is.read();
-    if (v == -1) throw new EOFException();
-    return (byte) v;
-  }
-  
-  @Override
-  public void readBytes(byte[] b, int offset, int len) throws IOException {
-    while (len > 0) {
-      final int cnt = is.read(b, offset, len);
-      if (cnt < 0) {
-          // Partially read the input, but no more data available in the stream.
-          throw new EOFException();
-      }
-      len -= cnt;
-      offset += cnt;
+    public InputStreamDataInput(InputStream is) {
+        this.is = is;
     }
-  }
 
-  @Override
-  public void close() throws IOException {
-    is.close();
-  }
+    @Override
+    public byte readByte() throws IOException {
+        int v = is.read();
+        if (v == -1)
+            throw new EOFException();
+        return (byte) v;
+    }
+
+    @Override
+    public void readBytes(byte[] b, int offset, int len) throws IOException {
+        while (len > 0) {
+            final int cnt = is.read(b, offset, len);
+            if (cnt < 0) {
+                // Partially read the input, but no more data available in the stream.
+                throw new EOFException();
+            }
+            len -= cnt;
+            offset += cnt;
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
+        is.close();
+    }
 }

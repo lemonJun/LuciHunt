@@ -75,85 +75,81 @@ import org.apache.lucene.util.ToStringUtils;
  * poor performance, and unexpected scoring behaviour.</p>
  */
 public class FieldMaskingSpanQuery extends SpanQuery {
-  private SpanQuery maskedQuery;
-  private String field;
-    
-  public FieldMaskingSpanQuery(SpanQuery maskedQuery, String maskedField) {
-    this.maskedQuery = maskedQuery;
-    this.field = maskedField;
-  }
+    private SpanQuery maskedQuery;
+    private String field;
 
-  @Override
-  public String getField() {
-    return field;
-  }
-
-  public SpanQuery getMaskedQuery() {
-    return maskedQuery;
-  }
-
-  // :NOTE: getBoost and setBoost are not proxied to the maskedQuery
-  // ...this is done to be more consistent with things like SpanFirstQuery
-  
-  @Override
-  public Spans getSpans(AtomicReaderContext context, Bits acceptDocs, Map<Term,TermContext> termContexts) throws IOException {
-    return maskedQuery.getSpans(context, acceptDocs, termContexts);
-  }
-
-  @Override
-  public void extractTerms(Set<Term> terms) {
-    maskedQuery.extractTerms(terms);
-  }  
-
-  @Override
-  public Weight createWeight(IndexSearcher searcher) throws IOException {
-    return maskedQuery.createWeight(searcher);
-  }
-
-  @Override
-  public Query rewrite(IndexReader reader) throws IOException {
-    FieldMaskingSpanQuery clone = null;
-
-    SpanQuery rewritten = (SpanQuery) maskedQuery.rewrite(reader);
-    if (rewritten != maskedQuery) {
-      clone = (FieldMaskingSpanQuery) this.clone();
-      clone.maskedQuery = rewritten;
+    public FieldMaskingSpanQuery(SpanQuery maskedQuery, String maskedField) {
+        this.maskedQuery = maskedQuery;
+        this.field = maskedField;
     }
 
-    if (clone != null) {
-      return clone;
-    } else {
-      return this;
+    @Override
+    public String getField() {
+        return field;
     }
-  }
 
-  @Override
-  public String toString(String field) {
-    StringBuilder buffer = new StringBuilder();
-    buffer.append("mask(");
-    buffer.append(maskedQuery.toString(field));
-    buffer.append(")");
-    buffer.append(ToStringUtils.boost(getBoost()));
-    buffer.append(" as ");
-    buffer.append(this.field);
-    return buffer.toString();
-  }
-  
-  @Override
-  public boolean equals(Object o) {
-    if (!(o instanceof FieldMaskingSpanQuery))
-      return false;
-    FieldMaskingSpanQuery other = (FieldMaskingSpanQuery) o;
-    return (this.getField().equals(other.getField())
-            && (this.getBoost() == other.getBoost())
-            && this.getMaskedQuery().equals(other.getMaskedQuery()));
+    public SpanQuery getMaskedQuery() {
+        return maskedQuery;
+    }
 
-  }
-  
-  @Override
-  public int hashCode() {
-    return getMaskedQuery().hashCode()
-      ^ getField().hashCode()
-      ^ Float.floatToRawIntBits(getBoost());
-  }
+    // :NOTE: getBoost and setBoost are not proxied to the maskedQuery
+    // ...this is done to be more consistent with things like SpanFirstQuery
+
+    @Override
+    public Spans getSpans(AtomicReaderContext context, Bits acceptDocs, Map<Term, TermContext> termContexts) throws IOException {
+        return maskedQuery.getSpans(context, acceptDocs, termContexts);
+    }
+
+    @Override
+    public void extractTerms(Set<Term> terms) {
+        maskedQuery.extractTerms(terms);
+    }
+
+    @Override
+    public Weight createWeight(IndexSearcher searcher) throws IOException {
+        return maskedQuery.createWeight(searcher);
+    }
+
+    @Override
+    public Query rewrite(IndexReader reader) throws IOException {
+        FieldMaskingSpanQuery clone = null;
+
+        SpanQuery rewritten = (SpanQuery) maskedQuery.rewrite(reader);
+        if (rewritten != maskedQuery) {
+            clone = (FieldMaskingSpanQuery) this.clone();
+            clone.maskedQuery = rewritten;
+        }
+
+        if (clone != null) {
+            return clone;
+        } else {
+            return this;
+        }
+    }
+
+    @Override
+    public String toString(String field) {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append("mask(");
+        buffer.append(maskedQuery.toString(field));
+        buffer.append(")");
+        buffer.append(ToStringUtils.boost(getBoost()));
+        buffer.append(" as ");
+        buffer.append(this.field);
+        return buffer.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof FieldMaskingSpanQuery))
+            return false;
+        FieldMaskingSpanQuery other = (FieldMaskingSpanQuery) o;
+        return (this.getField().equals(other.getField()) && (this.getBoost() == other.getBoost()) && this.getMaskedQuery().equals(other.getMaskedQuery()));
+
+    }
+
+    @Override
+    public int hashCode() {
+        return getMaskedQuery().hashCode() ^ getField().hashCode() ^ Float.floatToRawIntBits(getBoost());
+    }
 }

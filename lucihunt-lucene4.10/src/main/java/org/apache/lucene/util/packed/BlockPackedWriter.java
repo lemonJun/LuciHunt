@@ -58,50 +58,50 @@ import org.apache.lucene.store.DataOutput;
  * @lucene.internal
  */
 public final class BlockPackedWriter extends AbstractBlockPackedWriter {
-  
-  /**
-   * Sole constructor.
-   * @param blockSize the number of values of a single block, must be a power of 2
-   */
-  public BlockPackedWriter(DataOutput out, int blockSize) {
-    super(out, blockSize);
-  }
 
-  protected void flush() throws IOException {
-    assert off > 0;
-    long min = Long.MAX_VALUE, max = Long.MIN_VALUE;
-    for (int i = 0; i < off; ++i) {
-      min = Math.min(values[i], min);
-      max = Math.max(values[i], max);
+    /**
+     * Sole constructor.
+     * @param blockSize the number of values of a single block, must be a power of 2
+     */
+    public BlockPackedWriter(DataOutput out, int blockSize) {
+        super(out, blockSize);
     }
 
-    final long delta = max - min;
-    int bitsRequired = delta == 0 ? 0 : PackedInts.unsignedBitsRequired(delta);
-    if (bitsRequired == 64) {
-      // no need to delta-encode
-      min = 0L;
-    } else if (min > 0L) {
-      // make min as small as possible so that writeVLong requires fewer bytes
-      min = Math.max(0L, max - PackedInts.maxValue(bitsRequired));
-    }
-
-    final int token = (bitsRequired << BPV_SHIFT) | (min == 0 ? MIN_VALUE_EQUALS_0 : 0);
-    out.writeByte((byte) token);
-
-    if (min != 0) {
-      writeVLong(out, zigZagEncode(min) - 1);
-    }
-
-    if (bitsRequired > 0) {
-      if (min != 0) {
+    protected void flush() throws IOException {
+        assert off > 0;
+        long min = Long.MAX_VALUE, max = Long.MIN_VALUE;
         for (int i = 0; i < off; ++i) {
-          values[i] -= min;
+            min = Math.min(values[i], min);
+            max = Math.max(values[i], max);
         }
-      }
-      writeValues(bitsRequired);
-    }
 
-    off = 0;
-  }
+        final long delta = max - min;
+        int bitsRequired = delta == 0 ? 0 : PackedInts.unsignedBitsRequired(delta);
+        if (bitsRequired == 64) {
+            // no need to delta-encode
+            min = 0L;
+        } else if (min > 0L) {
+            // make min as small as possible so that writeVLong requires fewer bytes
+            min = Math.max(0L, max - PackedInts.maxValue(bitsRequired));
+        }
+
+        final int token = (bitsRequired << BPV_SHIFT) | (min == 0 ? MIN_VALUE_EQUALS_0 : 0);
+        out.writeByte((byte) token);
+
+        if (min != 0) {
+            writeVLong(out, zigZagEncode(min) - 1);
+        }
+
+        if (bitsRequired > 0) {
+            if (min != 0) {
+                for (int i = 0; i < off; ++i) {
+                    values[i] -= min;
+                }
+            }
+            writeValues(bitsRequired);
+        }
+
+        off = 0;
+    }
 
 }

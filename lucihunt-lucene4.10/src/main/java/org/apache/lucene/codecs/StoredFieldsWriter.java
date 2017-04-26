@@ -43,81 +43,82 @@ import org.apache.lucene.util.Bits;
  * @lucene.experimental
  */
 public abstract class StoredFieldsWriter implements Closeable {
-  
-  /** Sole constructor. (For invocation by subclass 
-   *  constructors, typically implicit.) */
-  protected StoredFieldsWriter() {
-  }
 
-  /** Called before writing the stored fields of the document.
-   *  {@link #writeField(FieldInfo, IndexableField)} will be called
-   *  for each stored field. Note that this is
-   *  called even if the document has no stored fields. */
-  public abstract void startDocument() throws IOException;
+    /** Sole constructor. (For invocation by subclass 
+     *  constructors, typically implicit.) */
+    protected StoredFieldsWriter() {
+    }
 
-  /** Called when a document and all its fields have been added. */
-  public void finishDocument() throws IOException {}
+    /** Called before writing the stored fields of the document.
+     *  {@link #writeField(FieldInfo, IndexableField)} will be called
+     *  for each stored field. Note that this is
+     *  called even if the document has no stored fields. */
+    public abstract void startDocument() throws IOException;
 
-  /** Writes a single stored field. */
-  public abstract void writeField(FieldInfo info, IndexableField field) throws IOException;
+    /** Called when a document and all its fields have been added. */
+    public void finishDocument() throws IOException {
+    }
 
-  /** Aborts writing entirely, implementation should remove
-   *  any partially-written files, etc. */
-  public abstract void abort();
-  
-  /** Called before {@link #close()}, passing in the number
-   *  of documents that were written. Note that this is 
-   *  intentionally redundant (equivalent to the number of
-   *  calls to {@link #startDocument()}, but a Codec should
-   *  check that this is the case to detect the JRE bug described 
-   *  in LUCENE-1282. */
-  public abstract void finish(FieldInfos fis, int numDocs) throws IOException;
-  
-  /** Merges in the stored fields from the readers in 
-   *  <code>mergeState</code>. The default implementation skips
-   *  over deleted documents, and uses {@link #startDocument()},
-   *  {@link #writeField(FieldInfo, IndexableField)}, and {@link #finish(FieldInfos, int)},
-   *  returning the number of documents that were written.
-   *  Implementations can override this method for more sophisticated
-   *  merging (bulk-byte copying, etc). */
-  public int merge(MergeState mergeState) throws IOException {
-    int docCount = 0;
-    for (AtomicReader reader : mergeState.readers) {
-      final int maxDoc = reader.maxDoc();
-      final Bits liveDocs = reader.getLiveDocs();
-      for (int i = 0; i < maxDoc; i++) {
-        if (liveDocs != null && !liveDocs.get(i)) {
-          // skip deleted docs
-          continue;
+    /** Writes a single stored field. */
+    public abstract void writeField(FieldInfo info, IndexableField field) throws IOException;
+
+    /** Aborts writing entirely, implementation should remove
+     *  any partially-written files, etc. */
+    public abstract void abort();
+
+    /** Called before {@link #close()}, passing in the number
+     *  of documents that were written. Note that this is 
+     *  intentionally redundant (equivalent to the number of
+     *  calls to {@link #startDocument()}, but a Codec should
+     *  check that this is the case to detect the JRE bug described 
+     *  in LUCENE-1282. */
+    public abstract void finish(FieldInfos fis, int numDocs) throws IOException;
+
+    /** Merges in the stored fields from the readers in 
+     *  <code>mergeState</code>. The default implementation skips
+     *  over deleted documents, and uses {@link #startDocument()},
+     *  {@link #writeField(FieldInfo, IndexableField)}, and {@link #finish(FieldInfos, int)},
+     *  returning the number of documents that were written.
+     *  Implementations can override this method for more sophisticated
+     *  merging (bulk-byte copying, etc). */
+    public int merge(MergeState mergeState) throws IOException {
+        int docCount = 0;
+        for (AtomicReader reader : mergeState.readers) {
+            final int maxDoc = reader.maxDoc();
+            final Bits liveDocs = reader.getLiveDocs();
+            for (int i = 0; i < maxDoc; i++) {
+                if (liveDocs != null && !liveDocs.get(i)) {
+                    // skip deleted docs
+                    continue;
+                }
+                // TODO: this could be more efficient using
+                // FieldVisitor instead of loading/writing entire
+                // doc; ie we just have to renumber the field number
+                // on the fly?
+                // NOTE: it's very important to first assign to doc then pass it to
+                // fieldsWriter.addDocument; see LUCENE-1282
+                Document doc = reader.document(i);
+                addDocument(doc, mergeState.fieldInfos);
+                docCount++;
+                mergeState.checkAbort.work(300);
+            }
         }
-        // TODO: this could be more efficient using
-        // FieldVisitor instead of loading/writing entire
-        // doc; ie we just have to renumber the field number
-        // on the fly?
-        // NOTE: it's very important to first assign to doc then pass it to
-        // fieldsWriter.addDocument; see LUCENE-1282
-        Document doc = reader.document(i);
-        addDocument(doc, mergeState.fieldInfos);
-        docCount++;
-        mergeState.checkAbort.work(300);
-      }
-    }
-    finish(mergeState.fieldInfos, docCount);
-    return docCount;
-  }
-  
-  /** sugar method for startDocument() + writeField() for every stored field in the document */
-  protected final void addDocument(Iterable<? extends IndexableField> doc, FieldInfos fieldInfos) throws IOException {
-    startDocument();
-    for (IndexableField field : doc) {
-      if (field.fieldType().stored()) {
-        writeField(fieldInfos.fieldInfo(field.name()), field);
-      }
+        finish(mergeState.fieldInfos, docCount);
+        return docCount;
     }
 
-    finishDocument();
-  }
+    /** sugar method for startDocument() + writeField() for every stored field in the document */
+    protected final void addDocument(Iterable<? extends IndexableField> doc, FieldInfos fieldInfos) throws IOException {
+        startDocument();
+        for (IndexableField field : doc) {
+            if (field.fieldType().stored()) {
+                writeField(fieldInfos.fieldInfo(field.name()), field);
+            }
+        }
 
-  @Override
-  public abstract void close() throws IOException;
+        finishDocument();
+    }
+
+    @Override
+    public abstract void close() throws IOException;
 }

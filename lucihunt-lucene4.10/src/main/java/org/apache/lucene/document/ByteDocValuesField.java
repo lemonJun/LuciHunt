@@ -39,18 +39,18 @@ import org.apache.lucene.index.NumericDocValues;
 @Deprecated
 public class ByteDocValuesField extends NumericDocValuesField {
 
-  /** 
-   * Creates a new DocValues field with the specified 8-bit byte value 
-   * @param name field name
-   * @param value 8-bit byte value
-   * @throws IllegalArgumentException if the field name is null.
-   */
-  public ByteDocValuesField(String name, byte value) {
-    super(name, value);
-  }
+    /** 
+     * Creates a new DocValues field with the specified 8-bit byte value 
+     * @param name field name
+     * @param value 8-bit byte value
+     * @throws IllegalArgumentException if the field name is null.
+     */
+    public ByteDocValuesField(String name, byte value) {
+        super(name, value);
+    }
 
-  @Override
-  public void setByteValue(byte value) {
-    setLongValue(value);
-  }
+    @Override
+    public void setByteValue(byte value) {
+        setLongValue(value);
+    }
 }

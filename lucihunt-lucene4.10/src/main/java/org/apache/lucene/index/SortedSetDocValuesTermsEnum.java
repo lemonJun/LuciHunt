@@ -28,110 +28,109 @@ import org.apache.lucene.util.BytesRefBuilder;
  * {@link SortedSetDocValues}. */
 
 class SortedSetDocValuesTermsEnum extends TermsEnum {
-  private final SortedSetDocValues values;
-  private long currentOrd = -1;
-  private final BytesRefBuilder scratch;
+    private final SortedSetDocValues values;
+    private long currentOrd = -1;
+    private final BytesRefBuilder scratch;
 
-  /** Creates a new TermsEnum over the provided values */
-  public SortedSetDocValuesTermsEnum(SortedSetDocValues values) {
-    this.values = values;
-    scratch = new BytesRefBuilder();
-  }
+    /** Creates a new TermsEnum over the provided values */
+    public SortedSetDocValuesTermsEnum(SortedSetDocValues values) {
+        this.values = values;
+        scratch = new BytesRefBuilder();
+    }
 
-  @Override
-  public SeekStatus seekCeil(BytesRef text) throws IOException {
-    long ord = values.lookupTerm(text);
-    if (ord >= 0) {
-      currentOrd = ord;
-      scratch.copyBytes(text);
-      return SeekStatus.FOUND;
-    } else {
-      currentOrd = -ord-1;
-      if (currentOrd == values.getValueCount()) {
-        return SeekStatus.END;
-      } else {
-        // TODO: hmm can we avoid this "extra" lookup?:
+    @Override
+    public SeekStatus seekCeil(BytesRef text) throws IOException {
+        long ord = values.lookupTerm(text);
+        if (ord >= 0) {
+            currentOrd = ord;
+            scratch.copyBytes(text);
+            return SeekStatus.FOUND;
+        } else {
+            currentOrd = -ord - 1;
+            if (currentOrd == values.getValueCount()) {
+                return SeekStatus.END;
+            } else {
+                // TODO: hmm can we avoid this "extra" lookup?:
+                scratch.copyBytes(values.lookupOrd(currentOrd));
+                return SeekStatus.NOT_FOUND;
+            }
+        }
+    }
+
+    @Override
+    public boolean seekExact(BytesRef text) throws IOException {
+        long ord = values.lookupTerm(text);
+        if (ord >= 0) {
+            currentOrd = ord;
+            scratch.copyBytes(text);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public void seekExact(long ord) throws IOException {
+        assert ord >= 0 && ord < values.getValueCount();
+        currentOrd = (int) ord;
         scratch.copyBytes(values.lookupOrd(currentOrd));
-        return SeekStatus.NOT_FOUND;
-      }
     }
-  }
 
-  @Override
-  public boolean seekExact(BytesRef text) throws IOException {
-    long ord = values.lookupTerm(text);
-    if (ord >= 0) {
-      currentOrd = ord;
-      scratch.copyBytes(text);
-      return true;
-    } else {
-      return false;
+    @Override
+    public BytesRef next() throws IOException {
+        currentOrd++;
+        if (currentOrd >= values.getValueCount()) {
+            return null;
+        }
+        scratch.copyBytes(values.lookupOrd(currentOrd));
+        return scratch.get();
     }
-  }
 
-  @Override
-  public void seekExact(long ord) throws IOException {
-    assert ord >= 0 && ord < values.getValueCount();
-    currentOrd = (int) ord;
-    scratch.copyBytes(values.lookupOrd(currentOrd));
-  }
-
-  @Override
-  public BytesRef next() throws IOException {
-    currentOrd++;
-    if (currentOrd >= values.getValueCount()) {
-      return null;
+    @Override
+    public BytesRef term() throws IOException {
+        return scratch.get();
     }
-    scratch.copyBytes(values.lookupOrd(currentOrd));
-    return scratch.get();
-  }
 
-  @Override
-  public BytesRef term() throws IOException {
-    return scratch.get();
-  }
+    @Override
+    public long ord() throws IOException {
+        return currentOrd;
+    }
 
-  @Override
-  public long ord() throws IOException {
-    return currentOrd;
-  }
+    @Override
+    public int docFreq() {
+        throw new UnsupportedOperationException();
+    }
 
-  @Override
-  public int docFreq() {
-    throw new UnsupportedOperationException();
-  }
+    @Override
+    public long totalTermFreq() {
+        return -1;
+    }
 
-  @Override
-  public long totalTermFreq() {
-    return -1;
-  }
+    @Override
+    public DocsEnum docs(Bits liveDocs, DocsEnum reuse, int flags) throws IOException {
+        throw new UnsupportedOperationException();
+    }
 
-  @Override
-  public DocsEnum docs(Bits liveDocs, DocsEnum reuse, int flags) throws IOException {
-    throw new UnsupportedOperationException();
-  }
+    @Override
+    public DocsAndPositionsEnum docsAndPositions(Bits liveDocs, DocsAndPositionsEnum reuse, int flags) throws IOException {
+        throw new UnsupportedOperationException();
+    }
 
-  @Override
-  public DocsAndPositionsEnum docsAndPositions(Bits liveDocs, DocsAndPositionsEnum reuse, int flags) throws IOException {
-    throw new UnsupportedOperationException();
-  }
+    @Override
+    public Comparator<BytesRef> getComparator() {
+        return BytesRef.getUTF8SortedAsUnicodeComparator();
+    }
 
-  @Override
-  public Comparator<BytesRef> getComparator() {
-    return BytesRef.getUTF8SortedAsUnicodeComparator();
-  }
+    @Override
+    public void seekExact(BytesRef term, TermState state) throws IOException {
+        assert state != null && state instanceof OrdTermState;
+        this.seekExact(((OrdTermState) state).ord);
+    }
 
-  @Override
-  public void seekExact(BytesRef term, TermState state) throws IOException {
-    assert state != null && state instanceof OrdTermState;
-    this.seekExact(((OrdTermState)state).ord);
-  }
-
-  @Override
-  public TermState termState() throws IOException {
-    OrdTermState state = new OrdTermState();
-    state.ord = currentOrd;
-    return state;
-  }
+    @Override
+    public TermState termState() throws IOException {
+        OrdTermState state = new OrdTermState();
+        state.ord = currentOrd;
+        return state;
+    }
 }
-

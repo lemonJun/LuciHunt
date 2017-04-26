@@ -129,78 +129,76 @@ import org.apache.lucene.util.packed.PackedInts;
 // NOTE: not registered in SPI, doesnt respect segment suffix, etc
 // for back compat only!
 public class Lucene40DocValuesFormat extends DocValuesFormat {
-  
-  /** Maximum length for each binary doc values field. */
-  public static final int MAX_BINARY_FIELD_LENGTH = (1 << 15) - 2;
-  
-  /** Sole constructor. */
-  public Lucene40DocValuesFormat() {
-    super("Lucene40");
-  }
-  
-  @Override
-  public DocValuesConsumer fieldsConsumer(SegmentWriteState state) throws IOException {
-    throw new UnsupportedOperationException("this codec can only be used for reading");
-  }
-  
-  @Override
-  public DocValuesProducer fieldsProducer(SegmentReadState state) throws IOException {
-    String filename = IndexFileNames.segmentFileName(state.segmentInfo.name, 
-                                                     "dv", 
-                                                     IndexFileNames.COMPOUND_FILE_EXTENSION);
-    return new Lucene40DocValuesReader(state, filename, Lucene40FieldInfosReader.LEGACY_DV_TYPE_KEY);
-  }
-  
-  // constants for VAR_INTS
-  static final String VAR_INTS_CODEC_NAME = "PackedInts";
-  static final int VAR_INTS_VERSION_START = 0;
-  static final int VAR_INTS_VERSION_CURRENT = VAR_INTS_VERSION_START;
-  static final byte VAR_INTS_PACKED = 0x00;
-  static final byte VAR_INTS_FIXED_64 = 0x01;
-  
-  // constants for FIXED_INTS_8, FIXED_INTS_16, FIXED_INTS_32, FIXED_INTS_64
-  static final String INTS_CODEC_NAME = "Ints";
-  static final int INTS_VERSION_START = 0;
-  static final int INTS_VERSION_CURRENT = INTS_VERSION_START;
-  
-  // constants for FLOAT_32, FLOAT_64
-  static final String FLOATS_CODEC_NAME = "Floats";
-  static final int FLOATS_VERSION_START = 0;
-  static final int FLOATS_VERSION_CURRENT = FLOATS_VERSION_START;
-  
-  // constants for BYTES_FIXED_STRAIGHT
-  static final String BYTES_FIXED_STRAIGHT_CODEC_NAME = "FixedStraightBytes";
-  static final int BYTES_FIXED_STRAIGHT_VERSION_START = 0;
-  static final int BYTES_FIXED_STRAIGHT_VERSION_CURRENT = BYTES_FIXED_STRAIGHT_VERSION_START;
-  
-  // constants for BYTES_VAR_STRAIGHT
-  static final String BYTES_VAR_STRAIGHT_CODEC_NAME_IDX = "VarStraightBytesIdx";
-  static final String BYTES_VAR_STRAIGHT_CODEC_NAME_DAT = "VarStraightBytesDat";
-  static final int BYTES_VAR_STRAIGHT_VERSION_START = 0;
-  static final int BYTES_VAR_STRAIGHT_VERSION_CURRENT = BYTES_VAR_STRAIGHT_VERSION_START;
-  
-  // constants for BYTES_FIXED_DEREF
-  static final String BYTES_FIXED_DEREF_CODEC_NAME_IDX = "FixedDerefBytesIdx";
-  static final String BYTES_FIXED_DEREF_CODEC_NAME_DAT = "FixedDerefBytesDat";
-  static final int BYTES_FIXED_DEREF_VERSION_START = 0;
-  static final int BYTES_FIXED_DEREF_VERSION_CURRENT = BYTES_FIXED_DEREF_VERSION_START;
-  
-  // constants for BYTES_VAR_DEREF
-  static final String BYTES_VAR_DEREF_CODEC_NAME_IDX = "VarDerefBytesIdx";
-  static final String BYTES_VAR_DEREF_CODEC_NAME_DAT = "VarDerefBytesDat";
-  static final int BYTES_VAR_DEREF_VERSION_START = 0;
-  static final int BYTES_VAR_DEREF_VERSION_CURRENT = BYTES_VAR_DEREF_VERSION_START;
-  
-  // constants for BYTES_FIXED_SORTED
-  static final String BYTES_FIXED_SORTED_CODEC_NAME_IDX = "FixedSortedBytesIdx";
-  static final String BYTES_FIXED_SORTED_CODEC_NAME_DAT = "FixedSortedBytesDat";
-  static final int BYTES_FIXED_SORTED_VERSION_START = 0;
-  static final int BYTES_FIXED_SORTED_VERSION_CURRENT = BYTES_FIXED_SORTED_VERSION_START;
-  
-  // constants for BYTES_VAR_SORTED
-  // NOTE THIS IS NOT A BUG! 4.0 actually screwed this up (VAR_SORTED and VAR_DEREF have same codec header)
-  static final String BYTES_VAR_SORTED_CODEC_NAME_IDX = "VarDerefBytesIdx";
-  static final String BYTES_VAR_SORTED_CODEC_NAME_DAT = "VarDerefBytesDat";
-  static final int BYTES_VAR_SORTED_VERSION_START = 0;
-  static final int BYTES_VAR_SORTED_VERSION_CURRENT = BYTES_VAR_SORTED_VERSION_START;
+
+    /** Maximum length for each binary doc values field. */
+    public static final int MAX_BINARY_FIELD_LENGTH = (1 << 15) - 2;
+
+    /** Sole constructor. */
+    public Lucene40DocValuesFormat() {
+        super("Lucene40");
+    }
+
+    @Override
+    public DocValuesConsumer fieldsConsumer(SegmentWriteState state) throws IOException {
+        throw new UnsupportedOperationException("this codec can only be used for reading");
+    }
+
+    @Override
+    public DocValuesProducer fieldsProducer(SegmentReadState state) throws IOException {
+        String filename = IndexFileNames.segmentFileName(state.segmentInfo.name, "dv", IndexFileNames.COMPOUND_FILE_EXTENSION);
+        return new Lucene40DocValuesReader(state, filename, Lucene40FieldInfosReader.LEGACY_DV_TYPE_KEY);
+    }
+
+    // constants for VAR_INTS
+    static final String VAR_INTS_CODEC_NAME = "PackedInts";
+    static final int VAR_INTS_VERSION_START = 0;
+    static final int VAR_INTS_VERSION_CURRENT = VAR_INTS_VERSION_START;
+    static final byte VAR_INTS_PACKED = 0x00;
+    static final byte VAR_INTS_FIXED_64 = 0x01;
+
+    // constants for FIXED_INTS_8, FIXED_INTS_16, FIXED_INTS_32, FIXED_INTS_64
+    static final String INTS_CODEC_NAME = "Ints";
+    static final int INTS_VERSION_START = 0;
+    static final int INTS_VERSION_CURRENT = INTS_VERSION_START;
+
+    // constants for FLOAT_32, FLOAT_64
+    static final String FLOATS_CODEC_NAME = "Floats";
+    static final int FLOATS_VERSION_START = 0;
+    static final int FLOATS_VERSION_CURRENT = FLOATS_VERSION_START;
+
+    // constants for BYTES_FIXED_STRAIGHT
+    static final String BYTES_FIXED_STRAIGHT_CODEC_NAME = "FixedStraightBytes";
+    static final int BYTES_FIXED_STRAIGHT_VERSION_START = 0;
+    static final int BYTES_FIXED_STRAIGHT_VERSION_CURRENT = BYTES_FIXED_STRAIGHT_VERSION_START;
+
+    // constants for BYTES_VAR_STRAIGHT
+    static final String BYTES_VAR_STRAIGHT_CODEC_NAME_IDX = "VarStraightBytesIdx";
+    static final String BYTES_VAR_STRAIGHT_CODEC_NAME_DAT = "VarStraightBytesDat";
+    static final int BYTES_VAR_STRAIGHT_VERSION_START = 0;
+    static final int BYTES_VAR_STRAIGHT_VERSION_CURRENT = BYTES_VAR_STRAIGHT_VERSION_START;
+
+    // constants for BYTES_FIXED_DEREF
+    static final String BYTES_FIXED_DEREF_CODEC_NAME_IDX = "FixedDerefBytesIdx";
+    static final String BYTES_FIXED_DEREF_CODEC_NAME_DAT = "FixedDerefBytesDat";
+    static final int BYTES_FIXED_DEREF_VERSION_START = 0;
+    static final int BYTES_FIXED_DEREF_VERSION_CURRENT = BYTES_FIXED_DEREF_VERSION_START;
+
+    // constants for BYTES_VAR_DEREF
+    static final String BYTES_VAR_DEREF_CODEC_NAME_IDX = "VarDerefBytesIdx";
+    static final String BYTES_VAR_DEREF_CODEC_NAME_DAT = "VarDerefBytesDat";
+    static final int BYTES_VAR_DEREF_VERSION_START = 0;
+    static final int BYTES_VAR_DEREF_VERSION_CURRENT = BYTES_VAR_DEREF_VERSION_START;
+
+    // constants for BYTES_FIXED_SORTED
+    static final String BYTES_FIXED_SORTED_CODEC_NAME_IDX = "FixedSortedBytesIdx";
+    static final String BYTES_FIXED_SORTED_CODEC_NAME_DAT = "FixedSortedBytesDat";
+    static final int BYTES_FIXED_SORTED_VERSION_START = 0;
+    static final int BYTES_FIXED_SORTED_VERSION_CURRENT = BYTES_FIXED_SORTED_VERSION_START;
+
+    // constants for BYTES_VAR_SORTED
+    // NOTE THIS IS NOT A BUG! 4.0 actually screwed this up (VAR_SORTED and VAR_DEREF have same codec header)
+    static final String BYTES_VAR_SORTED_CODEC_NAME_IDX = "VarDerefBytesIdx";
+    static final String BYTES_VAR_SORTED_CODEC_NAME_DAT = "VarDerefBytesDat";
+    static final int BYTES_VAR_SORTED_VERSION_START = 0;
+    static final int BYTES_VAR_SORTED_VERSION_CURRENT = BYTES_VAR_SORTED_VERSION_START;
 }

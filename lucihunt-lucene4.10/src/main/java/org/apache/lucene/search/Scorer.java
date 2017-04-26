@@ -42,61 +42,61 @@ import org.apache.lucene.index.DocsEnum;
  * with these scores.
  */
 public abstract class Scorer extends DocsEnum {
-  /** the Scorer's parent Weight. in some cases this may be null */
-  // TODO can we clean this up?
-  protected final Weight weight;
+    /** the Scorer's parent Weight. in some cases this may be null */
+    // TODO can we clean this up?
+    protected final Weight weight;
 
-  /**
-   * Constructs a Scorer
-   * @param weight The scorers <code>Weight</code>.
-   */
-  protected Scorer(Weight weight) {
-    this.weight = weight;
-  }
-
-  /** Returns the score of the current document matching the query.
-   * Initially invalid, until {@link #nextDoc()} or {@link #advance(int)}
-   * is called the first time, or when called from within
-   * {@link Collector#collect}.
-   */
-  public abstract float score() throws IOException;
-  
-  /** returns parent Weight
-   * @lucene.experimental
-   */
-  public Weight getWeight() {
-    return weight;
-  }
-  
-  /** Returns child sub-scorers
-   * @lucene.experimental */
-  public Collection<ChildScorer> getChildren() {
-    return Collections.emptyList();
-  }
-  
-  /** A child Scorer and its relationship to its parent.
-   * the meaning of the relationship depends upon the parent query. 
-   * @lucene.experimental */
-  public static class ChildScorer {
     /**
-     * Child Scorer. (note this is typically a direct child, and may
-     * itself also have children).
+     * Constructs a Scorer
+     * @param weight The scorers <code>Weight</code>.
      */
-    public final Scorer child;
-    /**
-     * An arbitrary string relating this scorer to the parent.
-     */
-    public final String relationship;
-    
-    /**
-     * Creates a new ChildScorer node with the specified relationship.
-     * <p>
-     * The relationship can be any be any string that makes sense to 
-     * the parent Scorer. 
-     */
-    public ChildScorer(Scorer child, String relationship) {
-      this.child = child;
-      this.relationship = relationship;
+    protected Scorer(Weight weight) {
+        this.weight = weight;
     }
-  }
+
+    /** Returns the score of the current document matching the query.
+     * Initially invalid, until {@link #nextDoc()} or {@link #advance(int)}
+     * is called the first time, or when called from within
+     * {@link Collector#collect}.
+     */
+    public abstract float score() throws IOException;
+
+    /** returns parent Weight
+     * @lucene.experimental
+     */
+    public Weight getWeight() {
+        return weight;
+    }
+
+    /** Returns child sub-scorers
+     * @lucene.experimental */
+    public Collection<ChildScorer> getChildren() {
+        return Collections.emptyList();
+    }
+
+    /** A child Scorer and its relationship to its parent.
+     * the meaning of the relationship depends upon the parent query. 
+     * @lucene.experimental */
+    public static class ChildScorer {
+        /**
+         * Child Scorer. (note this is typically a direct child, and may
+         * itself also have children).
+         */
+        public final Scorer child;
+        /**
+         * An arbitrary string relating this scorer to the parent.
+         */
+        public final String relationship;
+
+        /**
+         * Creates a new ChildScorer node with the specified relationship.
+         * <p>
+         * The relationship can be any be any string that makes sense to 
+         * the parent Scorer. 
+         */
+        public ChildScorer(Scorer child, String relationship) {
+            this.child = child;
+            this.relationship = relationship;
+        }
+    }
 }

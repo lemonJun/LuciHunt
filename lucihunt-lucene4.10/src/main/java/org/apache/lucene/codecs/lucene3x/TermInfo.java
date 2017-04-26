@@ -24,40 +24,40 @@ package org.apache.lucene.codecs.lucene3x;
 
 @Deprecated
 class TermInfo {
-  /** The number of documents which contain the term. */
-  public int docFreq = 0;
+    /** The number of documents which contain the term. */
+    public int docFreq = 0;
 
-  public long freqPointer = 0;
-  public long proxPointer = 0;
-  public int skipOffset;
+    public long freqPointer = 0;
+    public long proxPointer = 0;
+    public int skipOffset;
 
-  public TermInfo() {}
+    public TermInfo() {
+    }
 
-  public TermInfo(int df, long fp, long pp) {
-    docFreq = df;
-    freqPointer = fp;
-    proxPointer = pp;
-  }
+    public TermInfo(int df, long fp, long pp) {
+        docFreq = df;
+        freqPointer = fp;
+        proxPointer = pp;
+    }
 
-  public TermInfo(TermInfo ti) {
-    docFreq = ti.docFreq;
-    freqPointer = ti.freqPointer;
-    proxPointer = ti.proxPointer;
-    skipOffset = ti.skipOffset;
-  }
+    public TermInfo(TermInfo ti) {
+        docFreq = ti.docFreq;
+        freqPointer = ti.freqPointer;
+        proxPointer = ti.proxPointer;
+        skipOffset = ti.skipOffset;
+    }
 
-  public final void set(int docFreq,
-                 long freqPointer, long proxPointer, int skipOffset) {
-    this.docFreq = docFreq;
-    this.freqPointer = freqPointer;
-    this.proxPointer = proxPointer;
-    this.skipOffset = skipOffset;
-  }
+    public final void set(int docFreq, long freqPointer, long proxPointer, int skipOffset) {
+        this.docFreq = docFreq;
+        this.freqPointer = freqPointer;
+        this.proxPointer = proxPointer;
+        this.skipOffset = skipOffset;
+    }
 
-  public final void set(TermInfo ti) {
-    docFreq = ti.docFreq;
-    freqPointer = ti.freqPointer;
-    proxPointer = ti.proxPointer;
-    skipOffset = ti.skipOffset;
-  }
+    public final void set(TermInfo ti) {
+        docFreq = ti.docFreq;
+        freqPointer = ti.freqPointer;
+        proxPointer = ti.proxPointer;
+        skipOffset = ti.skipOffset;
+    }
 }

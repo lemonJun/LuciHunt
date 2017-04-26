@@ -41,87 +41,87 @@ import org.apache.lucene.util.automaton.Operations;
  * @see AutomatonQuery
  */
 public class WildcardQuery extends AutomatonQuery {
-  /** String equality with support for wildcards */
-  public static final char WILDCARD_STRING = '*';
+    /** String equality with support for wildcards */
+    public static final char WILDCARD_STRING = '*';
 
-  /** Char equality with support for wildcards */
-  public static final char WILDCARD_CHAR = '?';
+    /** Char equality with support for wildcards */
+    public static final char WILDCARD_CHAR = '?';
 
-  /** Escape character */
-  public static final char WILDCARD_ESCAPE = '\\';
-  
-  /**
-   * Constructs a query for terms matching <code>term</code>. 
-   */
-  public WildcardQuery(Term term) {
-    super(term, toAutomaton(term));
-  }
-  
-  /**
-   * Constructs a query for terms matching <code>term</code>.
-   * @param maxDeterminizedStates maximum number of states in the resulting
-   *   automata.  If the automata would need more than this many states
-   *   TooComplextToDeterminizeException is thrown.  Higher number require more
-   *   space but can process more complex automata.
-   */
-  public WildcardQuery(Term term, int maxDeterminizedStates) {
-    super(term, toAutomaton(term), maxDeterminizedStates);
-  }
+    /** Escape character */
+    public static final char WILDCARD_ESCAPE = '\\';
 
-  /**
-   * Convert Lucene wildcard syntax into an automaton.
-   * @lucene.internal
-   */
-  @SuppressWarnings("fallthrough")
-  public static Automaton toAutomaton(Term wildcardquery) {
-    List<Automaton> automata = new ArrayList<>();
-    
-    String wildcardText = wildcardquery.text();
-    
-    for (int i = 0; i < wildcardText.length();) {
-      final int c = wildcardText.codePointAt(i);
-      int length = Character.charCount(c);
-      switch(c) {
-        case WILDCARD_STRING: 
-          automata.add(Automata.makeAnyString());
-          break;
-        case WILDCARD_CHAR:
-          automata.add(Automata.makeAnyChar());
-          break;
-        case WILDCARD_ESCAPE:
-          // add the next codepoint instead, if it exists
-          if (i + length < wildcardText.length()) {
-            final int nextChar = wildcardText.codePointAt(i + length);
-            length += Character.charCount(nextChar);
-            automata.add(Automata.makeChar(nextChar));
-            break;
-          } // else fallthru, lenient parsing with a trailing \
-        default:
-          automata.add(Automata.makeChar(c));
-      }
-      i += length;
+    /**
+     * Constructs a query for terms matching <code>term</code>. 
+     */
+    public WildcardQuery(Term term) {
+        super(term, toAutomaton(term));
     }
-    
-    return Operations.concatenate(automata);
-  }
-  
-  /**
-   * Returns the pattern term.
-   */
-  public Term getTerm() {
-    return term;
-  }
-  
-  /** Prints a user-readable version of this query. */
-  @Override
-  public String toString(String field) {
-    StringBuilder buffer = new StringBuilder();
-    if (!getField().equals(field)) {
-      buffer.append(getField());
-      buffer.append(":");
+
+    /**
+     * Constructs a query for terms matching <code>term</code>.
+     * @param maxDeterminizedStates maximum number of states in the resulting
+     *   automata.  If the automata would need more than this many states
+     *   TooComplextToDeterminizeException is thrown.  Higher number require more
+     *   space but can process more complex automata.
+     */
+    public WildcardQuery(Term term, int maxDeterminizedStates) {
+        super(term, toAutomaton(term), maxDeterminizedStates);
     }
-    buffer.append(term.text());
-    buffer.append(ToStringUtils.boost(getBoost()));
-    return buffer.toString();
-  }
+
+    /**
+     * Convert Lucene wildcard syntax into an automaton.
+     * @lucene.internal
+     */
+    @SuppressWarnings("fallthrough")
+    public static Automaton toAutomaton(Term wildcardquery) {
+        List<Automaton> automata = new ArrayList<>();
+
+        String wildcardText = wildcardquery.text();
+
+        for (int i = 0; i < wildcardText.length();) {
+            final int c = wildcardText.codePointAt(i);
+            int length = Character.charCount(c);
+            switch (c) {
+                case WILDCARD_STRING:
+                    automata.add(Automata.makeAnyString());
+                    break;
+                case WILDCARD_CHAR:
+                    automata.add(Automata.makeAnyChar());
+                    break;
+                case WILDCARD_ESCAPE:
+                    // add the next codepoint instead, if it exists
+                    if (i + length < wildcardText.length()) {
+                        final int nextChar = wildcardText.codePointAt(i + length);
+                        length += Character.charCount(nextChar);
+                        automata.add(Automata.makeChar(nextChar));
+                        break;
+                    } // else fallthru, lenient parsing with a trailing \
+                default:
+                    automata.add(Automata.makeChar(c));
+            }
+            i += length;
+        }
+
+        return Operations.concatenate(automata);
+    }
+
+    /**
+     * Returns the pattern term.
+     */
+    public Term getTerm() {
+        return term;
+    }
+
+    /** Prints a user-readable version of this query. */
+    @Override
+    public String toString(String field) {
+        StringBuilder buffer = new StringBuilder();
+        if (!getField().equals(field)) {
+            buffer.append(getField());
+            buffer.append(":");
+        }
+        buffer.append(term.text());
+        buffer.append(ToStringUtils.boost(getBoost()));
+        return buffer.toString();
+    }
 }

@@ -26,9 +26,9 @@ package org.apache.lucene.search;
 @SuppressWarnings("serial")
 public final class CollectionTerminatedException extends RuntimeException {
 
-  /** Sole constructor. */
-  public CollectionTerminatedException() {
-    super();
-  }
+    /** Sole constructor. */
+    public CollectionTerminatedException() {
+        super();
+    }
 
 }
