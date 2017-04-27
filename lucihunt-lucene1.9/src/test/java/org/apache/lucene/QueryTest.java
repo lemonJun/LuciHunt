@@ -7,6 +7,7 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.Explanation;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.Query;
@@ -31,7 +32,26 @@ public class QueryTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
+    @Test
+    public void termqueryexp() {
+        try {
+            IndexSearcher searcher = new IndexSearcher("D:/luncene1.9");
+            BooleanQuery bq = new BooleanQuery();
+            bq.add(new TermQuery(new Term("line", "java")), Occur.MUST);
+            //            TopDocs tops = searcher.search(new TermQuery(new Term("line", "java")), null, 10);
+            TopDocs tdocs = searcher.search(bq, null, 5);
+            System.out.println(tdocs.totalHits);
+            for (int i = 0; i < tdocs.scoreDocs.length; i++) {
+                Explanation exp = searcher.explain(bq, i);
+                System.out.println(exp.toString());
+                System.out.println("--------------------------------");
+            }
+            searcher.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -51,7 +71,26 @@ public class QueryTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
+    @Test
+    public void booleanmustqueryexp() {
+        try {
+            IndexSearcher searcher = new IndexSearcher("D:/luncene1.9");
+            BooleanQuery query = new BooleanQuery();
+            query.add(new TermQuery(new Term("line", "java")), Occur.MUST);
+            query.add(new TermQuery(new Term("name", "java")), Occur.MUST);
+
+            TopDocs tdocs = searcher.search(query, null, 10);
+            for (int i = 0; i < tdocs.scoreDocs.length; i++) {
+                int doc = tdocs.scoreDocs[i].doc;
+                Explanation exp = searcher.explain(query, doc);
+                System.out.println(exp.toString());
+                System.out.println("--------------------------------");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -110,6 +149,10 @@ public class QueryTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static void main(String[] args) {
+        System.out.println((float) (1 / (float) Math.sqrt(2)));
     }
 
 }
