@@ -13,12 +13,11 @@
 		<lucene.maven.version>4.10.4</lucene.maven.version>
 		<maven.compile.deprecation>off</maven.compile.deprecation>
 	</properties>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>18.0</version>
 		</dependency>
 
 		<dependency>
@@ -108,24 +107,20 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.12</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
-			<version>1.2.24</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.6.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.6.6</version>
 		</dependency>
 
 		<dependency>
