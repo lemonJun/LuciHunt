@@ -25,6 +25,14 @@
 			<artifactId>lucene-test-framework</artifactId>
 			<version>4.10.4</version>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>
+						com.carrotsearch.randomizedtesting
+					</groupId>
+					<artifactId>randomizedtesting-runner</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
